@@ -1,0 +1,34 @@
+#%Module1.0#####################################################################
+##
+## Parasites and Microbes {{farm_name}} {{version}}
+##
+
+# help setup
+proc ModulesHelp { } {
+  global version modroot
+
+  puts stderr "Custom deployment managed by pathogen informatics: {{path}}"
+  puts stderr "Executables:"
+  puts stderr "\t{{farm_name}}"
+  puts stderr "Home page: {{repo_url}}"
+}
+
+# Whatis setup
+module-whatis "Custom deployment managed by pathogen informatics: {{path}}"
+module-whatis "Executables:"
+module-whatis "{{farm_name}}"
+
+# Load prerequisite modules
+module switch nextflow
+module switch ISG/singularity
+
+# Load message
+if { [ module-info mode load ] } {
+    puts stderr "\tModule loaded. For more information run 'module help {{farm_name}}/{{version}}' or check https://ssg-confluence.internal.sanger.ac.uk/display/PaMI/Bioinformatics+pipelines."
+}
+
+# Conflicts
+conflict {{farm_name}}
+
+# Add wrappers to PATH
+prepend-path PATH "{{path}}/{{farm_name}}"
