@@ -19,8 +19,8 @@ module-whatis "Executables:"
 module-whatis "{{farm_name}}"
 
 # Load prerequisite modules
-module switch nextflow
-module switch ISG/singularity
+module load nextflow
+module load ISG/singularity
 
 # Load message
 if { [ module-info mode load ] } {
