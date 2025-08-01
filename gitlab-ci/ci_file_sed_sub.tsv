@@ -1,0 +1,5 @@
+main.nf	s/nextflow +run +(.|main.nf)/${FARM_NAME}/g
+nextflow.config	s/\{\{pipeline_version\}\}/${CI_COMMIT_REF_NAME}/g
+nextflow.config	s/\{\{pipeline_name\}\}/${FARM_NAME}/g
+nextflow.config	s;\{\{pipeline_url\}\};${CI_PROJECT_URL};g
+nextflow.config	s;\{\{pipeline_description\}\};${CI_PROJECT_DESCRIPTION};g
