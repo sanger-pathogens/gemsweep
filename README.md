@@ -50,6 +50,12 @@ Deployment includes:
 The deployment path is the value of the `FARM_PATH` variable in the deployment job, which should already be set to
 the standard "custom install" path we use for dev/prod deployments.
 
+To access the deployed test module, use code following the example below (note that the `MODULEPATH` value might change depending on how the `FARM_PATH` variable is set in the deployment job):
+```
+export MODULEPATH="/data/pam/applications/farm-etc-testing/custom_installs/modules/current:${MODULEPATH}"
+module load qc-short-read/t-PAT-2785_set_kraken_defaults
+```
+
 ### Workflow
 
 Some standard files are provides to help with development workflow.
