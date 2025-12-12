@@ -6,6 +6,12 @@
         "default": "false",
         "help_text": "Should logs appear in plain ASCII"
       }
+    },
+    "Input options": {
+      "manifest": {
+        "default": null,
+        "help_text": "Input manifest CSV with (required) header line 'ID,R1,R2', containing per sample paths to .fastq.gz files"
+      }
     }
   },
   "overwrite_param": {
