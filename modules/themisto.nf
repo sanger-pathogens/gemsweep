@@ -1,9 +1,11 @@
+
+
 process THEMISTO_PSEUDOALIGN {
     label 'cpu_16'
     label params.temp_storage ? "mem_16" : "mem_120"
     label 'time_12'
 
-    container 'gitlab-registry.internal.sanger.ac.uk/sanger-pathogens/docker-images/themisto:3.2.2'
+    container 'quay.io/sangerpathogens/themisto:3.2.2'
 
     input:
     tuple val(meta), path(reads_1), path(reads_2)

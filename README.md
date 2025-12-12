@@ -92,7 +92,7 @@ The current version of the pipeline uses the following software dependencies:
 
 | Software | Version | Image URL                                      |
 | -------- | ------- | ---------------------------------------------- |
-| themisto | 3.2.2   | quay.io/...                                    |
+| themisto | 3.2.2   | quay.io/sangerpathogens/themisto:3.2.2         |
 | mSWEEP   | 2.2.1   | quay.io/biocontainers/msweep:2.2.1--h503566f_1 |
 | mGEMS    | 1.3.3   | quay.io/biocontainers/mgems:1.3.3--h13024bc_2  |
 
