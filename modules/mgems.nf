@@ -3,7 +3,7 @@ process MGEMS {
     label 'mem_1'
     label 'time_1'
 
-    container 'gitlab-registry.internal.sanger.ac.uk/sanger-pathogens/farm_installs/farm-etc/msweep/2.2.1/docker'
+    container 'quay.io/biocontainers/mgems:1.3.3--h13024bc_2'
 
     input:
 tuple val(meta),
@@ -22,7 +22,7 @@ tuple val(meta),
     script:
     output_file = "mGEMS_out"
     command = "mGEMS -r ${reads_1},${reads_2} --themisto-alns ${pseudoalignment_1},${pseudoalignment_2} -o ${output_file} --probs ${msweep_probs} -a ${msweep_abundances} --index ${index}"
-    if (params.output_read_assignment) {
+    if (params.get_assignments) {
         // if user wants the read assignment table used by mgems output, add to command
         command += " --write_assignment_table"
         }

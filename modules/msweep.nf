@@ -3,7 +3,7 @@ process MSWEEP {
     label 'mem_1'
     label 'time_1'
 
-    container 'gitlab-registry.internal.sanger.ac.uk/sanger-pathogens/farm_installs/farm-etc/msweep/2.2.1/docker'
+    container 'quay.io/biocontainers/msweep:2.2.1--h503566f_1'
 
     input:
     tuple val(meta), path(pseudoalignment_1), path(pseudoalignment_2)
