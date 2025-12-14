@@ -6,6 +6,44 @@
         "default": "false",
         "help_text": "Should logs appear in plain ASCII"
       }
+    },
+    "Input options": {
+      "manifest": {
+        "default": null,
+        "help_text": "Input manifest CSV with (required) header line 'ID,R1,R2', containing per sample paths to .fastq.gz files"
+      }
+    },
+    "Themisto options": {
+      "temp_storage": {
+        "default": "/tmp",
+        "help_text": ""
+      },
+      "themisto_index": {
+        "default": "null",
+        "help_text": ""
+      },
+      "kmer_size": {
+        "default": "31",
+        "help_text": ""
+      }
+    },
+    "mSWEEP options": {
+      "ref_groups": {
+        "default": "null",
+        "help_text": ""
+      }
+    },
+    "mGEMS options": {
+      "get_assignments": {
+        "default": "false",
+        "help_text": ""
+      }
+    },
+    "Skip options": {
+      "skip_clustering": {
+        "default": "null",
+        "help_text": ""
+      }
     }
   },
   "overwrite_param": {
