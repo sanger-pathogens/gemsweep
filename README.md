@@ -61,23 +61,48 @@ TBC
 
 ### Parameters
 
-<!--- WIP:
-    // themisto options
-    temp_storage = "/tmp"
-    themisto_index = null
-    kmer_size = 31
+**Logging options**
 
-    // msweep options
-    ref_groups = null
+| Flag              | Type      | Default | Description                                           |
+| ----------------- | --------- | ------- | ----------------------------------------------------- |
+| `monochrome_logs` | `boolean` | `false` | Output logs in plain ASCII (disable colored logging). |
 
-    // mgems options
-    get_assignments = false
+---
 
-    // skip options
-    skip_clustering = false
---->
+**Input options**
 
-TBC
+| Flag       | Type   | Default | Description                                                                                           |
+| ---------- | ------ | ------- | ----------------------------------------------------------------------------------------------------- |
+| `manifest` | `path` | `null`  | Input manifest CSV with required header `ID,R1,R2`, containing per-sample paths to `.fastq.gz` files. |
+
+---
+
+**Themisto options**
+
+| Flag             | Type      | Default | Description                                                                                                                    |
+| ---------------- | --------- | ------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| `temp_storage`   | `path`    | `/tmp`  | Temporary storage directory used during runtime (required).                                                                    |
+| `themisto_index` | `path`    | `null`  | Path to a pre-built Themisto index (including index prefix). If provided, indexing is skipped.                                 |
+| `kmer_size`      | `integer` | `31`    | K-mer size for indexing and pseudoalignment. Allowed values: `21`, `31`, `51`. K-mer sizes must match if an index is provided. |
+
+---
+
+**mSWEEP options**
+
+| Flag              | Type      | Default | Description                                                                                                                         |
+| ----------------- | --------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------- |
+| `ref_groups`      | `path`    | `null`  | Grouped references text file. If provided, reference clustering is skipped.                                                         |
+| `skip_clustering` | `boolean` | `false` | Use ungrouped references in mSWEEP (not recommended). If `--ref_groups` is provided, clustering is skipped regardless of this flag. |
+
+---
+
+**mGEMS options**
+
+| Flag              | Type      | Default | Description                                                 |
+| ----------------- | --------- | ------- | ----------------------------------------------------------- |
+| `get_assignments` | `boolean` | `false` | Output the read assignment table used by mGEMS for binning. |
+
+---
 
 ### Dependencies
 
