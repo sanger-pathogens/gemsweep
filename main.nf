@@ -56,7 +56,15 @@ workflow {
 
     //validate_parameters()
 
-    reads_ch = MIXED_INPUT    // outputs channel of [meta, R1, R2] for reads_<1|2>.fastq.gz
+    //reads_ch = MIXED_INPUT()    // outputs channel of [meta, R1, R2] for reads_<1|2>.fastq.gz
+    reads_ch = channel
+        .fromPath(params.manifest)
+        .splitCsv(header:true)
+        .map { row ->
+            // row is a map: [ID: 'sample1', R1: 'reads/sample1_R1.fastq.gz', R2: 'reads/sample1_R2.fastq.gz']
+            def meta = [id: row.ID]
+            tuple(meta, file(row.R1), file(row.R2))
+        }
 
     ref_groups_ch = params.ref_groups ? channel.fromPath(params.ref_groups) :    // If user supplies groups, give those
                  (params.skip_clustering ? channel.empty() : channel.empty())    // If user skips clustering give empty channel, else give poppunk clusters (not yet built)
