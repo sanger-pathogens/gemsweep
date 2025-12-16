@@ -15,7 +15,7 @@ process THEMISTO_PSEUDOALIGN {
     tuple val(meta), path("pseudoalignments_1.aln.gz"), path("pseudoalignments_2.aln.gz")
 
     script:
-    pseudoalignment_params = "-i ${index} -k ${params.kmer_size} --n-threads ${task.cpus} --sort-output --gzip-output"
+    pseudoalignment_params = "-i ${index} --n-threads ${task.cpus} --sort-output --gzip-output"
 
     if (params.temp_storage) {
         temp_storage_location = (params.temp_storage)
