@@ -9,13 +9,14 @@ process THEMISTO_PSEUDOALIGN {
 
     input:
     tuple val(meta), path(reads_1), path(reads_2)
-    path index
+    path index_files
+    val index_prefix
 
     output:
     tuple val(meta), path("pseudoalignments_1.aln.gz"), path("pseudoalignments_2.aln.gz")
 
     script:
-    pseudoalignment_params = "-i ${index} --n-threads ${task.cpus} --sort-output-lines --gzip-output"
+    pseudoalignment_params = "-i ${index_prefix} --n-threads ${task.cpus} --sort-output-lines --gzip-output"
 
     if (params.temp_storage) {
         temp_storage_location = (params.temp_storage)

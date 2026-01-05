@@ -69,9 +69,19 @@ workflow {
     ref_groups_ch = params.ref_groups ? channel.fromPath(params.ref_groups) :    // If user supplies groups, give those
                  (params.skip_clustering ? channel.empty() : channel.empty())    // If user skips clustering give empty channel, else give poppunk clusters (not yet built)
     
+    if (params.themisto_index) {
+        index_files_ch = channel.fromPath("${params.themisto_index}*").collect()
+        index_prefix_ch = channel.value(params.themisto_index.split('/')[-1])
+    } else {
+        error "ERROR: themisto index not supplied and indexing process not yet implemented."
+    }
+    //} else {
+    //    index_ch = THEMISTO_INDEX(reference_genomes)
+    //}
+    
     index_ch = channel.value(params.themisto_index)
     
-    pseudoaligned_ch = THEMISTO_PSEUDOALIGN(reads_ch,index_ch)
+    pseudoaligned_ch = THEMISTO_PSEUDOALIGN(reads_ch,index_files_ch,index_prefix_ch)
     
     msweep_ch = MSWEEP(pseudoaligned_ch,ref_groups_ch)
     
