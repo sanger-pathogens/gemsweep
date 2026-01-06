@@ -71,14 +71,16 @@ workflow {
     
     if (params.themisto_index) {
         index_files_ch = channel.fromPath("${params.themisto_index}*").collect()
-        index_prefix_ch = channel.value(params.themisto_index.split('/')[-1])
+        index_prefix_ch = channel.value(file(params.themisto_index).getName())
     } else {
         error "ERROR: themisto index not supplied and indexing process not yet implemented."
     }
+    // // This or switch to one index channel with a tuple of prefix and files (probs better)
     //} else {
-    //    index_ch = THEMISTO_INDEX(reference_genomes)
+    //    index_files_ch = THEMISTO_INDEX(reference_genomes)
+    //    index_prefix_ch = channel.value("index") // needs to be identical to what index is set as in indexing process
     //}
-    
+
     index_ch = channel.value(params.themisto_index)
     
     pseudoaligned_ch = THEMISTO_PSEUDOALIGN(reads_ch,index_files_ch,index_prefix_ch)
