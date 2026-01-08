@@ -49,6 +49,10 @@ Helper Scripts
 */
 
 workflow {
+    params.each { key, value ->
+    log.info "PARAM ${key} = ${value}"
+    }
+    
     if (params.help) {
         printHelp()
         exit 0
