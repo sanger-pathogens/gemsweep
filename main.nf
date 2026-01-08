@@ -25,7 +25,7 @@ def printHelp() {
     IMPORT MODULES/SUBWORKFLOWS
 ========================================================================================
 */
-include { MIXED_INPUT          } from './assorted-sub-workflows/mixed_input/mixed_input.nf'
+//include { MIXED_INPUT          } from './assorted-sub-workflows/mixed_input/mixed_input.nf'
 include { THEMISTO_PSEUDOALIGN } from './modules/themisto.nf'
 include { MSWEEP               } from './modules/msweep.nf'
 include { MGEMS                } from './modules/mgems.nf'
@@ -66,22 +66,17 @@ workflow {
             tuple(meta, file(row.R1), file(row.R2))
         }
 
-    ref_groups_ch = params.ref_groups ? channel.fromPath(params.ref_groups) :    // If user supplies groups, give those
-                 (params.skip_clustering ? channel.empty() : channel.empty())    // If user skips clustering give empty channel, else give poppunk clusters (not yet built)
+    ref_groups_ch = channel.fromPath(params.ref_groups)
     
     if (params.themisto_index) {
         index_files_ch = channel.fromPath("${params.themisto_index}*").collect()
         index_prefix_ch = channel.value(file(params.themisto_index).getName())
-    } else {
-        error "ERROR: themisto index not supplied and indexing process not yet implemented."
     }
     // // This or switch to one index channel with a tuple of prefix and files (probs better)
     //} else {
     //    index_files_ch = THEMISTO_INDEX(reference_genomes)
     //    index_prefix_ch = channel.value("index") // needs to be identical to what index is set as in indexing process
     //}
-
-    index_ch = channel.value(params.themisto_index)
     
     pseudoaligned_ch = THEMISTO_PSEUDOALIGN(reads_ch,index_files_ch,index_prefix_ch)
     
@@ -91,7 +86,7 @@ workflow {
         pseudoaligned_ch
             .join(msweep_ch, by: 0)
             .map { themisto_tuple, msweep_tuple -> themisto_tuple + msweep_tuple[1..2] }
-            .combine(index_ch, channel.value(params.ref_groups))
+            .combine(index_files_ch, index_prefix_ch, ref_groups_ch)
             .map { tuple, index, ref_groups -> tuple + [index, ref_groups] }
     )
 
