@@ -52,7 +52,7 @@ workflow {
     params.each { key, value ->
     log.info "PARAM ${key} = ${value}"
     }
-    
+
     if (params.help) {
         printHelp()
         exit 0
@@ -86,13 +86,17 @@ workflow {
     
     msweep_ch = MSWEEP(pseudoaligned_ch,ref_groups_ch)
     
-    MGEMS(
-        pseudoaligned_ch
-            .join(msweep_ch, by: 0)
-            .map { themisto_tuple, msweep_tuple -> themisto_tuple + msweep_tuple[1..2] }
-            .combine(index_files_ch, index_prefix_ch, ref_groups_ch)
-            .map { tuple, index, ref_groups -> tuple + [index, ref_groups] }
-    )
+   MGEMS(
+    reads_ch
+    .join(pseudoaligned_ch, by: 0)
+    .join(msweep_ch, by: 0)
+    .map { meta, r1, r2, aln1, aln2, abund, probs ->
+        tuple(meta, r1, r2, aln1, aln2, abund, probs)
+    },
+    index_files_ch,
+    index_prefix_ch,
+    ref_groups_ch
+   )
 
 
 
