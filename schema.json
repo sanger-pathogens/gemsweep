@@ -15,12 +15,12 @@
     },
     "Themisto options": {
       "temp_storage": {
-        "default": "/tmp",
-        "help_text": "Provide the temporary storage directory to be used during runtime. (Required)"
+        "default": "null",
+        "help_text": "Custom temporary storage directory to be used during runtime. Otherwise /tmp will be used."
       },
       "themisto_index": {
         "default": "null",
-        "help_text": "Path to a pre-built Themisto index including the index prefix. Skips indexing if provided."
+        "help_text": "Path to a pre-built Themisto index including the index prefix (without exts). Skips indexing if provided."
       },
       "kmer_size": {
         "default": "31",
@@ -30,11 +30,7 @@
     "mSWEEP options": {
       "ref_groups": {
         "default": "null",
-        "help_text": "Provide the grouped references as a text file. Skips clustering if provided."
-      },
-      "skip_clustering": {
-        "default": "null",
-        "help_text": "Use ungrouped references in mSWEEP (not recommended). If ref_groups is provided clustering is skipped regardless of this flag."
+        "help_text": "Grouped references text file, one line per reference. Mandatory when pre-built index is supplied to --themisto_index."
       }
     },
     "mGEMS options": {
