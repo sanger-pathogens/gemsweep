@@ -18,11 +18,7 @@ process MSWEEP {
 
     script:
     output_prefix = "${meta.id}_mSWEEP"
-    command = "mSWEEP --themisto-1 ${pseudoalignment_1} --themisto-2 ${pseudoalignment_2} -o ${output_prefix} --write-probs"
-    if (!params.skip_clustering) {
-        // if user has skipped poppunk grouping of references, do not add to command
-        command += " -i ${ref_groups}"
-        }
+    command = "mSWEEP --themisto-1 ${pseudoalignment_1} --themisto-2 ${pseudoalignment_2} -o ${output_prefix} -i ${ref_groups} --write-probs"
 
     """
     ${command}
