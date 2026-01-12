@@ -83,11 +83,12 @@ Add example tree of results output
 
 ---
 
-**Input options**
+**General options**
 
-| Flag       | Type   | Default | Description                                                                                           |
-| ---------- | ------ | ------- | ----------------------------------------------------------------------------------------------------- |
-| `manifest` | `path` | `null`  | Input manifest CSV with required header `ID,R1,R2`, containing per-sample paths to `.fastq.gz` files. |
+| Flag       | Type   | Default       | Description                                                                                           |
+| ---------- | ------ | ------------- | ----------------------------------------------------------------------------------------------------- |
+| `manifest` | `path` | `null`        | Input manifest CSV with required header `ID,R1,R2`, containing per-sample paths to `.fastq.gz` files. |
+| `outdir`   | `path` | `"./results"` | Location to output the results, by default in a 'results' directory within the launch directory.      |
 
 ---
 
