@@ -2,7 +2,7 @@
 
 process THEMISTO_PSEUDOALIGN {
     label 'cpu_16'
-    label params.temp_storage ? "mem_16" : "mem_120"
+    label 'mem_120'
     label 'time_12'
 
     // scratch used for fast node-local temp storage
