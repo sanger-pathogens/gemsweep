@@ -2,10 +2,10 @@ process THEMISTO_BUILD_INDEX {
     label 'cpu_16'
     label "mem_32"
     label 'time_12'
+    label 'request_temp'
 
     // scratch used for fast node-local temp storage
     scratch true
-    clusterOptions '-R "rusage[tmp=10000]"'
 
     container 'quay.io/sangerpathogens/themisto:3.2.2'
 
@@ -20,8 +20,8 @@ process THEMISTO_BUILD_INDEX {
     index_build_params = "-k ${params.kmer_size} -i ${references_txt} -o ${index_prefix}"
     
     // User-provided temp storage if given (and not accidentally provided as 'false') otherwise use tmp workdir (since scratch is enabled)
-    if (params.temp_storage && params.temp_storage != 'false') {
-        temp_storage_location = (params.temp_storage)
+    if (params.temp_dir && params.temp_dir != 'false') {
+        temp_storage_location = (params.temp_dir)
         index_build_params += " --temp-dir ${temp_storage_location}"
     } else {
         index_build_params += " --temp-dir \$PWD"
@@ -40,10 +40,10 @@ process THEMISTO_PSEUDOALIGN {
     label 'cpu_16'
     label 'mem_32'
     label 'time_12'
+    label 'request_temp'
 
     // scratch used for fast node-local temp storage
     scratch true
-    clusterOptions '-R "rusage[tmp=10000]"'
 
     container 'quay.io/sangerpathogens/themisto:3.2.2'
 
@@ -59,8 +59,8 @@ process THEMISTO_PSEUDOALIGN {
     pseudoalignment_params = "-i ${index_prefix} --n-threads ${task.cpus} --sort-output-lines --gzip-output"
 
     // User-provided temp storage if given (and not accidentally provided as 'false') otherwise use tmp workdir (since scratch is enabled)
-    if (params.temp_storage && params.temp_storage != 'false') {
-        temp_storage_location = (params.temp_storage)
+    if (params.temp_dir && params.temp_dir != 'false') {
+        temp_storage_location = (params.temp_dir)
         pseudoalignment_params += " --temp-dir ${temp_storage_location}"
     } else {
         pseudoalignment_params += " --temp-dir \$PWD"

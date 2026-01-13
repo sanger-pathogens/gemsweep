@@ -22,7 +22,7 @@
       }
     },
     "Themisto options": {
-      "temp_storage": {
+      "temp_dir": {
         "default": "null",
         "help_text": "Custom temporary storage directory to be used during runtime. Otherwise local /tmp will be used."
       },
