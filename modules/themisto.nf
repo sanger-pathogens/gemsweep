@@ -1,4 +1,40 @@
+process THEMISTO_BUILD_INDEX {
+    label 'cpu_16'
+    label "mem_32"
+    label 'time_12'
 
+    // scratch used for fast node-local temp storage
+    scratch true
+    clusterOptions '-R "rusage[tmp=10000]"'
+
+    container 'quay.io/sangerpathogens/themisto:3.2.2'
+
+    input:
+    val index_prefix
+    path references_txt
+
+    output:
+    path "path/to/index*"
+
+    script:
+    index_build_params = "-k ${params.kmer_size} -i ${references_txt} -o ${index_prefix}"
+    
+    // User-provided temp storage if given (and not accidentally provided as 'false') otherwise use tmp workdir (since scratch is enabled)
+    if (params.temp_storage && params.temp_storage != 'false') {
+        temp_storage_location = (params.temp_storage)
+        index_build_params += " --temp-dir ${temp_storage_location}"
+    } else {
+        index_build_params += " --temp-dir \$PWD"
+    }
+
+    // supply less memory allocation in the command as it requires additional overhead (will likely fail if exact)
+    mem_gigas_param = task.memory / 1.2
+    index_build_params += " --mem-gigas ${mem_gigas_param}"
+
+    """
+    themisto build ${index_build_params}
+    """
+}
 
 process THEMISTO_PSEUDOALIGN {
     label 'cpu_16'
@@ -35,3 +71,4 @@ process THEMISTO_PSEUDOALIGN {
     themisto pseudoalign -q ${reads_2} -o pseudoalignments_2.aln ${pseudoalignment_params}
     """
 }
+

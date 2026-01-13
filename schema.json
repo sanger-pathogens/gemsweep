@@ -12,6 +12,10 @@
         "default": "null",
         "help_text": "Input manifest CSV with (required) header line 'ID,R1,R2', containing per sample paths to .fastq.gz files"
       },
+      "references": {
+        "default": "null",
+        "help_text": "Text files containing paths to references"
+      },
       "outdir": {
         "default": "./results",
         "help_text": "Path to top directory containing all results, by default 'results' within the launch directory."
