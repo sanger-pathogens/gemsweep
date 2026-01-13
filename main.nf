@@ -27,7 +27,8 @@ def printHelp() {
 */
 //include { MIXED_INPUT          } from './assorted-sub-workflows/mixed_input/mixed_input.nf'
 include { THEMISTO_BUILD_INDEX; 
-          THEMISTO_PSEUDOALIGN } from './modules/themisto.nf'
+          THEMISTO_PSEUDOALIGN;
+          THEMISTO_STATS       } from './modules/themisto.nf'
 include { MSWEEP               } from './modules/msweep.nf'
 include { MGEMS                } from './modules/mgems.nf'
 
@@ -71,7 +72,7 @@ workflow {
             tuple(meta, file(row.R1), file(row.R2))
         }
 
-    references_ch = channel.empty()
+    references_ch = channel.fromPath(params.references)
 
     if (params.themisto_index) {
         ref_groups_ch = channel.fromPath(params.ref_groups)
@@ -83,7 +84,9 @@ workflow {
         index_prefix_ch = channel.value("index") // needs to be identical to what index is set as in indexing process
         index_files_ch = THEMISTO_BUILD_INDEX(index_prefix_ch, references_ch)
         }
-        
+    
+    THEMISTO_STATS(index_files_ch, index_prefix_ch)
+
     pseudoaligned_ch = THEMISTO_PSEUDOALIGN(reads_ch,index_files_ch,index_prefix_ch)
     
     msweep_ch = MSWEEP(pseudoaligned_ch,ref_groups_ch)

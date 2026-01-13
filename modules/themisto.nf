@@ -72,3 +72,24 @@ process THEMISTO_PSEUDOALIGN {
     """
 }
 
+process THEMISTO_STATS {
+    label 'cpu_1'
+    label "mem_1"
+    label 'time_1'
+
+    container 'quay.io/sangerpathogens/themisto:3.2.2'
+
+    publishDir mode: 'copy', path: "${params.outdir}/themisto"
+
+    input:
+    path index_files    // For staging
+    val index_prefix    // For use in command
+
+    output:
+    path "index_report.txt"
+
+    script:
+    """
+    themisto stats -i ${index_prefix} > "index_report.txt"
+    """
+}
