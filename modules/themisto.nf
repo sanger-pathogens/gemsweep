@@ -2,7 +2,7 @@
 
 process THEMISTO_PSEUDOALIGN {
     label 'cpu_16'
-    label 'mem_64'
+    label 'mem_32'
     label 'time_12'
 
     // scratch used for fast node-local temp storage
