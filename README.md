@@ -85,10 +85,11 @@ Add example tree of results output
 
 **General options**
 
-| Flag       | Type   | Default       | Description                                                                                           |
-| ---------- | ------ | ------------- | ----------------------------------------------------------------------------------------------------- |
-| `manifest` | `path` | `null`        | Input manifest CSV with required header `ID,R1,R2`, containing per-sample paths to `.fastq.gz` files. |
-| `outdir`   | `path` | `"./results"` | Path to top directory containing all results, by default `results` within the launch directory.       |
+| Flag         | Type   | Default       | Description                                                                                                         |
+| ------------ | ------ | ------------- | ------------------------------------------------------------------------------------------------------------------- |
+| `manifest`   | `path` | `null`        | Input manifest CSV with required header `ID,R1,R2`, containing per-sample paths to `.fastq.gz` files.               |
+| `references` | `path` | `null`        | Path to text file containing paths to references, one per line. Ignored if providing ref_groups and themisto_index. |
+| `outdir`     | `path` | `"./results"` | Path to top directory containing all results, by default `results` within the launch directory.                     |
 
 ---
 
