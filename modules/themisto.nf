@@ -28,7 +28,7 @@ process THEMISTO_BUILD_INDEX {
     }
 
     // supply less memory allocation in the command as it requires additional overhead (will likely fail if exact)
-    mem_gigas_param = task.memory / 1.2
+    mem_gigas_param = (task.memory.toGiga() / 1.2).toInteger()
     index_build_params += " --mem-gigas ${mem_gigas_param}"
 
     """
