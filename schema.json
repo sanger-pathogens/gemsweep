@@ -7,42 +7,40 @@
         "help_text": "Should logs appear in plain ASCII"
       }
     },
-    "Input options": {
+    "General options": {
       "manifest": {
-        "default": null,
+        "default": "null",
         "help_text": "Input manifest CSV with (required) header line 'ID,R1,R2', containing per sample paths to .fastq.gz files"
+      },
+      "outdir": {
+        "default": "./results",
+        "help_text": "Path to top directory containing all results, by default 'results' within the launch directory."
       }
     },
     "Themisto options": {
       "temp_storage": {
-        "default": "/tmp",
-        "help_text": ""
+        "default": "null",
+        "help_text": "Custom temporary storage directory to be used during runtime. Otherwise local /tmp will be used."
       },
       "themisto_index": {
         "default": "null",
-        "help_text": ""
+        "help_text": "Path to a pre-built Themisto index including the index prefix (without exts). Skips indexing if provided."
       },
       "kmer_size": {
         "default": "31",
-        "help_text": ""
+        "help_text": "K-mer size to use for index and pseudoalignment (21|31|51). If providing an index ensure k-mer size is identical."
       }
     },
     "mSWEEP options": {
       "ref_groups": {
         "default": "null",
-        "help_text": ""
+        "help_text": "Grouped references text file, one line per reference. Mandatory when pre-built index is supplied to --themisto_index."
       }
     },
     "mGEMS options": {
       "get_assignments": {
         "default": "false",
-        "help_text": ""
-      }
-    },
-    "Skip options": {
-      "skip_clustering": {
-        "default": "null",
-        "help_text": ""
+        "help_text": "Output the read assignment table used by mGEMS for binning."
       }
     }
   },

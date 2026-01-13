@@ -53,31 +53,70 @@ This pipeline requires a manifest of reads i.e. a CSV file with the header line 
 
 ### Inputs
 
+- Either of the following:
+  - a prebuilt themisto index of references and a reference grouping text file\*
+  - a references.txt (indexing and clustering will happen within the pipeline)
 - Paired-end reads per (mixed) sample
+
+\* NOTE: If supplying a prebuilt index a\) the kmer size must be identical to the argument `kmer_size` (default: 31) and b\) the reference grouping file must be in identical order to the references when indexed.
+
+<!---
+Example reference grouping file would be useful to add.
+--->
 
 ### Outputs
 
-TBC
+- Binned reads per reference group (strain-level deconvolution)
+- Read assignment table (optionally, with `--get_assignments`)
+
+<!---
+Add example tree of results output
+--->
 
 ### Parameters
 
-<!--- WIP:
-    // themisto options
-    temp_storage = "/tmp"
-    themisto_index = null
-    kmer_size = 31
+**Logging options**
 
-    // msweep options
-    ref_groups = null
+| Flag              | Type      | Default | Description                                           |
+| ----------------- | --------- | ------- | ----------------------------------------------------- |
+| `monochrome_logs` | `boolean` | `false` | Output logs in plain ASCII (disable colored logging). |
 
-    // mgems options
-    get_assignments = false
+---
 
-    // skip options
-    skip_clustering = false
---->
+**General options**
 
-TBC
+| Flag       | Type   | Default       | Description                                                                                           |
+| ---------- | ------ | ------------- | ----------------------------------------------------------------------------------------------------- |
+| `manifest` | `path` | `null`        | Input manifest CSV with required header `ID,R1,R2`, containing per-sample paths to `.fastq.gz` files. |
+| `outdir`   | `path` | `"./results"` | Path to top directory containing all results, by default `results` within the launch directory.       |
+
+---
+
+**Themisto options**
+
+| Flag             | Type      | Default | Description                                                                                                                    |
+| ---------------- | --------- | ------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| `temp_storage`   | `path`    | `null`  | Custom temporary storage directory to be used during runtime. Otherwise local `/tmp` will be used..                            |
+| `themisto_index` | `path`    | `null`  | Path to a pre-built Themisto index including the index prefix (without exts). Skips indexing if provided.                      |
+| `kmer_size`      | `integer` | `31`    | K-mer size for indexing and pseudoalignment. Allowed values: `21`, `31`, `51`. K-mer sizes must match if an index is provided. |
+
+---
+
+**mSWEEP options**
+
+| Flag         | Type   | Default | Description                                                                                                             |
+| ------------ | ------ | ------- | ----------------------------------------------------------------------------------------------------------------------- |
+| `ref_groups` | `path` | `null`  | Grouped references text file, one line per reference. Mandatory when pre-built index is supplied to `--themisto_index`. |
+
+---
+
+**mGEMS options**
+
+| Flag              | Type      | Default | Description                                                 |
+| ----------------- | --------- | ------- | ----------------------------------------------------------- |
+| `get_assignments` | `boolean` | `false` | Output the read assignment table used by mGEMS for binning. |
+
+---
 
 ### Dependencies
 
@@ -105,9 +144,9 @@ The current version of the pipeline uses the following software dependencies:
 To see the dependencies for a previous version go to the tag corresponding to that version and navigate to this section of the README.
 --->
 
-## Temporary Storage Usage
+## Customise Temporary Storage
 
-TBC
+The `--temp_storage` option is available to customise temporary storage location if necessary. Themisto pseudoalignment requires temporary storage and requires that it is on the same filesystem as the process is run. By default this pipeline uses node-local `/tmp` which is safe for both HPC and non-HPC as long as `/tmp` is available and writable (usually true).
 
 ## GPU Acceleration
 
