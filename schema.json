@@ -14,13 +14,13 @@
       },
       "outdir": {
         "default": "./results",
-        "help_text": "Output top folder where the various outputs will be written"
+        "help_text": "Path to top directory containing all results, by default 'results' within the launch directory."
       }
     },
     "Themisto options": {
       "temp_storage": {
         "default": "null",
-        "help_text": "Custom temporary storage directory to be used during runtime. Otherwise /tmp will be used."
+        "help_text": "Custom temporary storage directory to be used during runtime. Otherwise local /tmp will be used."
       },
       "themisto_index": {
         "default": "null",

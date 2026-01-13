@@ -88,7 +88,7 @@ Add example tree of results output
 | Flag       | Type   | Default       | Description                                                                                           |
 | ---------- | ------ | ------------- | ----------------------------------------------------------------------------------------------------- |
 | `manifest` | `path` | `null`        | Input manifest CSV with required header `ID,R1,R2`, containing per-sample paths to `.fastq.gz` files. |
-| `outdir`   | `path` | `"./results"` | Location to output the results, by default in a 'results' directory within the launch directory.      |
+| `outdir`   | `path` | `"./results"` | Path to top directory containing all results, by default `results` within the launch directory.       |
 
 ---
 
@@ -96,7 +96,7 @@ Add example tree of results output
 
 | Flag             | Type      | Default | Description                                                                                                                    |
 | ---------------- | --------- | ------- | ------------------------------------------------------------------------------------------------------------------------------ |
-| `temp_storage`   | `path`    | `null`  | Custom temporary storage directory to be used during runtime. Otherwise the local `/tmp` directory will be used.                                   |
+| `temp_storage`   | `path`    | `null`  | Custom temporary storage directory to be used during runtime. Otherwise local `/tmp` will be used..                            |
 | `themisto_index` | `path`    | `null`  | Path to a pre-built Themisto index including the index prefix (without exts). Skips indexing if provided.                      |
 | `kmer_size`      | `integer` | `31`    | K-mer size for indexing and pseudoalignment. Allowed values: `21`, `31`, `51`. K-mer sizes must match if an index is provided. |
 
