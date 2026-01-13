@@ -14,7 +14,7 @@ process THEMISTO_BUILD_INDEX {
     path references_txt
 
     output:
-    path "path/to/index*"
+    path "${index_prefix}.*"
 
     script:
     index_build_params = "-k ${params.kmer_size} -i ${references_txt} -o ${index_prefix}"
