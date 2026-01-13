@@ -14,7 +14,7 @@
       },
       "outdir": {
         "default": "./results",
-        "help_text": "Input manifest CSV with (required) header line 'ID,R1,R2', containing per sample paths to .fastq.gz files"
+        "help_text": "Output top folder where the various outputs will be written"
       }
     },
     "Themisto options": {
