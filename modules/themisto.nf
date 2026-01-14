@@ -19,8 +19,8 @@ process THEMISTO_BUILD_INDEX {
     script:
     index_build_params = "-k ${params.kmer_size} -i ${references_txt} -o ${index_prefix}"
     
-    // User-provided temp storage if given (and not accidentally provided as 'false') otherwise use tmp workdir (since scratch is enabled)
-    if (params.temp_dir && params.temp_dir != 'false') {
+    // User-provided temp storage if given otherwise use tmp workdir (since scratch is enabled)
+    if (params.temp_dir) {
         temp_storage_location = (params.temp_dir)
         index_build_params += " --temp-dir ${temp_storage_location}"
     } else {
@@ -58,8 +58,8 @@ process THEMISTO_PSEUDOALIGN {
     script:
     pseudoalignment_params = "-i ${index_prefix} --n-threads ${task.cpus} --sort-output-lines --gzip-output"
 
-    // User-provided temp storage if given (and not accidentally provided as 'false') otherwise use tmp workdir (since scratch is enabled)
-    if (params.temp_dir && params.temp_dir != 'false') {
+    // User-provided temp storage if given otherwise use tmp workdir (since scratch is enabled)
+    if (params.temp_dir) {
         temp_storage_location = (params.temp_dir)
         pseudoalignment_params += " --temp-dir ${temp_storage_location}"
     } else {
