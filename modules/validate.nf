@@ -10,7 +10,7 @@
 
 // Pre-built index validation:
 def validate_index(kmer_index, kmer_arg) {
-    if (kmer_index != kmer_arg) {
+    if (kmer_index != kmer_arg.toInteger()) {
         log.error("Unexpected K-mer length for pre-built index. Please use the option '--kmer_size' in your command to supply the index's K-mer size: ${kmer_index}")
         return 1
     }

@@ -40,7 +40,7 @@ include { MGEMS                } from './modules/mgems.nf'
 Helper Scripts
 */
 
-//include { validate_parameters } from './modules/validate.nf'
+include { validate_index       } from './modules/validate.nf'
 
 
 
@@ -85,6 +85,12 @@ workflow {
         }
     
     THEMISTO_STATS(index_files_ch, index_prefix_ch)
+        .map { file ->
+                def line = file.readLines().find { it.startsWith('Node length k:') }
+                return line.tokenize(':')[1].trim().toInteger()
+            }
+        .map { kmer_index -> validate_index(kmer_index, params.kmer_size) }
+    
 
     pseudoaligned_ch = THEMISTO_PSEUDOALIGN(reads_ch,index_files_ch,index_prefix_ch)
     
