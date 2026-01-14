@@ -80,7 +80,7 @@ workflow {
         index_prefix_ch = channel.value(file(params.themisto_index).getName())
         // This or switch to one index channel with a tuple of prefix and files (probs better)
         } else {
-        // ref_groups_ch = CLUSTERING PROCESS(references_ch) (placeholder, process not yet developed)
+        ref_groups_ch = channel.fromPath(params.ref_groups) //CLUSTERING PROCESS(references_ch) placeholder, process not yet developed
         index_prefix_ch = channel.value("index") // needs to be identical to what index is set as in indexing process
         index_files_ch = THEMISTO_BUILD_INDEX(index_prefix_ch, references_ch)
         }
