@@ -85,10 +85,11 @@ Add example tree of results output
 
 **General options**
 
-| Flag       | Type   | Default       | Description                                                                                           |
-| ---------- | ------ | ------------- | ----------------------------------------------------------------------------------------------------- |
-| `manifest` | `path` | `null`        | Input manifest CSV with required header `ID,R1,R2`, containing per-sample paths to `.fastq.gz` files. |
-| `outdir`   | `path` | `"./results"` | Path to top directory containing all results, by default `results` within the launch directory.       |
+| Flag         | Type   | Default       | Description                                                                                                         |
+| ------------ | ------ | ------------- | ------------------------------------------------------------------------------------------------------------------- |
+| `manifest`   | `path` | `null`        | Input manifest CSV with required header `ID,R1,R2`, containing per-sample paths to `.fastq.gz` files.               |
+| `references` | `path` | `null`        | Path to text file containing paths to references, one per line. Ignored if providing ref_groups and themisto_index. |
+| `outdir`     | `path` | `"./results"` | Path to top directory containing all results, by default `results` within the launch directory.                     |
 
 ---
 
@@ -96,7 +97,7 @@ Add example tree of results output
 
 | Flag             | Type      | Default | Description                                                                                                                    |
 | ---------------- | --------- | ------- | ------------------------------------------------------------------------------------------------------------------------------ |
-| `temp_storage`   | `path`    | `null`  | Custom temporary storage directory to be used during runtime. Otherwise local `/tmp` will be used..                            |
+| `temp_dir`       | `path`    | `null`  | Custom temporary storage directory to be used during runtime. Otherwise local `/tmp` will be used..                            |
 | `themisto_index` | `path`    | `null`  | Path to a pre-built Themisto index including the index prefix (without exts). Skips indexing if provided.                      |
 | `kmer_size`      | `integer` | `31`    | K-mer size for indexing and pseudoalignment. Allowed values: `21`, `31`, `51`. K-mer sizes must match if an index is provided. |
 
@@ -146,7 +147,7 @@ To see the dependencies for a previous version go to the tag corresponding to th
 
 ## Customise Temporary Storage
 
-The `--temp_storage` option is available to customise temporary storage location if necessary. Themisto pseudoalignment requires temporary storage and requires that it is on the same filesystem as the process is run. By default this pipeline uses node-local `/tmp` which is safe for both HPC and non-HPC as long as `/tmp` is available and writable (usually true).
+The `--temp_dir` option is available to customise temporary storage location if necessary. Themisto pseudoalignment requires temporary storage and requires that it is on the same filesystem as the process is run. By default this pipeline uses node-local `/tmp` which is safe for both HPC and non-HPC as long as `/tmp` is available and writable (usually true).
 
 ## GPU Acceleration
 

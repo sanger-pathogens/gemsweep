@@ -26,7 +26,9 @@ def printHelp() {
 ========================================================================================
 */
 //include { MIXED_INPUT          } from './assorted-sub-workflows/mixed_input/mixed_input.nf'
-include { THEMISTO_PSEUDOALIGN } from './modules/themisto.nf'
+include { THEMISTO_BUILD_INDEX; 
+          THEMISTO_PSEUDOALIGN;
+          THEMISTO_STATS       } from './modules/themisto.nf'
 include { MSWEEP               } from './modules/msweep.nf'
 include { MGEMS                } from './modules/mgems.nf'
 
@@ -38,7 +40,7 @@ include { MGEMS                } from './modules/mgems.nf'
 Helper Scripts
 */
 
-//include { validate_parameters } from './modules/validate.nf'
+include { validate_index       } from './modules/validate.nf'
 
 
 
@@ -70,18 +72,26 @@ workflow {
             tuple(meta, file(row.R1), file(row.R2))
         }
 
-    ref_groups_ch = channel.fromPath(params.ref_groups)
-    
     if (params.themisto_index) {
+        ref_groups_ch = channel.fromPath(params.ref_groups)
         index_files_ch = channel.fromPath("${params.themisto_index}*").collect()
         index_prefix_ch = channel.value(file(params.themisto_index).getName())
-    }
-    // // This or switch to one index channel with a tuple of prefix and files (probs better)
-    //} else {
-    //    index_files_ch = THEMISTO_INDEX(reference_genomes)
-    //    index_prefix_ch = channel.value("index") // needs to be identical to what index is set as in indexing process
-    //}
+        // This or switch to one index channel with a tuple of prefix and files (probs better)
+        } else {
+        references_ch = channel.fromPath(params.references)
+        ref_groups_ch = channel.fromPath(params.ref_groups) //CLUSTERING PROCESS(references_ch) placeholder, process not yet developed
+        index_prefix_ch = channel.value("index") // needs to be identical to what index is set as in indexing process
+        index_files_ch = THEMISTO_BUILD_INDEX(index_prefix_ch, references_ch)
+        }
     
+    THEMISTO_STATS(index_files_ch, index_prefix_ch)
+        .map { file ->
+                def line = file.readLines().find { it.startsWith('Node length k:') }
+                return line.tokenize(':')[1].trim().toInteger()
+            }
+        .map { kmer_index -> validate_index(kmer_index, params.kmer_size) }
+    
+
     pseudoaligned_ch = THEMISTO_PSEUDOALIGN(reads_ch,index_files_ch,index_prefix_ch)
     
     msweep_ch = MSWEEP(pseudoaligned_ch,ref_groups_ch)
