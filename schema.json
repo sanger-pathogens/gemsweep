@@ -14,7 +14,7 @@
       },
       "references": {
         "default": "null",
-        "help_text": "Path to text file containing paths to references, one per line. Ignored if providing ref_groups and themisto_index."
+        "help_text": "Path to text file containing paths to references, one per line. If provided, ref_groups and themisto_index will be ignored."
       },
       "outdir": {
         "default": "./results",

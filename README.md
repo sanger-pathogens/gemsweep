@@ -47,20 +47,20 @@ To run the pipeline from source (this repository):
 
     See [Usage](#usage) for all available pipeline options.
 
-### Input manifest
-
-This pipeline utilises mixed_input.nf from assorted-subworkflows. See here for more detail: https://gitlab.internal.sanger.ac.uk/sanger-pathogens/pipelines/assorted-sub-workflows/-/blob/main/mixed_input/README.md?ref_type=heads
-
-This pipeline requires a manifest of reads i.e. a CSV file with the header line 'ID,R1,R2' (mandatory) and rows containing the read ID, path to read 1 and path to read 2. Only paired-end reads are supported and the files should be gzipped fastqs (file extension '.fastq.gz').
-
 ### Inputs
 
-- Either of the following:
-  - a prebuilt themisto index of references and a reference grouping text file\*
+- Either of the following options for supplying references:
+
+  - a prebuilt themisto index of references AND a reference grouping text file\*
   - a references.txt (indexing and clustering will happen within the pipeline)
+
+  If a references.txt is supplied, any files supplied to `--ref_groups` and/or `--themisto_index` are ignored.
+
+  NOTE: If supplying a prebuilt index a\) the kmer size must be identical to the argument `kmer_size` (default: 31) and b\) the reference grouping file must be in identical positional order to the references when indexed.
+
 - Paired-end reads per (mixed) sample
 
-\* NOTE: If supplying a prebuilt index a\) the kmer size must be identical to the argument `kmer_size` (default: 31) and b\) the reference grouping file must be in identical order to the references when indexed.
+  This pipeline requires a manifest of reads i.e. a CSV file with the header line 'ID,R1,R2' (mandatory) and rows containing the read ID, path to read 1 and path to read 2. Only paired-end reads are supported and the files should be gzipped fastqs (file extension '.fastq.gz').
 
 <!---
 Example reference grouping file would be useful to add.
@@ -87,11 +87,11 @@ Add example tree of results output
 
 **General options**
 
-| Flag         | Type   | Default       | Description                                                                                                         |
-| ------------ | ------ | ------------- | ------------------------------------------------------------------------------------------------------------------- |
-| `manifest`   | `path` | `null`        | Input manifest CSV with required header `ID,R1,R2`, containing per-sample paths to `.fastq.gz` files.               |
-| `references` | `path` | `null`        | Path to text file containing paths to references, one per line. Ignored if providing ref_groups and themisto_index. |
-| `outdir`     | `path` | `"./results"` | Path to top directory containing all results, by default `results` within the launch directory.                     |
+| Flag         | Type   | Default       | Description                                                                                                                 |
+| ------------ | ------ | ------------- | --------------------------------------------------------------------------------------------------------------------------- |
+| `manifest`   | `path` | `null`        | Input manifest CSV with required header `ID,R1,R2`, containing per-sample paths to `.fastq.gz` files.                       |
+| `references` | `path` | `null`        | Path to text file containing paths to references, one per line. If provided, ref_groups and themisto_index will be ignored. |
+| `outdir`     | `path` | `"./results"` | Path to top directory containing all results, by default `results` within the launch directory.                             |
 
 ---
 
