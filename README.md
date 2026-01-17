@@ -115,9 +115,10 @@ Add example tree of results output
 
 **mGEMS options**
 
-| Flag              | Type      | Default | Description                                                 |
-| ----------------- | --------- | ------- | ----------------------------------------------------------- |
-| `get_assignments` | `boolean` | `false` | Output the read assignment table used by mGEMS for binning. |
+| Flag              | Type      | Default  | Description                                                                      |
+| ----------------- | --------- | -------- | -------------------------------------------------------------------------------- |
+| `get_assignments` | `boolean` | `false`  | Output the read assignment table used by mGEMS for binning.                      |
+| `min_abundance`   | `float`   | `0.0001` | Only bin reads for groups that have a relative abundance higher than this value. |
 
 ---
 

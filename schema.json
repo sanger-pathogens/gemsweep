@@ -45,6 +45,10 @@
       "get_assignments": {
         "default": "false",
         "help_text": "Output the read assignment table used by mGEMS for binning."
+      },
+      "min_abundance": {
+        "default": "0.0001",
+        "help_text": "Only bin reads for groups that have a relative abundance higher than this value."
       }
     }
   },
