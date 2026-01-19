@@ -60,7 +60,7 @@ workflow {
 
     //validate_parameters()
 
-    reads_ch = MIXED_INPUT().all_reads_ready_ch    // outputs channel of [meta, R1, R2] for reads_<1|2>.fastq.gz
+    reads_ch = MIXED_INPUT()    // outputs channel of [meta, R1, R2] for reads_<1|2>.fastq.gz
 
     if (params.themisto_index) {
         ref_groups_ch = channel.fromPath(params.ref_groups)
