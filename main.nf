@@ -40,7 +40,8 @@ include { MGEMS                } from './modules/mgems.nf'
 Helper Scripts
 */
 
-include { validate_index;
+include { validate_params;
+          validate_index;
           validate_ref_groups } from './modules/validate.nf'
 
 /*
@@ -59,7 +60,7 @@ workflow {
         exit 0
     }
 
-    //validate_parameters()
+    validate_params()
 
     reads_ch = MIXED_INPUT()    // outputs channel of [meta, R1, R2] for reads_<1|2>.fastq.gz
 
@@ -104,6 +105,7 @@ workflow {
             }
     }
 
+    // Core Workflow
     pseudoaligned_ch = THEMISTO_PSEUDOALIGN(reads_ch,index_files_ch,index_prefix_ch)
     
     msweep_ch = MSWEEP(pseudoaligned_ch,ref_groups_ch)
