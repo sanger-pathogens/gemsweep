@@ -17,7 +17,8 @@ process SKETCHLIB {
     helper = '../bin/sketchlib_helper.py'
     """
     python3 ${helper} ${ref_file} ${params.outdir}
-    sketchlib sketch -l ${ref_path} -o references --cpus 4
+
+    sketchlib sketch -l ${params.outdir}/references.tsv -o references --cpus 4
     
     # now create the groups file
     # example ref file: 
