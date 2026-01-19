@@ -31,6 +31,7 @@ include { THEMISTO_BUILD_INDEX;
           THEMISTO_STATS       } from './modules/themisto.nf'
 include { MSWEEP               } from './modules/msweep.nf'
 include { MGEMS                } from './modules/mgems.nf'
+include { SKETCHLIB            } from './modules/pp-sketchlib.nf'
 
 //
 // SUBWORKFLOWS
