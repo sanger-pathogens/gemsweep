@@ -49,6 +49,8 @@ To run the pipeline from source (this repository):
 
 ### Input manifest
 
+This pipeline utilises mixed_input.nf from assorted-subworkflows. See here for more detail: https://gitlab.internal.sanger.ac.uk/sanger-pathogens/pipelines/assorted-sub-workflows/-/blob/main/mixed_input/README.md?ref_type=heads
+
 This pipeline requires a manifest of reads i.e. a CSV file with the header line 'ID,R1,R2' (mandatory) and rows containing the read ID, path to read 1 and path to read 2. Only paired-end reads are supported and the files should be gzipped fastqs (file extension '.fastq.gz').
 
 ### Inputs
