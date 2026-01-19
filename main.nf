@@ -25,7 +25,7 @@ def printHelp() {
     IMPORT MODULES/SUBWORKFLOWS
 ========================================================================================
 */
-//include { MIXED_INPUT          } from './assorted-sub-workflows/mixed_input/mixed_input.nf'
+include { MIXED_INPUT          } from './assorted-sub-workflows/mixed_input/mixed_input.nf'
 include { THEMISTO_BUILD_INDEX; 
           THEMISTO_PSEUDOALIGN;
           THEMISTO_STATS       } from './modules/themisto.nf'
@@ -41,8 +41,6 @@ Helper Scripts
 */
 
 include { validate_index       } from './modules/validate.nf'
-
-
 
 /*
 ========================================================================================
@@ -62,15 +60,7 @@ workflow {
 
     //validate_parameters()
 
-    //reads_ch = MIXED_INPUT()    // outputs channel of [meta, R1, R2] for reads_<1|2>.fastq.gz
-    reads_ch = channel
-        .fromPath(params.manifest)
-        .splitCsv(header:true)
-        .map { row ->
-            // row is a map: [ID: 'sample1', R1: 'reads/sample1_R1.fastq.gz', R2: 'reads/sample1_R2.fastq.gz']
-            def meta = [id: row.ID]
-            tuple(meta, file(row.R1), file(row.R2))
-        }
+    reads_ch = MIXED_INPUT().all_reads_ready_ch    // outputs channel of [meta, R1, R2] for reads_<1|2>.fastq.gz
 
     if (params.themisto_index) {
         ref_groups_ch = channel.fromPath(params.ref_groups)
@@ -90,7 +80,6 @@ workflow {
                 return line.tokenize(':')[1].trim().toInteger()
             }
         .map { kmer_index -> validate_index(kmer_index, params.kmer_size) }
-    
 
     pseudoaligned_ch = THEMISTO_PSEUDOALIGN(reads_ch,index_files_ch,index_prefix_ch)
     
@@ -107,7 +96,4 @@ workflow {
     index_prefix_ch,
     ref_groups_ch
    )
-
-
-
 }
