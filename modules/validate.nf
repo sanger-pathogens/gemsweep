@@ -1,23 +1,43 @@
 // Param validation:
-    // // validate index +ref groups OR references have been provided
-    // if ( (params.ref_groups && params.index) == (params.references != null) ) {
-    //     log.info "Provide either --ref_groups + --index OR --references"
-    // }
-
-    // validate kmer_size is one of 21|31|51
-    def validate_choice_param(flag, value, choices) {
-        def param_name = (flag - "--").replaceAll("_", " ")
-        if (!choices.contains(value)) {
-            log.error("Please specify the ${param_name} using ${flag}, must be one of ${choices}.")
+    def validate_params() {
+        def validation_errors = []
+        // validate all params then error pipeline when all have been validated and any were incorrect
+        validate_choice_param("--kmer_size", params.kmer_size, [21,31,51], validation_errors)
+        validate_reference_input_type(params.references, params.ref_groups, params.themisto_index)
+        if (validation_errors) {
+            validation_errors.each { log.error " - $it " }
+                error("Parameters have failed validation, please review logged errors and rerun once resolved.")
         }
     }
 
+    // TODO:
+    // validate tmp space is in MB (or GB if changing) NOT CURRENTLY PARAMETERISED
+    // validate that temp_dir is a existing/valid path
+    //     def validate_path(flag, value, access, all_errors) {
+    //         def param_name = (flag - "--").replaceAll("_", " ")
+    //         if !path.exists() {
+    //         // error on not exsiting
+    //            all_errors << "Path ${value} for ${param_name} does not exist."
+    //         }
+    //         if not read/writable {
+    //         // error on not read/writeable path
+    //            all_errors << "Cannot ${access} to path ${value} for ${param_name}."
+    //         }
+    //     }
 
-// validate tmp space is in MB (or GB if changing)
-// validate that temp_dir is a existing/valid path
-    def validate_params() {
-        // validate all params then error pipeline when all have been validated and any were incorrect.
-        validate_choice_param("--kmer_size", params.kmer_size, [21,31,51])
+
+    // validate kmer_size is one of 21|31|51
+    def validate_choice_param(flag, value, choices, all_errors) {
+        def param_name = (flag - "--").replaceAll("_", " ")
+        if (!choices.contains(value)) {
+            all_errors << "Please specify the ${param_name} using ${flag}, must be one of ${choices}."
+        }
+    }
+
+    def validate_reference_input_type(references_value, ref_groups_value, themisto_index_value) {
+        if ( (ref_groups_value && themisto_index_value) == (references_value != null) ) {
+            log.info "Provide either --ref_groups + --index OR --references. As references have been supplied these will be used, themisto_index and ref_groups arguments will be ignored."
+            }
     }
 
 // Pre-built index validation:
