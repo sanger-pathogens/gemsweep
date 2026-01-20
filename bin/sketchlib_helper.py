@@ -3,8 +3,8 @@
 from pathlib import Path
 import sys
 
-
-def main():
+if __name__ == '__main__':
+    
     input = sys.argv[1]
     outdir = Path(sys.argv[2])
 
@@ -16,7 +16,3 @@ def main():
             path = Path(fasta)
             sample = path.stem
             out_f.write(f'{sample}\t{path}\n')
-
-
-if __name__ == '__main__':
-    main()
