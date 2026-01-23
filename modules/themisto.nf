@@ -39,8 +39,9 @@ process THEMISTO_BUILD_INDEX {
 process THEMISTO_PSEUDOALIGN {
     label 'cpu_16'
     label 'mem_32'
-    label 'time_12'
+    label 'time_48'
     label 'request_temp'
+    label 'time_queue_from_long'
 
     // scratch used for fast node-local temp storage
     scratch true
@@ -74,7 +75,7 @@ process THEMISTO_PSEUDOALIGN {
 
 process THEMISTO_STATS {
     label 'cpu_1'
-    label "mem_1"
+    label "mem_10"
     label 'time_1'
 
     container 'quay.io/sangerpathogens/themisto:3.2.2'

@@ -5,21 +5,21 @@ process POPPUNK {
 
     container 'quay.io/biocontainers/poppunk:2.7.8--py310h4d0eb5b_0'
 
-    publishDir mode: 'copy', path: "${params.outdir}/groups.txt"
+    publishDir mode: 'copy', path: "${params.outdir}/poppunk"
 
     input:
-    path(ref_file)
+    path ref_file
 
     output:
-    path(groups_file)
+    path "${params.outdir}/groups.txt"
 
     script:
-    helper = '../bin/sketchlib_helper.py'
-    validate = '../bin/validate_groups.py'
+    command = "${projectDir}/bin/sketchlib_helper.py"
+    validate = "${projectDir}/bin/validate_groups.py"
     """
-    python3 ${helper} ${ref_file} ${params.outdir}
-    poppunk --create-db --output database --r-files ${params.outdir}/references.tsv --threads 4
-    poppunk --fit-model ${params.poppunk_model} --ref-db database
+    python3 ${command} ${ref_file} ${params.outdir}
+    poppunk --create-db --output database --r-files ${params.outdir}/references.tsv --threads ${task.cpus}
+    poppunk --fit-model ${params.poppunk_model} --ref-db database --threads ${task.cpus}
     cp database/database_clusters.csv ${params.outdir}
     python3 ${validate} ${params.outdir}/references.tsv ${params.outdir}/database_clusters.csv ${params.outdir}
     """

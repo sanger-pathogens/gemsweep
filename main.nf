@@ -25,13 +25,13 @@ def printHelp() {
     IMPORT MODULES/SUBWORKFLOWS
 ========================================================================================
 */
-include { MIXED_INPUT          } from './assorted-sub-workflows/mixed_input/mixed_input.nf'
+include { MIXED_INPUT               } from './assorted-sub-workflows/mixed_input/mixed_input.nf'
 include { THEMISTO_BUILD_INDEX; 
           THEMISTO_PSEUDOALIGN;
-          THEMISTO_STATS       } from './modules/themisto.nf'
-include { MSWEEP               } from './modules/msweep.nf'
-include { MGEMS                } from './modules/mgems.nf'
-include { POPPUNK            } from './modules/poppunk.nf'
+          THEMISTO_STATS            } from './modules/themisto.nf'
+include { MSWEEP                    } from './modules/msweep.nf'
+include { MGEMS                     } from './modules/mgems.nf'
+include { POPPUNK                   } from './modules/poppunk.nf'
 
 //
 // SUBWORKFLOWS
