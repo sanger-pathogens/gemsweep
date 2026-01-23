@@ -15,5 +15,5 @@ if __name__ == '__main__':
     with open(outdir / 'references.tsv', 'w') as out_f:
         for fasta in file:
             path = Path(fasta)
-            sample = path.stem
+            sample = Path(path.stem).with_suffix('')
             out_f.write(f'{sample}\t{path}\n')
