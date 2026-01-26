@@ -5,7 +5,7 @@ process MSWEEP {
 
     container 'quay.io/biocontainers/msweep:2.2.1--h503566f_1'
 
-    publishDir mode: 'copy', path: "${params.outdir}/msweep"
+    publishDir mode: 'copy', path: "${params.outdir}/${meta.id}"
 
     input:
     tuple val(meta), path(pseudoalignment_1), path(pseudoalignment_2)

@@ -5,7 +5,7 @@ process MGEMS {
 
     container 'quay.io/biocontainers/mgems:1.3.3--h13024bc_2'
     
-    publishDir mode: 'copy', path: "${params.outdir}/mgems"
+    publishDir mode: 'copy', path: "${params.outdir}/${meta.id}"
 
     input:
     tuple val(meta),
@@ -15,15 +15,15 @@ process MGEMS {
           path(pseudoalignment_2),
           path(msweep_abundances),
           path(msweep_probs)
-        path(index_files)
-        val(index_prefix)
-        path(reference_groups)
+    path(index_files)
+    val(index_prefix)
+    path(reference_groups)
 
     output:
     tuple val(meta), path("mGEMS_out/*")
 
     script:
-    output_file = "mGEMS_out"
+    output_file = "mGEMS"
     command = "mGEMS -r ${reads_1},${reads_2} --themisto-alns ${pseudoalignment_1},${pseudoalignment_2} -o ${output_file} --probs ${msweep_probs} -a ${msweep_abundances} --index . -i ${reference_groups}"
     if (params.get_assignments) {
         // if user wants the read assignment table used by mgems to be output, add to command
@@ -35,7 +35,7 @@ process MGEMS {
     }
 
     """
-    mkdir mGEMS_out
+    mkdir ${output_file}
     ${command}
     """
 }
