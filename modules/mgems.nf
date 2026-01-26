@@ -20,7 +20,7 @@ process MGEMS {
     path(reference_groups)
 
     output:
-    tuple val(meta), path("mGEMS_out/*")
+    tuple val(meta), path("mGEMS/*")
 
     script:
     output_file = "mGEMS"
