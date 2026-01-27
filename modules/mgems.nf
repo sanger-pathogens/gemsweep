@@ -5,7 +5,7 @@ process MGEMS {
 
     container 'quay.io/biocontainers/mgems:1.3.3--h13024bc_2'
     
-    publishDir mode: 'copy', path: "${params.outdir}/${meta.id}"
+    publishDir mode: 'copy', path: "${params.outdir}/${meta.ID}"
 
     input:
     tuple val(meta),
