@@ -5,7 +5,7 @@ process POPPUNK {
 
     container 'quay.io/biocontainers/poppunk:2.7.8--py310h4d0eb5b_0'
 
-    publishDir mode: 'copy', path: "${params.outdir}/poppunk"
+    publishDir "${params.outdir}/poppunk/", mode: 'copy', pattern: '*.{png,csv}'
 
     input:
     path ref_file
@@ -20,7 +20,6 @@ process POPPUNK {
     python3 ${command} ${ref_file} ${params.outdir}
     poppunk --create-db --output database --r-files ${params.outdir}/references.tsv --threads ${task.cpus}
     poppunk --fit-model ${params.poppunk_model} --ref-db database --threads ${task.cpus}
-    cp database/database_clusters.csv ${params.outdir}
     python3 ${validate} ${params.outdir}/references.tsv ${params.outdir}/database_clusters.csv ${params.outdir}
     """
 }
