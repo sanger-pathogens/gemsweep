@@ -124,6 +124,14 @@ Add example tree of results output
 
 ---
 
+**Clustering options**
+
+| Flag              | Type      | Default  | Description                                                                      |
+| ----------------- | --------- | -------- | -------------------------------------------------------------------------------- |
+| `poppunk_model`   | `string`  | `dbscan` | Tell PopPUNK which model to fit (Options: bgmm, dbscan)                          |
+
+---
+
 ### Dependencies
 
 All dependencies are containerised in publicly available docker images.
