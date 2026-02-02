@@ -2,8 +2,12 @@
     def validate_params() {
         def validation_errors = []
         // validate all params then error pipeline when all have been validated and any were incorrect
-        validate_choice_param("--kmer_size", params.kmer_size, [21,31,51], validation_errors)
+        // General options
         validate_reference_input_type(params.references, params.ref_groups, params.themisto_index)
+        // Clustering options
+        validate_choice_param("--poppunk_model", params.poppunk_model, ["dbscan","bgmm"], validation_errors)
+        // Themisto options
+        validate_choice_param("--kmer_size", params.kmer_size, [21,31,51], validation_errors)
         if (validation_errors) {
             validation_errors.each { log.error " - $it " }
                 error("Parameters have failed validation, please review logged errors and rerun once resolved.")
@@ -26,7 +30,6 @@
     //     }
 
 
-    // validate kmer_size is one of 21|31|51
     def validate_choice_param(flag, value, choices, all_errors) {
         def param_name = (flag - "--").replaceAll("_", " ")
         if (!choices.contains(value)) {
