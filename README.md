@@ -99,9 +99,9 @@ Add example tree of results output
 
 **Clustering options**
 
-| Flag            | Type     | Default  | Description                                 |
-| --------------- | -------- | -------- | ------------------------------------------- | ----- |
-| `poppunk_model` | `string` | `dbscan` | Clustering model for poppunk to use (dbscan | bgmm) |
+| Flag            | Type     | Default  | Description                                                 |
+| --------------- | -------- | -------- | ----------------------------------------------------------- |
+| `poppunk_model` | `string` | `dbscan` | Clustering model for poppunk to use (either dbscan or bgmm) |
 
 ---
 
