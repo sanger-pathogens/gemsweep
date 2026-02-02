@@ -5,7 +5,7 @@ process POPPUNK {
 
     container 'quay.io/biocontainers/poppunk:2.7.8--py310h4d0eb5b_0'
 
-    publishDir "${params.outdir}/poppunk/", mode: 'copy', pattern: 'pp_database/*.{png,csv}'
+    publishDir "${params.outdir}/poppunk/", mode: 'copy', pattern: 'pp_database/*.{png,csv,txt}'
 
     input:
     path ref_file
