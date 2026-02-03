@@ -9,6 +9,9 @@ process THEMISTO_BUILD_INDEX {
 
     container 'quay.io/sangerpathogens/themisto:3.2.2'
 
+    publishDir mode: 'copy', path: "${params.outdir}/themisto"
+
+
     input:
     val index_prefix
     path references_txt
