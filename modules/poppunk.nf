@@ -11,16 +11,16 @@ process POPPUNK {
     path ref_file
 
     output:
-    path "${db_dir}/groups.txt"
+    path "${out}/groups.txt"
 
     script:
-    db_dir = "pp_database"
+    out = "pp_database"
     command = "${projectDir}/bin/sketchlib_helper.py"
     validate = "${projectDir}/bin/validate_groups.py"
     """
     python3 ${command} ${ref_file} .
-    poppunk --create-db --output ${db_dir} --r-files references.tsv --threads ${task.cpus}
-    poppunk --fit-model ${params.poppunk_model} --ref-db ${db_dir} --threads ${task.cpus}
-    python3 ${validate} references.tsv ${db_dir}/database_clusters.csv ${db_dir}
+    poppunk --create-db --output ${out} --r-files references.tsv --threads ${task.cpus}
+    poppunk --fit-model ${params.poppunk_model} --ref-db ${out} --threads ${task.cpus}
+    python3 ${validate} references.tsv ${out}/${out}_clusters.csv ${out}
     """
 }
