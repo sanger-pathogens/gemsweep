@@ -1,6 +1,6 @@
 process MSWEEP {
     label 'cpu_1'
-    label 'mem_1'
+    label 'mem_4'
     label 'time_1'
 
     container 'quay.io/biocontainers/msweep:2.2.1--h503566f_1'

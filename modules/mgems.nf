@@ -1,7 +1,7 @@
 process MGEMS {
     label 'cpu_1'
     label 'mem_1'
-    label 'time_1'
+    label 'time_12'
 
     container 'quay.io/biocontainers/mgems:1.3.3--h13024bc_2'
     
