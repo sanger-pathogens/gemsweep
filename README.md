@@ -59,8 +59,9 @@ To run the pipeline from source (this repository):
   NOTE: If supplying a prebuilt index a\) the kmer size must be identical to the argument `kmer_size` (default: 31) and b\) the reference grouping file must be in identical positional order to the references when indexed.
 
 - Paired-end reads per (mixed) sample
+  To provide locally stored reads either use --manifest (or alias --manifest_of_reads) to supply a CSV file with the header line 'ID,R1,R2' (mandatory) and rows containing the read ID, path to read 1 and path to read 2, or use --manifest_from_dir to supply a directory containing the reads (can be used alongside --max_depth with an integer reflecting how many sub-directories deep to look for reads).
 
-  You may provide locally stored reads with a manifest of reads i.e. a CSV file with the header line 'ID,R1,R2' (mandatory) and rows containing the read ID, path to read 1 and path to read 2. Only paired-end reads are supported and the files should be gzipped fastqs (file extension '.fastq.gz').
+  Note: Only paired-end reads are supported and the files should be gzipped fastqs (file extension '.fastq.gz').
 
   Alternatively you can supply reads from ENA or, if you have access, Sanger's iRODS. See here for more detail: https://gitlab.internal.sanger.ac.uk/sanger-pathogens/pipelines/assorted-sub-workflows/-/blob/main/mixed_input/README.md?ref_type=heads
 
