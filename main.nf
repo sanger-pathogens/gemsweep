@@ -70,7 +70,7 @@ workflow {
         references_ch = channel.fromPath(params.references)
         ref_groups_ch = POPPUNK(references_ch).first() // TODO: ternary operator for alt clustering process not yet developed
         index_prefix_ch = channel.value("index") // needs to be identical to what index is set as in indexing process
-        index_files_ch = THEMISTO_BUILD_INDEX(index_prefix_ch, references_ch)
+        index_files_ch = THEMISTO_BUILD_INDEX(index_prefix_ch, references_ch).collect()
         
         // Output stats on the index (not required for anything just an additional output)
         THEMISTO_STATS(index_files_ch, index_prefix_ch)
