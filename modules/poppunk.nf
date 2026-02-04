@@ -11,7 +11,8 @@ process POPPUNK {
     path ref_file
 
     output:
-    path "${out}/groups.txt"
+    path "${out}/groups.txt", emit: groups  // for downstream
+    path "pp_database/*"                    // for publishing
 
     script:
     out = "pp_database"
