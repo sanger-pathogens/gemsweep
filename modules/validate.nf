@@ -15,6 +15,7 @@
     }
 
     // TODO:
+    // validate references.txt has no duplicates to error early before poppunk error with a readable message
     // validate tmp space is in MB (or GB if changing) NOT CURRENTLY PARAMETERISED
     // validate that temp_dir is a existing/valid path
     //     def validate_path(flag, value, access, all_errors) {
