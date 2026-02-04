@@ -16,12 +16,12 @@ process POPPUNK {
 
     script:
     out = "pp_database"
-    command = "${projectDir}/bin/sketchlib_helper.py"
-    validate = "${projectDir}/bin/validate_groups.py"
+    convert_format = "${projectDir}/bin/poppunk_helper.py"
+    reorder_groups = "${projectDir}/bin/order_groups.py"
     """
-    python3 ${command} ${ref_file} .
+    python3 ${convert_format} ${ref_file} .
     poppunk --create-db --output ${out} --r-files references.tsv --threads ${task.cpus}
     poppunk --fit-model ${params.poppunk_model} --ref-db ${out} --threads ${task.cpus}
-    python3 ${validate} references.tsv ${out}/${out}_clusters.csv ${out}
+    python3 ${reorder_groups} references.tsv ${out}/${out}_clusters.csv ${out}
     """
 }

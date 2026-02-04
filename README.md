@@ -16,14 +16,14 @@ This workflow deconvolutes mixed read sets (e.g. plate sweep sequencing data) an
 
 ### Quickstart
 
-<!--- Add once a module:
+<!--- Add once a module with known name:
 ### On the Sanger HPC
 
 To run the pipeline on the Sanger HPC as a module replace `nextflow run main.nf` with the name of the tool. For instance, to see a help message:
 
 ```
-module load qc_mags
-qc_mags --help
+module load gemsweep
+gemsweep --help
 ```
 
 ### From source

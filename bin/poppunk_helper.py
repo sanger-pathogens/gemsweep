@@ -1,4 +1,13 @@
 #!/usr/bin/env python3
+"""
+Generate a references TSV file from a text file of FASTA file paths 
+(one path per line) to form expected input for poppunk."
+
+
+Usage:
+    poppunk_helper.py <input_txt_file> <output_directory>
+
+"""
 
 from pathlib import Path
 import sys

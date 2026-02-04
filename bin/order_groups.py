@@ -1,5 +1,13 @@
 #!/usr/bin/env python3
 
+"""
+This script takes PopPUNK clustering output and reorders the cluster
+assignments so they align positionally with the supplied reference list.
+
+Usage:
+    order_groups.py <references.tsv> <poppunk_groups.csv> <output_directory>
+"""
+
 import sys
 from pathlib import Path
 
