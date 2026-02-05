@@ -100,9 +100,10 @@ Add example tree of results output
 
 **Clustering options**
 
-| Flag            | Type     | Default  | Description                                                 |
-| --------------- | -------- | -------- | ----------------------------------------------------------- |
-| `poppunk_model` | `string` | `dbscan` | Clustering model for poppunk to use (either dbscan or bgmm) |
+| Flag              | Type     | Default  | Description                                                                     |
+| ----------------- | -------- | -------- | ------------------------------------------------------------------------------- |
+| `poppunk_model`   | `string` | `dbscan` | Clustering model for poppunk to use (either dbscan or bgmm)                     |
+| `publish_poppunk` | `bool`   | `false`  | Optionally publish full poppunk output, group assignments are always published. |
 
 ---
 

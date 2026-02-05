@@ -25,6 +25,10 @@
       "poppunk_model": {
         "default": "dbscan",
         "help_text": "Clustering model for poppunk to use (dbscan|bgmm)"
+      },
+      "publish_poppunk": {
+        "default": "false",
+        "help_text": "Optionally publish full poppunk output, group assignments are always published."
       }
     },
     "Themisto options": {
