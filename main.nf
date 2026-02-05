@@ -70,7 +70,8 @@ workflow {
     if (params.references) {
         // Set up input channels starting from references.txt
         references_ch = channel.fromPath(params.references).first()
-        ref_groups_ch = ORDER_GROUPS(POPPUNK(PREP_REFS(references_ch)).clusters).groups
+        pp_input_ch = PREP_REFS(references_ch)
+        ref_groups_ch = ORDER_GROUPS(pp_input_ch,POPPUNK(pp_input_ch).clusters).groups
         index_prefix_ch = channel.value("index") // needs to be identical to what index is set as in indexing process
         index_files_ch = THEMISTO_BUILD_INDEX(index_prefix_ch, references_ch).collect()
         
