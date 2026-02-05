@@ -26,12 +26,14 @@ def printHelp() {
 ========================================================================================
 */
 include { MIXED_INPUT               } from './assorted-sub-workflows/mixed_input/mixed_input.nf'
+include { PREP_REFS;                
+          POPPUNK;                  
+          ORDER_GROUPS              } from './modules/poppunk.nf'
 include { THEMISTO_BUILD_INDEX; 
           THEMISTO_PSEUDOALIGN;
           THEMISTO_STATS            } from './modules/themisto.nf'
 include { MSWEEP                    } from './modules/msweep.nf'
 include { MGEMS                     } from './modules/mgems.nf'
-include { POPPUNK                   } from './modules/poppunk.nf'
 
 //
 // SUBWORKFLOWS
@@ -67,8 +69,8 @@ workflow {
 
     if (params.references) {
         // Set up input channels starting from references.txt
-        references_ch = channel.fromPath(params.references)
-        ref_groups_ch = POPPUNK(references_ch).groups.first() // TODO: ternary operator for alt clustering process not yet developed
+        references_ch = channel.fromPath(params.references).first()
+        ref_groups_ch = ORDER_GROUPS(POPPUNK(PREP_REFS(references_ch)).clusters).groups
         index_prefix_ch = channel.value("index") // needs to be identical to what index is set as in indexing process
         index_files_ch = THEMISTO_BUILD_INDEX(index_prefix_ch, references_ch).collect()
         

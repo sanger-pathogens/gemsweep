@@ -1,3 +1,20 @@
+process PREP_REFS {
+    label 'cpu_1'
+    label 'mem_1'
+    label 'time_30m'
+
+    input:
+    path refs_txt
+
+    output:
+    path 'references.tsv'
+
+    script:
+    """
+    python3 ${projectDir}/bin/poppunk_helper.py ${refs_txt} .
+    """
+}
+
 process POPPUNK {
     label 'cpu_4'
     label 'mem_8'
@@ -5,23 +22,47 @@ process POPPUNK {
 
     container 'quay.io/biocontainers/poppunk:2.7.8--py310h4d0eb5b_0'
 
-    publishDir "${params.outdir}/poppunk/", mode: 'copy', pattern: 'pp_database/*.{png,csv,txt}'
+    publishDir( 
+        params.publish_poppunk ? "${params.outdir}/poppunk/" : null , 
+        mode: 'copy', 
+        pattern: 'pp_database/*'
+        )
 
     input:
-    path ref_file
+    path ref_tsv
 
     output:
-    path "${out}/groups.txt", emit: groups  // for downstream
-    path "pp_database/*"                    // for publishing
+    path "${out}/${out}_clusters.csv", emit: clusters // for downstream
+    path "pp_database/*"                              // for publishing
 
     script:
     out = "pp_database"
-    convert_format = "${projectDir}/bin/poppunk_helper.py"
-    reorder_groups = "${projectDir}/bin/order_groups.py"
+
     """
-    python3 ${convert_format} ${ref_file} .
-    poppunk --create-db --output ${out} --r-files references.tsv --threads ${task.cpus}
+    poppunk --create-db --output ${out} --r-files ${ref_tsv} --threads ${task.cpus}
     poppunk --fit-model ${params.poppunk_model} --ref-db ${out} --threads ${task.cpus}
-    python3 ${reorder_groups} references.tsv ${out}/${out}_clusters.csv ${out}
     """
 }
+
+process ORDER_GROUPS {
+    label 'cpu_1'
+    label 'mem_1'
+    label 'time_30m'
+
+    publishDir "${params.outdir}/poppunk/", mode: 'copy', overwrite: true
+
+    input:
+    path refs_tsv
+    path clusters_csv
+
+
+    output:
+    path "groups.txt", emit: groups
+    path clusters_csv
+
+
+    script:
+    """
+    python3 ${projectDir}/bin/order_groups.py ${refs_tsv} ${clusters_csv} .
+    """
+    }
