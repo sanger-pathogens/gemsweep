@@ -22,18 +22,14 @@ process POPPUNK {
 
     container 'quay.io/biocontainers/poppunk:2.7.8--py310h4d0eb5b_0'
 
-    publishDir( 
-        params.publish_poppunk ? "${params.outdir}/poppunk/" : null , 
-        mode: 'copy', 
-        pattern: 'pp_database/*'
-        )
+    publishDir "${params.outdir}/poppunk/", mode: 'copy', pattern: 'pp_database/*', enabled: params.publish_poppunk
 
     input:
     path ref_tsv
 
     output:
     path "${out}/${out}_clusters.csv", emit: clusters // for downstream
-    path "pp_database/*"                              // for publishing
+    path "${out}/*"                              // for publishing
 
     script:
     out = "pp_database"
@@ -65,4 +61,4 @@ process ORDER_GROUPS {
     """
     python3 ${projectDir}/bin/order_groups.py ${refs_tsv} ${clusters_csv} .
     """
-    }
+}
