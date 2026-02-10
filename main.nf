@@ -25,12 +25,15 @@ def printHelp() {
     IMPORT MODULES/SUBWORKFLOWS
 ========================================================================================
 */
-include { MIXED_INPUT          } from './assorted-sub-workflows/mixed_input/mixed_input.nf'
+include { MIXED_INPUT               } from './assorted-sub-workflows/mixed_input/mixed_input.nf'
+include { PREP_REFS;                
+          POPPUNK;                  
+          ORDER_GROUPS              } from './modules/poppunk.nf'
 include { THEMISTO_BUILD_INDEX; 
           THEMISTO_PSEUDOALIGN;
-          THEMISTO_STATS       } from './modules/themisto.nf'
-include { MSWEEP               } from './modules/msweep.nf'
-include { MGEMS                } from './modules/mgems.nf'
+          THEMISTO_STATS            } from './modules/themisto.nf'
+include { MSWEEP                    } from './modules/msweep.nf'
+include { MGEMS                     } from './modules/mgems.nf'
 
 //
 // SUBWORKFLOWS
@@ -52,7 +55,7 @@ include { validate_params;
 
 workflow {
     params.each { key, value ->
-    log.info "PARAM ${key} = ${value}"
+    log.info "PARAM ${key} = ${value}" // for dev/ debugging
     }
 
     if (params.help) {
@@ -66,10 +69,11 @@ workflow {
 
     if (params.references) {
         // Set up input channels starting from references.txt
-        references_ch = channel.fromPath(params.references)
-        ref_groups_ch = channel.fromPath(params.ref_groups).first() //CLUSTERING PROCESS(references_ch) placeholder, process not yet developed
+        references_ch = channel.fromPath(params.references).first()
+        pp_input_ch = PREP_REFS(references_ch)
+        ref_groups_ch = ORDER_GROUPS(pp_input_ch,POPPUNK(pp_input_ch).clusters).groups
         index_prefix_ch = channel.value("index") // needs to be identical to what index is set as in indexing process
-        index_files_ch = THEMISTO_BUILD_INDEX(index_prefix_ch, references_ch)
+        index_files_ch = THEMISTO_BUILD_INDEX(index_prefix_ch, references_ch).collect()
         
         // Output stats on the index (not required for anything just an additional output)
         THEMISTO_STATS(index_files_ch, index_prefix_ch)

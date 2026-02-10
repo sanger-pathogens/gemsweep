@@ -1,7 +1,7 @@
 process MGEMS {
     label 'cpu_1'
-    label 'mem_1'
-    label 'time_1'
+    label 'mem_2'
+    label 'time_12'
 
     container 'quay.io/biocontainers/mgems:1.3.3--h13024bc_2'
     
@@ -27,7 +27,7 @@ process MGEMS {
     command = "mGEMS -r ${reads_1},${reads_2} --themisto-alns ${pseudoalignment_1},${pseudoalignment_2} -o ${output_file} --probs ${msweep_probs} -a ${msweep_abundances} --index . -i ${reference_groups}"
     if (params.get_assignments) {
         // if user wants the read assignment table used by mgems to be output, add to command
-        command += " --write_assignment_table"
+        command += " --write-assignment-table"
         }
     if (params.min_abundance != 0) {
         // create bins for groups with relative abundance above a certain threshold, user can turn off with 0

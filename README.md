@@ -16,14 +16,14 @@ This workflow deconvolutes mixed read sets (e.g. plate sweep sequencing data) an
 
 ### Quickstart
 
-<!--- Add once a module:
+<!--- Add once a module with known name:
 ### On the Sanger HPC
 
 To run the pipeline on the Sanger HPC as a module replace `nextflow run main.nf` with the name of the tool. For instance, to see a help message:
 
 ```
-module load qc_mags
-qc_mags --help
+module load gemsweep
+gemsweep --help
 ```
 
 ### From source
@@ -59,8 +59,9 @@ To run the pipeline from source (this repository):
   NOTE: If supplying a prebuilt index a\) the kmer size must be identical to the argument `kmer_size` (default: 31) and b\) the reference grouping file must be in identical positional order to the references when indexed.
 
 - Paired-end reads per (mixed) sample
+  To provide locally stored reads either use --manifest (or alias --manifest_of_reads) to supply a CSV file with the header line 'ID,R1,R2' (mandatory) and rows containing the read ID, path to read 1 and path to read 2, or use --manifest_from_dir to supply a directory containing the reads (can be used alongside --max_depth with an integer reflecting how many sub-directories deep to look for reads).
 
-  You may provide locally stored reads with a manifest of reads i.e. a CSV file with the header line 'ID,R1,R2' (mandatory) and rows containing the read ID, path to read 1 and path to read 2. Only paired-end reads are supported and the files should be gzipped fastqs (file extension '.fastq.gz').
+  Note: Only paired-end reads are supported and the files should be gzipped fastqs (file extension '.fastq.gz').
 
   Alternatively you can supply reads from ENA or, if you have access, Sanger's iRODS. See here for more detail: https://gitlab.internal.sanger.ac.uk/sanger-pathogens/pipelines/assorted-sub-workflows/-/blob/main/mixed_input/README.md?ref_type=heads
 
@@ -94,6 +95,15 @@ Add example tree of results output
 | `manifest`   | `path` | `null`        | Input manifest CSV with required header `ID,R1,R2`, containing per-sample paths to `.fastq.gz` files.                       |
 | `references` | `path` | `null`        | Path to text file containing paths to references, one per line. If provided, ref_groups and themisto_index will be ignored. |
 | `outdir`     | `path` | `"./results"` | Path to top directory containing all results, by default `results` within the launch directory.                             |
+
+---
+
+**Clustering options**
+
+| Flag              | Type     | Default  | Description                                                                     |
+| ----------------- | -------- | -------- | ------------------------------------------------------------------------------- |
+| `poppunk_model`   | `string` | `dbscan` | Clustering model for poppunk to use (either dbscan or bgmm)                     |
+| `publish_poppunk` | `bool`   | `false`  | Optionally publish full poppunk output, group assignments are always published. |
 
 ---
 
@@ -135,11 +145,12 @@ All dependencies are containerised in publicly available docker images.
 
 The current version of the pipeline uses the following software dependencies:
 
-| Software | Version | Image URL                                      |
-| -------- | ------- | ---------------------------------------------- |
-| themisto | 3.2.2   | quay.io/sangerpathogens/themisto:3.2.2         |
-| mSWEEP   | 2.2.1   | quay.io/biocontainers/msweep:2.2.1--h503566f_1 |
-| mGEMS    | 1.3.3   | quay.io/biocontainers/mgems:1.3.3--h13024bc_2  |
+| Software | Version | Image URL                                            |
+| -------- | ------- | ---------------------------------------------------- |
+| themisto | 3.2.2   | quay.io/sangerpathogens/themisto:3.2.2               |
+| mSWEEP   | 2.2.1   | quay.io/biocontainers/msweep:2.2.1--h503566f_1       |
+| mGEMS    | 1.3.3   | quay.io/biocontainers/mgems:1.3.3--h13024bc_2        |
+| PopPUNK  | 2.7.8   | quay.io/biocontainers/poppunk:2.7.8--py310h4d0eb5b_0 |
 
 <!---
 | XXX       | X.X.X   | quay.io/...                                           |

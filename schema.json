@@ -21,6 +21,16 @@
         "help_text": "Path to top directory containing all results, by default 'results' within the launch directory."
       }
     },
+    "Clustering options": {
+      "poppunk_model": {
+        "default": "dbscan",
+        "help_text": "Clustering model for poppunk to use (dbscan|bgmm)"
+      },
+      "publish_poppunk": {
+        "default": "false",
+        "help_text": "Optionally publish full poppunk output, group assignments are always published."
+      }
+    },
     "Themisto options": {
       "temp_dir": {
         "default": "null",
