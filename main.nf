@@ -25,12 +25,12 @@ def printHelp() {
     IMPORT MODULES/SUBWORKFLOWS
 ========================================================================================
 */
-include { MIXED_INPUT           } from './assorted-sub-workflows/mixed_input/mixed_input.nf'
-include { PREP_REFS;             
-          POPPUNK;                
-          ORDER_GROUPS          } from './modules/poppunk.nf'
-include { PUBLISH_GROUPS;
-          PUBLISH_REPS          } from './modules/publish_intermediates.nf'
+include { MIXED_INPUT               } from './assorted-sub-workflows/mixed_input/mixed_input.nf'
+include { SYLPH_SKETCH_ASSEMBLIES;
+          SYLPH_QUERY               } from './modules/sylph.nf'
+include { PREP_REFS;                
+          POPPUNK;                  
+          ORDER_GROUPS              } from './modules/poppunk.nf'
 include { THEMISTO_BUILD_INDEX; 
           THEMISTO_PSEUDOALIGN;
           THEMISTO_STATS        } from './modules/themisto.nf'
@@ -125,6 +125,13 @@ workflow {
 
         }
 
+        if (params.derep) {
+            SYLPH_SKETCH_ASSEMBLIES(references_ch)
+            | SYLPH_QUERY
+            | set { sylph_profile }
+        }
+        pp_input_ch = PREP_REFS(references_ch)
+        ref_groups_ch = ORDER_GROUPS(pp_input_ch,POPPUNK(pp_input_ch).clusters).groups
         index_prefix_ch = channel.value("index") // needs to be identical to what index is set as in indexing process
         index_files_ch = THEMISTO_BUILD_INDEX(index_prefix_ch, representatives_ch).collect()
         
