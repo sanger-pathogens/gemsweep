@@ -25,12 +25,22 @@ def printHelp() {
     IMPORT MODULES/SUBWORKFLOWS
 ========================================================================================
 */
+<<<<<<< HEAD
 include { MIXED_INPUT           } from './assorted-sub-workflows/mixed_input/mixed_input.nf'
 include { PREP_REFS;             
           POPPUNK;                
           ORDER_GROUPS          } from './modules/poppunk.nf'
 include { PUBLISH_GROUPS;
           PUBLISH_REPS          } from './modules/publish_intermediates.nf'
+=======
+include { MIXED_INPUT               } from './assorted-sub-workflows/mixed_input/mixed_input.nf'
+include { SKANI_SEARCH;
+          GET_TOP_HITS;
+          GET_REFERENCES            } from './modules/skani.nf'
+include { PREP_REFS;                
+          POPPUNK;                  
+          ORDER_GROUPS              } from './modules/poppunk.nf'
+>>>>>>> 8d2f62c (Extract top hits using skani)
 include { THEMISTO_BUILD_INDEX; 
           THEMISTO_PSEUDOALIGN;
           THEMISTO_STATS        } from './modules/themisto.nf'
@@ -128,8 +138,8 @@ workflow {
         index_prefix_ch = channel.value("index") // needs to be identical to what index is set as in indexing process
         index_files_ch = THEMISTO_BUILD_INDEX(index_prefix_ch, representatives_ch).collect()
         
-        // Output stats on the index (not required for anything just an additional output)
-        THEMISTO_STATS(index_files_ch, index_prefix_ch)
+        // // Output stats on the index (not required for anything just an additional output)
+        // THEMISTO_STATS(index_files_ch, index_prefix_ch)
 
     } else {
         // Set up input channels starting from pre-built index AND provided ref_groups
