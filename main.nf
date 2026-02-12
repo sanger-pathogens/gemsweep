@@ -26,8 +26,9 @@ def printHelp() {
 ========================================================================================
 */
 include { MIXED_INPUT               } from './assorted-sub-workflows/mixed_input/mixed_input.nf'
-include { SYLPH_SKETCH_ASSEMBLIES;
-          SYLPH_QUERY               } from './modules/sylph.nf'
+include { SKANI_SEARCH;
+          GET_TOP_HITS;
+          GET_REFERENCES            } from './modules/skani.nf'
 include { PREP_REFS;                
           POPPUNK;                  
           ORDER_GROUPS              } from './modules/poppunk.nf'
@@ -126,17 +127,27 @@ workflow {
         }
 
         if (params.derep) {
-            SYLPH_SKETCH_ASSEMBLIES(references_ch)
-            | SYLPH_QUERY
-            | set { sylph_profile }
+            ref_db_files_ch = channel.fromPath(params.ref_db_files).first()
+
+            SKANI_SEARCH(references_ch)
+            | GET_TOP_HITS
+            | set { top_hits_ch }
+
+            GET_REFERENCES(
+                ref_db_files_ch,
+                top_hits_ch
+            )
+            | set { filtered_ref_ch }
+        } else {
+            filtered_ref_ch = references_ch
         }
-        pp_input_ch = PREP_REFS(references_ch)
-        ref_groups_ch = ORDER_GROUPS(pp_input_ch,POPPUNK(pp_input_ch).clusters).groups
-        index_prefix_ch = channel.value("index") // needs to be identical to what index is set as in indexing process
-        index_files_ch = THEMISTO_BUILD_INDEX(index_prefix_ch, representatives_ch).collect()
+        // pp_input_ch = PREP_REFS(filtered_ref_ch)
+        // ref_groups_ch = ORDER_GROUPS(pp_input_ch,POPPUNK(pp_input_ch).clusters).groups
+        // index_prefix_ch = channel.value("index") // needs to be identical to what index is set as in indexing process
+        // index_files_ch = THEMISTO_BUILD_INDEX(index_prefix_ch, filtered_ref_ch).collect()
         
-        // Output stats on the index (not required for anything just an additional output)
-        THEMISTO_STATS(index_files_ch, index_prefix_ch)
+        // // Output stats on the index (not required for anything just an additional output)
+        // THEMISTO_STATS(index_files_ch, index_prefix_ch)
 
     } else {
         // Set up input channels starting from pre-built index AND provided ref_groups
@@ -149,19 +160,19 @@ workflow {
     }
 
     // Core Workflow
-    pseudoaligned_ch = THEMISTO_PSEUDOALIGN(reads_ch, index_files_ch, index_prefix_ch)
+//     pseudoaligned_ch = THEMISTO_PSEUDOALIGN(reads_ch,index_files_ch,index_prefix_ch)
     
-    msweep_ch = MSWEEP(pseudoaligned_ch, ref_groups_ch)
+//     msweep_ch = MSWEEP(pseudoaligned_ch,ref_groups_ch)
     
-    MGEMS(
-        reads_ch
-            .join(pseudoaligned_ch, by: 0)
-            .join(msweep_ch, by: 0)
-            .map { meta, r1, r2, aln1, aln2, abund, probs ->
-                tuple(meta, r1, r2, aln1, aln2, abund, probs)
-            },
-            index_files_ch,
-            index_prefix_ch,
-            ref_groups_ch
-    )
+//    MGEMS(
+//     reads_ch
+//     .join(pseudoaligned_ch, by: 0)
+//     .join(msweep_ch, by: 0)
+//     .map { meta, r1, r2, aln1, aln2, abund, probs ->
+//         tuple(meta, r1, r2, aln1, aln2, abund, probs)
+//     },
+//     index_files_ch,
+//     index_prefix_ch,
+//     ref_groups_ch
+//    )
 }
