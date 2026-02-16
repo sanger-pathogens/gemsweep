@@ -34,7 +34,8 @@ process GENERATE_TOTAL_DIST_MATRIX {
     tuple val(meta), path("*.phylip"), emit: matrix
 
     script:
+    def ani_tree_tools = "${projectDir}/bin/ani_tree_tools.py"
     """
-    ani_tree_tools.py --dist_tsv_path ${betweenness_tsv} --meta_ID ${meta.ref_ani_bin}
+    ${ani_tree_tools} --dist_tsv_path ${betweenness_tsv} --meta_ID ${meta.ref_ani_bin}
     """
 }
