@@ -24,6 +24,6 @@ process SUBSELECT_GRAPH {
     def representatives = params.representatives ? "--n_representatives ${params.representatives}" : ""
     def subselect_graph = "${projectDir}/bin/subselect_graph.py"
     """
-    subselect_graph.py --phylip ${phylip} --methods ${params.cluster_method} ${make_gif} ${representatives}
+    ${subselect_graph} --phylip ${phylip} --methods ${params.cluster_method} ${make_gif} ${representatives}
     """
 }
