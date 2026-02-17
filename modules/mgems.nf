@@ -37,6 +37,9 @@ process MGEMS {
     """
     mkdir ${out}
     ${command}
-    for f in ${out};do mv -v "$f" "${meta.ID}_${f%.*}.${f##*.}";done
+    for f in ${out}/*.fastq.gz; do
+        base=\$(basename "\$f")
+        mv "\$f" "${out}/${meta.ID}_\${base}"
+    done
     """
 }
