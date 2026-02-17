@@ -68,15 +68,18 @@ workflow {
 
    // reads_ch = MIXED_INPUT()    // outputs channel of [meta, R1, R2] for reads_<1|2>.fastq.gz
 
-   if (params.references) {
+
+
+   //if (params.references) {
         // Set up input channels starting from references.txt
-        references_ch = channel.fromPath(params.references).first()
+        //references_ch = channel.fromPath("/data/pam/team230/tm22/scratch/tickets/PAT-3113/references.txt").first()
         //pp_input_ch = PREP_REFS(references_ch)
 
-        poppunk_ch = POPPUNK(PREP_REFS(references_ch))
+        //poppunk_ch = POPPUNK(PREP_REFS(references_ch))
+        poppunk_dists_ch = channel.fromPath("/data/pam/team230/cc52/scratch/dev_tests/msweep-mgems/test_derep_groups/pp_database_14k_ecoli/pp_database.dists.npy")
+        poppunk_clusters_csv = channel.fromPath("/data/pam/team230/cc52/scratch/dev_tests/msweep-mgems/test_derep_groups/pp_database_14k_ecoli/pp_database_clusters.csv")
+        DEREP_GROUPS(poppunk_clusters_csv, poppunk_dists_ch)
 
-        representatives_ch = DEREP_GROUPS(bin2channel_equivalent, poppunk_ch.out.database)
-        representatives_ch.view()
     //    ref_groups_ch = ORDER_GROUPS(pp_input_ch,poppunk_ch.out.clusters).groups
     //    index_prefix_ch = channel.value("index") // needs to be identical to what index is set as in indexing process
     //    index_files_ch = THEMISTO_BUILD_INDEX(index_prefix_ch, references_ch).collect()
@@ -85,7 +88,7 @@ workflow {
     //    THEMISTO_STATS(index_files_ch, index_prefix_ch)
 
 // --- REMOVE THIS SECTION ONCE TESTED --- //
-   }
+//   }
 // --- TO HERE--- //
 
 //    } else {

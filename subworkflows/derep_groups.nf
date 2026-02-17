@@ -5,39 +5,28 @@ include { SUBSELECT_GRAPH               } from '../modules_derep/plotting.nf'
 
 workflow DEREP_GROUPS {
     take:
-    bin2channel
-    sketchlib_db_ch
+    clusters_csv
+    pp_dist_matrix
+    // sketchlib_db_ch
 
     main:
-    // seperate singletons from multi-genome groups
-    bin2channel
-    | groupTuple(by: 1)
-    | branch {
-        single: it[0].size() == 1
-        multiple: it[0].size() != 1
-    }
-    | set { samples }
+    clusters_csv
+    | splitCsv(header: true)
+    | map { row -> tuple(row.Cluster, row.Taxon) }
+    | groupTuple(by:0)
+    // | view()
 
-    samples.single
-    | map { it -> it[0] }
-    | set { single_samples }
+    // SKETCH_SUBSET_TOTAL_ANI_DIST(multiple_samples, sketchlib_db_ch)
+    // | GENERATE_TOTAL_DIST_MATRIX
+    // | SUBSELECT_GRAPH
 
-    // all vs all ANI for multi-genome groups
-    samples.multiple
-    | COLLECT_FILE
-    | set { multiple_samples }
+    // SUBSELECT_GRAPH.out.representatives
+    // | splitCsv()
+    // | mix(single_samples)
+    // | ifEmpty { error("Error: No representatives found for any bin") }
+    // | set { chosen_representatives }
 
-    SKETCH_SUBSET_TOTAL_ANI_DIST(multiple_samples, sketchlib_db_ch)
-    | GENERATE_TOTAL_DIST_MATRIX
-    | SUBSELECT_GRAPH
-
-    SUBSELECT_GRAPH.out.representatives
-    | splitCsv()
-    | mix(single_samples)
-    | ifEmpty { error("Error: No representatives found for any bin") }
-    | set { chosen_representatives }
-
-    bin2channel
-    | join(chosen_representatives)
-    | set { final_dataset }
+    // bin2channel
+    // | join(chosen_representatives)
+    // | set { final_dataset }
 }
