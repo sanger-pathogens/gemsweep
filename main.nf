@@ -27,19 +27,11 @@ def printHelp() {
 */
 include { MIXED_INPUT               } from './assorted-sub-workflows/mixed_input/mixed_input.nf'
 include { PREP_REFS;                
-<<<<<<< HEAD
           POPPUNK;                  
           ORDER_GROUPS              } from './modules/poppunk.nf'
 include { THEMISTO_BUILD_INDEX;
           THEMISTO_PSEUDOALIGN;
           THEMISTO_STATS            } from './modules/themisto.nf'
-=======
-         POPPUNK;                  
-         ORDER_GROUPS              } from './modules/poppunk.nf'
-include { THEMISTO_BUILD_INDEX; 
-         THEMISTO_PSEUDOALIGN;
-         THEMISTO_STATS            } from './modules/themisto.nf'
->>>>>>> d16314d (Roughly transplant binbadger dereplication logic into gemsweep)
 include { MSWEEP                    } from './modules/msweep.nf'
 include { MGEMS                     } from './modules/mgems.nf'
 
@@ -82,12 +74,13 @@ workflow {
         validate_references(params.references)
 
         // Set up input channels starting from references.txt
-        references_ch = channel.fromPath(params.references).first()
+        //references_ch = channel.fromPath("/data/pam/team230/tm22/scratch/tickets/PAT-3113/references.txt").first()
         //pp_input_ch = PREP_REFS(references_ch)
 
-        poppunk_ch = POPPUNK(PREP_REFS(references_ch))
-
-        representatives_ch = DEREP_GROUPS(bin2channel_equivalent, poppunk_ch.out.database)
+        //poppunk_ch = POPPUNK(PREP_REFS(references_ch))
+        poppunk_dists_ch = channel.fromPath("/data/pam/team230/cc52/scratch/dev_tests/msweep-mgems/test_derep_groups/pp_database_14k_ecoli/pp_database.dists.npy")
+        poppunk_clusters_csv = channel.fromPath("/data/pam/team230/cc52/scratch/dev_tests/msweep-mgems/test_derep_groups/pp_database_14k_ecoli/pp_database_clusters.csv")
+        DEREP_GROUPS(poppunk_clusters_csv, poppunk_dists_ch)
 
     //    ref_groups_ch = ORDER_GROUPS(pp_input_ch,poppunk_ch.out.clusters).groups
     //    index_prefix_ch = channel.value("index") // needs to be identical to what index is set as in indexing process
@@ -96,28 +89,14 @@ workflow {
     //    // Output stats on the index (not required for anything just an additional output)
     //    THEMISTO_STATS(index_files_ch, index_prefix_ch)
 
-<<<<<<< HEAD
-   } else {
-        // Set up input channels starting from pre-built index AND provided ref_groups
-        ref_groups_ch = channel.fromPath(params.ref_groups).first()
-        index_files_ch = channel.fromPath("${params.themisto_index}.*").collect()
-        index_prefix_ch = channel.value(file(params.themisto_index).getName())
-
-        // Validate
-        VALIDATE_PREBUILT_INPUT(index_files_ch, index_prefix_ch)
-
-    }
-=======
-// --- REMOVE THIS SECTION ONCE TESTED --- //
-   }
-// --- TO HERE--- //
->>>>>>> 7bb2024 ( save changes for binbadger derep from bin2channel)
-
 //    } else {
 //         // Set up input channels starting from pre-built index AND provided ref_groups
 //        ref_groups_ch = channel.fromPath(params.ref_groups).first()
 //        index_files_ch = channel.fromPath("${params.themisto_index}*").collect()
 //        index_prefix_ch = channel.value(file(params.themisto_index).getName())
+
+        // Validate
+        //VALIDATE_PREBUILT_INPUT(index_files_ch, index_prefix_ch)
 
 //         // Validate inputs to ensure compatibility (kmer size, number of refs)
 //        def len_ref_groups = file(params.ref_groups).readLines().findAll { it.trim() }.size()
