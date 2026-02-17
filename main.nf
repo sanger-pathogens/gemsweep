@@ -76,8 +76,8 @@ workflow {
         //pp_input_ch = PREP_REFS(references_ch)
 
         //poppunk_ch = POPPUNK(PREP_REFS(references_ch))
-        poppunk_dists_ch = channel.fromPath("/data/pam/team230/cc52/scratch/dev_tests/msweep-mgems/test_derep_groups/pp_database_14k_ecoli/pp_database.dists.npy")
-        poppunk_clusters_csv = channel.fromPath("/data/pam/team230/cc52/scratch/dev_tests/msweep-mgems/test_derep_groups/pp_database_14k_ecoli/pp_database_clusters.csv")
+        poppunk_dists_ch = channel.fromPath("/data/pam/team230/cc52/scratch/dev_tests/msweep-mgems/python_derep/218_ref_pp_database.dists.npy")
+        poppunk_clusters_csv = channel.fromPath("/data/pam/team230/cc52/scratch/dev_tests/msweep-mgems/python_derep/218_ref_pp_database_clusters.csv")
         DEREP_GROUPS(poppunk_clusters_csv, poppunk_dists_ch)
 
     //    ref_groups_ch = ORDER_GROUPS(pp_input_ch,poppunk_ch.out.clusters).groups

@@ -12,9 +12,21 @@ workflow DEREP_GROUPS {
     main:
     clusters_csv
     | splitCsv(header: true)
-    | map { row -> tuple(row.Cluster, row.Taxon) }
-    | groupTuple(by:0)
-    // | view()
+    | map { row -> [row.Taxon, row.Cluster] }
+    | groupTuple(by:1)
+    | branch {
+        single: it[0].size() == 1
+        multiple: it[0].size() > 1
+    }
+    | set { clusters }
+
+    clusters.multiple
+    | transpose
+    | collectFile { sample, cluster ->
+        [ "multiple_samples.csv", [sample, cluster].join(",") + "\n" ]
+    }
+    | set { clusters_multiple_samples }
+
 
     // SKETCH_SUBSET_TOTAL_ANI_DIST(multiple_samples, sketchlib_db_ch)
     // | GENERATE_TOTAL_DIST_MATRIX
