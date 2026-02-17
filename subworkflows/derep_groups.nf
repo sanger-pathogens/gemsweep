@@ -1,6 +1,7 @@
 include { COLLECT_FILE                 } from '../modules_derep/collect_file.nf'
 include { SKETCH_SUBSET_TOTAL_ANI_DIST;
           GENERATE_TOTAL_DIST_MATRIX   } from '../modules_derep/sketchlib.nf'
+include { SPLIT_DIST_MATRIX            } from '../modules_derep/split_dist_matrix.nf'
 include { SUBSELECT_GRAPH               } from '../modules_derep/plotting.nf'
 
 workflow DEREP_GROUPS {
@@ -26,6 +27,8 @@ workflow DEREP_GROUPS {
         [ "multiple_samples.csv", [sample, cluster].join(",") + "\n" ]
     }
     | set { clusters_multiple_samples }
+
+    SPLIT_DIST_MATRIX(pp_dist_matrix, clusters_multiple_samples)
 
 
     // SKETCH_SUBSET_TOTAL_ANI_DIST(multiple_samples, sketchlib_db_ch)
