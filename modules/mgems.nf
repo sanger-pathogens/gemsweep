@@ -20,11 +20,11 @@ process MGEMS {
     path(reference_groups)
 
     output:
-    tuple val(meta), path("mGEMS/*")
+    tuple val(meta), path("${out}/*")
 
     script:
-    output_file = "mGEMS"
-    command = "mGEMS -r ${reads_1},${reads_2} --themisto-alns ${pseudoalignment_1},${pseudoalignment_2} -o ${output_file} --probs ${msweep_probs} -a ${msweep_abundances} --index . -i ${reference_groups}"
+    out = "mGEMS"
+    command = "mGEMS -r ${reads_1},${reads_2} --themisto-alns ${pseudoalignment_1},${pseudoalignment_2} -o ${out} --probs ${msweep_probs} -a ${msweep_abundances} --index . -i ${reference_groups}"
     if (params.get_assignments) {
         // if user wants the read assignment table used by mgems to be output, add to command
         command += " --write-assignment-table"
@@ -35,7 +35,8 @@ process MGEMS {
     }
 
     """
-    mkdir ${output_file}
+    mkdir ${out}
     ${command}
+    for f in ${out};do mv -v "$f" "${meta.ID}_${f%.*}.${f##*.}";done
     """
 }
