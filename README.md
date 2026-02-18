@@ -78,6 +78,23 @@ Example reference grouping file would be useful to add.
 Add example tree of results output
 --->
 
+#### Generate a manifest of binned reads
+
+To generate a manifest of binned reads for downstream analysis, after your run has completed use `generate_manifest.py` from the assorted-sub-workflows submodule as demonstrated below (path relative to repo root):
+
+```bash
+mkdir mGEMs_bins_manifest
+./assorted-sub-workflows/mixed_input/bin/generate_manifest.py \
+  --input ./results \
+  --output mGEMs_bins_manifest \
+  --fastq_validation relaxed \
+  --max_depth 2
+```
+
+- `--input`: path to your results directory (set by `--outdir`, default: `./results`)
+- `--output`: name CSV manifest of all discovered FASTQs
+- `--max_depth 2`: searches 2 subdirectory levels deep, capturing all mGEMs bins across samples
+
 ### Parameters
 
 **Logging options**
