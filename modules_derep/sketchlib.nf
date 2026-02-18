@@ -36,6 +36,6 @@ process GENERATE_TOTAL_DIST_MATRIX {
     script:
     def ani_tree_tools = "${projectDir}/bin/ani_tree_tools.py"
     """
-    ${ani_tree_tools} --dist_tsv_path ${betweenness_tsv} --meta_ID ${meta.cluster} --core_accession
+    ${ani_tree_tools} --dist_tsv_path ${betweenness_tsv} --meta_ID ${meta.cluster} --core_accession --header
     """
 }
