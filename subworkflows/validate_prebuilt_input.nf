@@ -1,11 +1,11 @@
 #!/usr/bin/env nextflow
 // Copyright (C) 2024 Genome Research Ltd.
 // Processes
-include { THEMISTO_STATS      } from './modules/themisto.nf'
+include { THEMISTO_STATS      } from '../modules/themisto.nf'
 
 // Helper Functions
 include { validate_index;
-          validate_ref_groups } from './modules/validate.nf'
+          validate_ref_groups } from '../modules/validate.nf'
 
 workflow VALIDATE_PREBUILT_INPUT {
     // Validation of reference-related inputs for the entry point taking prebuilt reference index and clusters file
