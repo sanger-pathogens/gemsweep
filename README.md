@@ -80,7 +80,7 @@ Add example tree of results output
 
 #### Generate a manifest of binned reads
 
-To generate a manifest of binned reads for downstream analysis, after your run has completed use `generate_manifest.py` from the assort-sub-workflows submodule as demonstrated below (path relative to repo root):
+To generate a manifest of binned reads for downstream analysis, after your run has completed use `generate_manifest.py` from the assorted-sub-workflows submodule as demonstrated below (path relative to repo root):
 
 ```bash
 mkdir mGEMs_bins_manifest
