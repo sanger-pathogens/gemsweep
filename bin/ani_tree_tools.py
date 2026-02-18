@@ -28,7 +28,8 @@ def read_tsv_to_structures(filepath: str) -> tuple[list[str], np.ndarray]:
     try:
         df = pd.read_csv(filepath,
                          sep="\t",
-                         names=["sample", "reference", "ani"])
+                         names=["reference", "sample", "core_dist", "acc_dist"],
+                         header=0)
 
         # get the uniques and store them indexed to map to the df
         unique_ids = pd.unique(pd.concat([df["sample"], df["reference"]]))
@@ -38,7 +39,7 @@ def read_tsv_to_structures(filepath: str) -> tuple[list[str], np.ndarray]:
         df["reference_idx"] = df["reference"].map(id_to_idx)
 
         # Vectorized conversion of ANI to distance
-        df["distance"] = 1 - df["ani"]
+        df["distance"] = 1 - df["core_dist"]
 
         # Initialize distance matrix
         n = len(unique_ids)
