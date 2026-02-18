@@ -29,7 +29,7 @@ include { MIXED_INPUT               } from './assorted-sub-workflows/mixed_input
 include { PREP_REFS;                
           POPPUNK;                  
           ORDER_GROUPS              } from './modules/poppunk.nf'
-include { THEMISTO_BUILD_INDEX; 
+include { THEMISTO_BUILD_INDEX;
           THEMISTO_PSEUDOALIGN;
           THEMISTO_STATS            } from './modules/themisto.nf'
 include { MSWEEP                    } from './modules/msweep.nf'
@@ -39,13 +39,13 @@ include { MGEMS                     } from './modules/mgems.nf'
 // SUBWORKFLOWS
 //
 
+include { VALIDATE_PREBUILT_INPUT } from './subworkflows/validate_prebuilt_input.nf'
+
 /*
 Helper Scripts
 */
 
-include { validate_params;
-          validate_index;
-          validate_ref_groups } from './modules/validate.nf'
+include { validate_params } from './modules/validate.nf'
 
 /*
 ========================================================================================
@@ -84,29 +84,8 @@ workflow {
         index_files_ch = channel.fromPath("${params.themisto_index}*").collect()
         index_prefix_ch = channel.value(file(params.themisto_index).getName())
 
-        // Validate inputs to ensure compatibility (kmer size, number of refs)
-        def len_ref_groups = file(params.ref_groups).readLines().findAll { it.trim() }.size()
-        
-        THEMISTO_STATS(index_files_ch, index_prefix_ch)
-            .map { file ->
-                def lines = file.readLines()
+        VALIDATE_PREBUILT_INPUT(index_files_ch, index_prefix_ch)
 
-                def kmer_index = lines.find { it.startsWith('Node length k:') }
-                                    .tokenize(':')[1].trim().toInteger()
-
-                def range = lines.find { it.startsWith('Color id range:') }
-                                .split(':')[1].trim()
-                                .split('\\.\\.')
-
-                def refs_index = range[1].toInteger() - range[0].toInteger() + 1
-
-                tuple(kmer_index, refs_index)
-            }
-            .map { kmer_index, refs_index ->
-                validate_index(kmer_index, params.kmer_size)
-                validate_ref_groups(refs_index, len_ref_groups)
-                tuple(kmer_index, refs_index)
-            }
     }
 
     // Core Workflow
