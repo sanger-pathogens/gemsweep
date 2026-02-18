@@ -30,18 +30,28 @@ workflow DEREP_GROUPS {
 
     SPLIT_DIST_MATRIX(pp_dist_matrix, clusters_multiple_samples)
 
+    SPLIT_DIST_MATRIX.out.cluster_dists
+    | flatten
+    | map { path ->
+        def meta = [:]
+        meta.cluster = path.name.split("_")[0]
+        [meta, path]
+    }
+    | GENERATE_TOTAL_DIST_MATRIX
+    | SUBSELECT_GRAPH
 
-    // SKETCH_SUBSET_TOTAL_ANI_DIST(multiple_samples, sketchlib_db_ch)
-    // | GENERATE_TOTAL_DIST_MATRIX
-    // | SUBSELECT_GRAPH
+    clusters.single
+    | map { rep, cluster -> rep[0]}
+    | set { single_representatives }
 
-    // SUBSELECT_GRAPH.out.representatives
-    // | splitCsv()
-    // | mix(single_samples)
-    // | ifEmpty { error("Error: No representatives found for any bin") }
-    // | set { chosen_representatives }
+    SUBSELECT_GRAPH.out.representatives
+    | splitCsv()
+    | collect
+    | flatten
+    | mix(single_representatives)
+    | ifEmpty { error("Error: No representatives found for any bin") }
+    | set { chosen_representatives }
 
-    // bin2channel
-    // | join(chosen_representatives)
-    // | set { final_dataset }
+    emit:
+    chosen_representatives
 }
