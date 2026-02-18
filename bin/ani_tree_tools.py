@@ -12,7 +12,7 @@ import pandas as pd
 from tree_builder import generate_phylogeny
 
 
-def read_tsv_to_structures(filepath: str) -> tuple[list[str], np.ndarray]:
+def read_tsv_to_structures(filepath: str, header: bool) -> tuple[list[str], np.ndarray]:
     """
     Read a TSV file containing pairwise ANI values and convert to a
     distance matrix.
@@ -26,9 +26,12 @@ def read_tsv_to_structures(filepath: str) -> tuple[list[str], np.ndarray]:
         - Square numpy array of distance values
     """
     try:
-        df = pd.read_csv(filepath,
-                         sep="\t",
-                         names=["sample", "reference", "ani"])
+        df = pd.read_csv(
+            filepath,
+            sep="\t",
+            names=["sample", "reference", "ani"],
+            header=0 if header else None
+        )
 
         # get the uniques and store them indexed to map to the df
         unique_ids = pd.unique(pd.concat([df["sample"], df["reference"]]))
@@ -52,8 +55,7 @@ def read_tsv_to_structures(filepath: str) -> tuple[list[str], np.ndarray]:
         raise ValueError(f"Error processing TSV file: {str(e)}")
 
 
-def read_tsv_to_core_accession(filepath: str
-                               ) -> tuple[list[str], np.ndarray, np.ndarray]:
+def read_tsv_to_core_accession(filepath: str, header: bool) -> tuple[list[str], np.ndarray, np.ndarray]:
     """
     Read a TSV file containing pairwise core and accessory distances and
     convert to distance matrices.
@@ -70,12 +72,15 @@ def read_tsv_to_core_accession(filepath: str
     """
     try:
         # Read TSV into DataFrame
-        df = pd.read_csv(filepath,
-                         sep="\t",
-                         names=["sample",
-                                "reference",
-                                "core_dist",
-                                "acc_dist"])
+        df = pd.read_csv(
+            filepath,
+            sep="\t",
+            names=["sample",
+                "reference",
+                "core_dist",
+                "acc_dist"],
+            header=0 if header else None
+        )
 
         # Get unique identifiers while preserving order of first appearance
         unique_ids = pd.unique(pd.concat([df["sample"], df["reference"]]))
@@ -169,6 +174,11 @@ if __name__ == "__main__":
         action="store_true",
         help="parse input TSV as core + accession rather than single ANI scores",
     )
+    parser.add_argument(
+        "--header",
+        action="store_true",
+        help="Indicates that the input TSV file has a header row"
+    )
     args = parser.parse_args()
 
     if args.phylip_path:
@@ -177,9 +187,9 @@ if __name__ == "__main__":
     else:
         # Read the TSV and process data
         if args.core_accession:
-            ref_list, dist_mat, _ = read_tsv_to_core_accession(args.dist_tsv_path)
+            ref_list, dist_mat, _ = read_tsv_to_core_accession(args.dist_tsv_path, header=args.header)
         else:
-            ref_list, dist_mat = read_tsv_to_structures(args.dist_tsv_path)
+            ref_list, dist_mat = read_tsv_to_structures(args.dist_tsv_path, header=args.header)
 
         # Generate the PHYLIP matrix
         phylip_path = generate_phylip_matrix(ref_list, dist_mat, args.meta_ID)
