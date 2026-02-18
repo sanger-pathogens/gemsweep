@@ -20,7 +20,7 @@ process SKETCH_SUBSET_TOTAL_ANI_DIST {
 }
 
 process GENERATE_TOTAL_DIST_MATRIX {
-    tag "${meta.reference_ID}_${meta.ref_ani_bin}"
+    tag "${meta.cluster}"
     label "cpu_4"
     label "mem_8"
     label "time_1"
@@ -36,6 +36,6 @@ process GENERATE_TOTAL_DIST_MATRIX {
     script:
     def ani_tree_tools = "${projectDir}/bin/ani_tree_tools.py"
     """
-    ${ani_tree_tools} --dist_tsv_path ${betweenness_tsv} --meta_ID ${meta.ref_ani_bin}
+    ${ani_tree_tools} --dist_tsv_path ${betweenness_tsv} --meta_ID ${meta.cluster} --core_accession
     """
 }
