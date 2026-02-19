@@ -4,7 +4,6 @@
         def validation_errors = []
 
         // General options
-        validate_path_exists("--outdir", params.outdir, validation_errors)
         if (params.references) {
             // use supplied references, ignore other inputs
             validate_path_exists("--references", params.references, validation_errors)
