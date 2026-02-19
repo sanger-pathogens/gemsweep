@@ -4,13 +4,14 @@
         // validate all params then error pipeline when all have been validated and any were incorrect
 
         // General options
+        validate_path_exists("--outdir", params.outdir, validation_errors)
         if (params.references) {
             validate_path_exists("--references", params.references, validation_errors)
-            if (params.themisto_index) || (params.ref_groups) {
+            if (params.themisto_index || params.ref_groups) {
                 log.warn("As references are supplied, the ref_groups and themisto_index parameters will be ignored.")
             }
         } else {
-            if !(params.ref_groups) || !(params.themisto_index) {
+            if (!params.ref_groups || !params.themisto_index) {
                 validation_errors << "You must supply either references or both themisto index and reference groups file."
             } else {
                 validate_path_exists("--ref_groups", params.ref_groups, validation_errors)
@@ -23,6 +24,9 @@
         
         // Themisto options
         validate_choice_param("--kmer_size", params.kmer_size, [21,31,51], validation_errors)
+        validate_path_exists("--temp_dir", params.temp_dir, validation_errors)
+        // TODO: validate requested tmp space is in MB (or GB if changing) NOT CURRENTLY PARAMETERISED
+
 
         if (validation_errors) {
             validation_errors.each { log.error " - $it " }
@@ -30,9 +34,6 @@
         }
         
     }
-
-    // TODO:
-    // validate tmp space is in MB (or GB if changing) NOT CURRENTLY PARAMETERISED
 
     def validate_path_exists(path_param, path_param_value, all_errors) {
         if( !file(path_param_value).exists() ) {
