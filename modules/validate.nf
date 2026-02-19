@@ -4,14 +4,20 @@
         // validate all params then error pipeline when all have been validated and any were incorrect
         // General options
         validate_reference_input_type(params.references, params.ref_groups, params.themisto_index)
+        // validate_mutually_exclusive(params.references, params.themisto_index, validation_errors)
+        // validate_mutually_exclusive(params.references, params.ref_groups, validation_errors)
+
         // Clustering options
         validate_choice_param("--poppunk_model", params.poppunk_model, ["dbscan","bgmm"], validation_errors)
+        
         // Themisto options
         validate_choice_param("--kmer_size", params.kmer_size, [21,31,51], validation_errors)
+
         if (validation_errors) {
             validation_errors.each { log.error " - $it " }
                 error("Parameters have failed validation, please review logged errors and rerun once resolved.")
         }
+        
     }
 
     // TODO:
@@ -38,11 +44,17 @@
         }
     }
 
+    def validate_mutually_exclusive(incompatible_param_1, incompatible_param_2, all_errors) {
+        if (incompatible_param_1 != null && incompatible_param_2 != null) {
+        all_errors << "Incompatible options ${incompatible_param_1} and ${incompatible_param_2} provided. Please remove one from the command."
+        }
+    }
     def validate_reference_input_type(references_value, ref_groups_value, themisto_index_value) {
         if ( (ref_groups_value && themisto_index_value) == (references_value != null) ) {
             log.info "Provide either --ref_groups + --index OR --references. As references have been supplied these will be used, themisto_index and ref_groups arguments will be ignored."
             }
     }
+
 
 // Pre-built index validation:
 def validate_index(kmer_index, kmer_arg) {
