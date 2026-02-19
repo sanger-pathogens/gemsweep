@@ -41,13 +41,20 @@ workflow DEREP_GROUPS {
     | SUBSELECT_GRAPH
 
     clusters.single
-    | map { rep, cluster -> rep[0]}
+    | map { rep, cluster -> 
+        def meta = [:]
+        meta.cluster = cluster
+        [meta, rep[0]]
+    }
     | set { single_representatives }
 
     SUBSELECT_GRAPH.out.representatives
     | splitCsv()
+    | map { meta, reps -> 
+        [[meta, reps[0]]]
+    }
     | collect
-    | flatten
+    | flatMap
     | mix(single_representatives)
     | ifEmpty { error("Error: No representatives found for any bin") }
     | set { chosen_representatives }

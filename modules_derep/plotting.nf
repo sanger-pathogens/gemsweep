@@ -14,16 +14,12 @@ process SUBSELECT_GRAPH {
     tuple val(meta), path(phylip)
 
     output:
-    path("*.txt"), emit: representatives, optional: true
-    path("*.csv"), emit: clusters, optional: true
-    path("*.png"), optional: true
-    path("*.gif"), optional: true
+    tuple val(meta), path("*.txt"), emit: representatives, optional: true
 
     script:
-    def make_gif = params.make_gif ? "--plot_selection_plots" : ""
     def representatives = params.representatives ? "--n_representatives ${params.representatives}" : ""
     def subselect_graph = "${projectDir}/bin/subselect_graph.py"
     """
-    ${subselect_graph} --phylip ${phylip} --methods ${params.cluster_method} ${make_gif} ${representatives}
+    ${subselect_graph} --phylip ${phylip} --methods ${params.cluster_method} ${representatives}
     """
 }
