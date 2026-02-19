@@ -1,22 +1,23 @@
 // Param validation:
     def validate_params() {
-        // accumulate any param-related error messages, error the pipeline with all messages together
+        // accumulate any param-related error messages, error the pipeline with any/all messages together
         def validation_errors = []
 
         // General options
         validate_path_exists("--outdir", params.outdir, validation_errors)
         if (params.references) {
+            // use supplied references, ignore other inputs
             validate_path_exists("--references", params.references, validation_errors)
             if (params.themisto_index || params.ref_groups) {
-                log.warn("As references are supplied, the ref_groups and themisto_index parameters will be ignored.")
+                log.warn("As --references are supplied, the --ref_groups and --themisto_index params will be ignored.")
             }
+        } else if (params.ref_groups && params.themisto_index) {
+            // use prebuilt index
+            validate_path_exists("--ref_groups", params.ref_groups, validation_errors)
+            validate_path_exists("--themisto_index", params.themisto_index, validation_errors)
         } else {
-            if (!params.ref_groups || !params.themisto_index) {
-                validation_errors << "You must supply either references or both themisto index and reference groups file."
-            } else {
-                validate_path_exists("--ref_groups", params.ref_groups, validation_errors)
-                validate_path_exists("--themisto_index", params.themisto_index, validation_errors)
-            }
+            // error if insufficient combo of inputs provided
+            validation_errors << "You must supply either --references or both --ref_groups and --themisto_index."
         }
 
         // Clustering options
