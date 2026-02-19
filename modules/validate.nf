@@ -2,10 +2,21 @@
     def validate_params() {
         def validation_errors = []
         // validate all params then error pipeline when all have been validated and any were incorrect
+
         // General options
-        validate_reference_input_type(params.references, params.ref_groups, params.themisto_index)
-        // validate_mutually_exclusive(params.references, params.themisto_index, validation_errors)
-        // validate_mutually_exclusive(params.references, params.ref_groups, validation_errors)
+        if (params.references) {
+            validate_path_exists("--references", params.references, validation_errors)
+            if (params.themisto_index) || (params.ref_groups) {
+                log.warn("As references are supplied, the ref_groups and themisto_index parameters will be ignored.")
+            }
+        } else {
+            if !(params.ref_groups) || !(params.themisto_index) {
+                validation_errors << "You must supply either references or both themisto index and reference groups file."
+            } else {
+                validate_path_exists("--ref_groups", params.ref_groups, validation_errors)
+                validate_path_exists("--themisto_index", params.themisto_index, validation_errors)
+            }
+        }
 
         // Clustering options
         validate_choice_param("--poppunk_model", params.poppunk_model, ["dbscan","bgmm"], validation_errors)
@@ -22,19 +33,12 @@
 
     // TODO:
     // validate tmp space is in MB (or GB if changing) NOT CURRENTLY PARAMETERISED
-    // validate that temp_dir is a existing/valid path
-    //     def validate_path(flag, value, access, all_errors) {
-    //         def param_name = (flag - "--").replaceAll("_", " ")
-    //         if !path.exists() {
-    //         // error on not exsiting
-    //            all_errors << "Path ${value} for ${param_name} does not exist."
-    //         }
-    //         if not read/writable {
-    //         // error on not read/writeable path
-    //            all_errors << "Cannot ${access} to path ${value} for ${param_name}."
-    //         }
-    //     }
 
+    def validate_path_exists(path_param, path_param_value, all_errors) {
+        if( !file(path_param_value).exists() ) {
+            all_errors << "File supplied to ${path_param} does not exist: ${path_param_value}"
+        }
+    }
 
     def validate_choice_param(flag, value, choices, all_errors) {
         def param_name = (flag - "--").replaceAll("_", " ")
