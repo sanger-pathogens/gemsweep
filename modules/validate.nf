@@ -1,7 +1,7 @@
 // Param validation:
     def validate_params() {
+        // accumulate any param-related error messages, error the pipeline with all messages together
         def validation_errors = []
-        // validate all params then error pipeline when all have been validated and any were incorrect
 
         // General options
         validate_path_exists("--outdir", params.outdir, validation_errors)
