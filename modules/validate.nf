@@ -21,7 +21,6 @@
     }
 
     // TODO:
-    // validate references.txt has no duplicates to error early before poppunk error with a readable message
     // validate tmp space is in MB (or GB if changing) NOT CURRENTLY PARAMETERISED
     // validate that temp_dir is a existing/valid path
     //     def validate_path(flag, value, access, all_errors) {
@@ -66,4 +65,30 @@ def validate_ref_groups(num_refs_index, len_ref_groups) {
     if (num_refs_index != len_ref_groups) {
         error("Unexpected number of references assigned groups in file supplied to --ref_groups. One line per reference required, stating the cluster assigned.")
     }
+}
+
+// References manifest validation:
+def validate_references(ref_paths_txt) {
+
+    def lines = file(ref_paths_txt)
+        .readLines()
+        .collect { line -> line.trim() }
+        .findAll { line -> line }
+
+    def duplicates = lines
+        .groupBy { line -> line }
+        .findAll { key, values -> values.size() > 1 }
+        .keySet()
+
+    if (!duplicates.isEmpty()) {
+        error("Duplicated references in ${ref_paths_txt}:\n${duplicates.join('\n')}")
+    }
+
+    def missing = lines.findAll { path -> !file(path).exists() }
+
+    if (!missing.isEmpty()) {
+        error("The following reference files do not exist:\n${missing.join('\n')}")
+    }
+
+    return lines
 }

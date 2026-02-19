@@ -45,7 +45,8 @@ include { VALIDATE_PREBUILT_INPUT } from './subworkflows/validate_prebuilt_input
 Helper Scripts
 */
 
-include { validate_params } from './modules/validate.nf'
+include { validate_params;
+          validate_references } from './modules/validate.nf'
 
 /*
 ========================================================================================
@@ -68,6 +69,9 @@ workflow {
     reads_ch = MIXED_INPUT()    // outputs channel of [meta, R1, R2] for reads_<1|2>.fastq.gz
 
     if (params.references) {
+        // Check references exist and are not duplicated or fail early
+        validate_references(params.references)
+
         // Set up input channels starting from references.txt
         references_ch = channel.fromPath(params.references).first()
         pp_input_ch = PREP_REFS(references_ch)
@@ -84,6 +88,7 @@ workflow {
         index_files_ch = channel.fromPath("${params.themisto_index}*").collect()
         index_prefix_ch = channel.value(file(params.themisto_index).getName())
 
+        // Validate
         VALIDATE_PREBUILT_INPUT(index_files_ch, index_prefix_ch)
 
     }
