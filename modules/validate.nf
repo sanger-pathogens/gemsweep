@@ -25,7 +25,9 @@
         
         // Themisto options
         validate_choice_param("--kmer_size", params.kmer_size, [21,31,51], validation_errors)
-        validate_path_exists("--temp_dir", params.temp_dir, validation_errors)
+        if (params.temp_dir != null) {
+            validate_path_exists("--temp_dir", params.temp_dir, validation_errors)
+        }
         // TODO: validate requested tmp space is in MB (or GB if changing) NOT CURRENTLY PARAMETERISED
 
 
