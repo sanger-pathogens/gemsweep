@@ -85,7 +85,7 @@ workflow {
     } else {
         // Set up input channels starting from pre-built index AND provided ref_groups
         ref_groups_ch = channel.fromPath(params.ref_groups).first()
-        index_files_ch = channel.fromPath("${params.themisto_index}*").collect()
+        index_files_ch = channel.fromPath("${params.themisto_index}.*").collect()
         index_prefix_ch = channel.value(file(params.themisto_index).getName())
 
         // Validate
