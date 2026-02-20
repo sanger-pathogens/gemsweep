@@ -13,7 +13,7 @@
         } else if (params.ref_groups && params.themisto_index) {
             // use prebuilt index
             validate_path_exists("--ref_groups", params.ref_groups, validation_errors)
-            validate_path_exists("--themisto_index", params.themisto_index, validation_errors)
+            validate_index_exists("--themisto_index", params.themisto_index, ["tbdg","tcolors"], validation_errors)
         } else {
             // error if insufficient combo of inputs provided
             validation_errors << "You must supply either --references or both --ref_groups and --themisto_index."
@@ -40,6 +40,12 @@
     def validate_path_exists(path_param, path_param_value, all_errors) {
         if( !file(path_param_value).exists() ) {
             all_errors << "File supplied to ${path_param} does not exist: ${path_param_value}"
+        }
+    }
+
+    def validate_index_exists(index_param, index_param_value, suffix_list, all_errors) {
+        suffix_list.each { suffix ->
+            validate_path_exists(index_param, "${index_param_value}.${suffix}", all_errors)
         }
     }
 
