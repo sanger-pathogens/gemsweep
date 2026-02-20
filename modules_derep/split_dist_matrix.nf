@@ -1,7 +1,7 @@
 process SPLIT_DIST_MATRIX {
     label "cpu_1"
     label "mem_16"
-    label "time_30m"
+    label "time_queue_from_small"
 
     container "quay.io/sangerpathogens/pandas:2.2.1"
 
