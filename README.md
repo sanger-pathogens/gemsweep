@@ -54,8 +54,6 @@ To run the pipeline from source (this repository):
   - a prebuilt themisto index of references AND a reference grouping text file\*
   - a references.txt (indexing and clustering will happen within the pipeline)
 
-  If a references.txt is supplied, any files supplied to `--ref_groups` and/or `--themisto_index` are ignored.
-
   NOTE: If supplying a prebuilt index a\) the kmer size must be identical to the argument `kmer_size` (default: 31) and b\) the reference grouping file must be in identical positional order to the references when indexed.
 
 - Paired-end reads per (mixed) sample
@@ -107,11 +105,11 @@ mkdir mGEMs_bins_manifest
 
 **General options**
 
-| Flag         | Type   | Default       | Description                                                                                                                 |
-| ------------ | ------ | ------------- | --------------------------------------------------------------------------------------------------------------------------- |
-| `manifest`   | `path` | `null`        | Input manifest CSV with required header `ID,R1,R2`, containing per-sample paths to `.fastq.gz` files.                       |
-| `references` | `path` | `null`        | Path to text file containing paths to references, one per line. If provided, ref_groups and themisto_index will be ignored. |
-| `outdir`     | `path` | `"./results"` | Path to top directory containing all results, by default `results` within the launch directory.                             |
+| Flag         | Type   | Default       | Description                                                                                           |
+| ------------ | ------ | ------------- | ----------------------------------------------------------------------------------------------------- |
+| `manifest`   | `path` | `null`        | Input manifest CSV with required header `ID,R1,R2`, containing per-sample paths to `.fastq.gz` files. |
+| `references` | `path` | `null`        | Path to text file containing paths to references, one per line.                                       |
+| `outdir`     | `path` | `"./results"` | Path to top directory containing all results, by default `results` within the launch directory.       |
 
 ---
 
@@ -136,9 +134,9 @@ mkdir mGEMs_bins_manifest
 
 **mSWEEP options**
 
-| Flag         | Type   | Default | Description                                                                                                             |
-| ------------ | ------ | ------- | ----------------------------------------------------------------------------------------------------------------------- |
-| `ref_groups` | `path` | `null`  | Grouped references text file, one line per reference. Mandatory when pre-built index is supplied to `--themisto_index`. |
+| Flag         | Type   | Default | Description                                                                                                                    |
+| ------------ | ------ | ------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| `ref_groups` | `path` | `null`  | Grouped references text file, one line per reference. Mandatory only when a pre-built index is supplied to `--themisto_index`. |
 
 ---
 

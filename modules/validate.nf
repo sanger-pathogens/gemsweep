@@ -4,19 +4,15 @@
         def validation_errors = []
 
         // General options
-        if (params.references) {
-            // use supplied references, ignore other inputs
+        if (params.references && !(params.themisto_index || params.ref_groups)) {
             validate_path_exists("--references", params.references, validation_errors)
-            if (params.themisto_index || params.ref_groups) {
-                log.warn("As --references are supplied, the --ref_groups and --themisto_index params will be ignored.")
-            }
-        } else if (params.ref_groups && params.themisto_index) {
+        } else if (params.ref_groups && params.themisto_index && !params.references) {
             // use prebuilt index
             validate_path_exists("--ref_groups", params.ref_groups, validation_errors)
             validate_index_exists("--themisto_index", params.themisto_index, ["tbdg","tcolors"], validation_errors)
         } else {
             // error if insufficient combo of inputs provided
-            validation_errors << "You must supply either --references or both --ref_groups and --themisto_index."
+            validation_errors << "You must supply either --references alone or both of --ref_groups and --themisto_index."
         }
 
         // Clustering options
