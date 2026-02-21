@@ -39,7 +39,7 @@ workflow DEREP_GROUPS {
     }
     | GENERATE_TOTAL_DIST_MATRIX
     | SUBSELECT_GRAPH
-
+    
     clusters.single
     | map { rep, cluster -> 
         def meta = [:]
