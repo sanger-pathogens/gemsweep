@@ -68,9 +68,7 @@ workflow {
 
    reads_ch = MIXED_INPUT()    // outputs channel of [meta, R1, R2] for reads_<1|2>.fastq.gz
 
-
-
-   //if (params.references) {
+    if (params.references) {
         // Set up input channels starting from references.txt
         references_ch = channel.fromPath("/data/pam/team230/tm22/scratch/tickets/PAT-3113/references.txt").first()
         //pp_input_ch = PREP_REFS(references_ch)
@@ -97,63 +95,57 @@ workflow {
         }
         | set { clusters_rep_paths }
 
+        // split out clusters and paths into seperate files for positionally consistent files in index and core workflow
         clusters_rep_paths
-        | collectFile {
-            ["representatives.txt", { cluster, rep_path -> "${rep_path}\n" }]
-        }
+        | collectFile { cluster, rep_path -> ["representatives.txt", "${rep_path}\n"] }
         | set { representatives_ch }
         
         clusters_rep_paths
-        | collectFile {
-            ["groups.txt", { cluster, rep_path -> "${cluster}\n" }]
-        }
-        | set { reps_groups_ch }
-        
+        | collectFile { cluster, rep_path -> ["groups.txt", "${cluster}\n"] }
+        | set {ref_groups_ch} // groups file for representatives only
+
+
        index_prefix_ch = channel.value("index") // needs to be identical to what index is set as in indexing process
        index_files_ch = THEMISTO_BUILD_INDEX(index_prefix_ch, representatives_ch).collect()
         
        // Output stats on the index (not required for anything just an additional output)
        THEMISTO_STATS(index_files_ch, index_prefix_ch)
 
-// --- REMOVE THIS SECTION ONCE TESTED --- //
-//   }
-// --- TO HERE--- //
+   } else {
+        // Set up input channels starting from pre-built index AND provided ref_groups
+       ref_groups_ch = channel.fromPath(params.ref_groups).first()
+       index_files_ch = channel.fromPath("${params.themisto_index}*").collect()
+       index_prefix_ch = channel.value(file(params.themisto_index).getName())
 
-//    } else {
-//         // Set up input channels starting from pre-built index AND provided ref_groups
-//        ref_groups_ch = channel.fromPath(params.ref_groups).first()
-//        index_files_ch = channel.fromPath("${params.themisto_index}*").collect()
-//        index_prefix_ch = channel.value(file(params.themisto_index).getName())
-
-//         // Validate inputs to ensure compatibility (kmer size, number of refs)
-//        def len_ref_groups = file(params.ref_groups).readLines().findAll { it.trim() }.size()
+        // Validate inputs to ensure compatibility (kmer size, number of refs)
+       def len_ref_groups = file(params.ref_groups).readLines().findAll { it.trim() }.size()
        
-//        THEMISTO_STATS(index_files_ch, index_prefix_ch)
-//            .map { file ->
-//                def lines = file.readLines()
+       THEMISTO_STATS(index_files_ch, index_prefix_ch)
+           .map { file ->
+               def lines = file.readLines()
 
-//                def kmer_index = lines.find { it.startsWith('Node length k:') }
-//                                    .tokenize(':')[1].trim().toInteger()
+               def kmer_index = lines.find { it.startsWith('Node length k:') }
+                                   .tokenize(':')[1].trim().toInteger()
 
-//                def range = lines.find { it.startsWith('Color id range:') }
-//                                .split(':')[1].trim()
-//                                .split('\\.\\.')
+               def range = lines.find { it.startsWith('Color id range:') }
+                               .split(':')[1].trim()
+                               .split('\\.\\.')
 
-//                def refs_index = range[1].toInteger() - range[0].toInteger() + 1
+               def refs_index = range[1].toInteger() - range[0].toInteger() + 1
 
-//                tuple(kmer_index, refs_index)
-//            }
-//            .map { kmer_index, refs_index ->
-//                validate_index(kmer_index, params.kmer_size)
-//                validate_ref_groups(refs_index, len_ref_groups)
-//                tuple(kmer_index, refs_index)
-//            }
-//    }
+               tuple(kmer_index, refs_index)
+           }
+           .map { kmer_index, refs_index ->
+               validate_index(kmer_index, params.kmer_size)
+               validate_ref_groups(refs_index, len_ref_groups)
+               tuple(kmer_index, refs_index)
+           }
+   }
 
-    // Core Workflow
-    pseudoaligned_ch = THEMISTO_PSEUDOALIGN(reads_ch, index_files_ch, index_prefix_ch)
+//     // Core Workflow
+//     pseudoaligned_ch = THEMISTO_PSEUDOALIGN(reads_ch, index_files_ch, index_prefix_ch)
     
-    msweep_ch = MSWEEP(pseudoaligned_ch, reps_groups_ch)
+//     msweep_ch = MSWEEP(pseudoaligned_ch, ref_groups_ch)
     
 //   MGEMS(
 //    reads_ch
