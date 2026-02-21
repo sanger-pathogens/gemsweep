@@ -1,14 +1,13 @@
-include { COLLECT_FILE                 } from '../modules_derep/collect_file.nf'
+include { COLLECT_FILE                  } from '../modules_derep/collect_file.nf'
 include { SKETCH_SUBSET_TOTAL_ANI_DIST;
-          GENERATE_TOTAL_DIST_MATRIX   } from '../modules_derep/sketchlib.nf'
-include { SPLIT_DIST_MATRIX            } from '../modules_derep/split_dist_matrix.nf'
+          GENERATE_TOTAL_DIST_MATRIX    } from '../modules_derep/sketchlib.nf'
+include { SPLIT_DIST_MATRIX             } from '../modules_derep/split_dist_matrix.nf'
 include { SUBSELECT_GRAPH               } from '../modules_derep/plotting.nf'
 
 workflow DEREP_GROUPS {
     take:
     clusters_csv
     pp_dist_matrix
-    // sketchlib_db_ch
 
     main:
     clusters_csv

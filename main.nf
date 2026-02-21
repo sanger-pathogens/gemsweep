@@ -25,15 +25,15 @@ def printHelp() {
     IMPORT MODULES/SUBWORKFLOWS
 ========================================================================================
 */
-include { MIXED_INPUT               } from './assorted-sub-workflows/mixed_input/mixed_input.nf'
-include { PREP_REFS;                
-          POPPUNK;                  
-          ORDER_GROUPS              } from './modules/poppunk.nf'
-include { THEMISTO_BUILD_INDEX;
+include { MIXED_INPUT           } from './assorted-sub-workflows/mixed_input/mixed_input.nf'
+include { PREP_REFS;             
+          POPPUNK;                
+          ORDER_GROUPS          } from './modules/poppunk.nf'
+include { THEMISTO_BUILD_INDEX; 
           THEMISTO_PSEUDOALIGN;
-          THEMISTO_STATS            } from './modules/themisto.nf'
-include { MSWEEP                    } from './modules/msweep.nf'
-include { MGEMS                     } from './modules/mgems.nf'
+          THEMISTO_STATS        } from './modules/themisto.nf'
+include { MSWEEP                } from './modules/msweep.nf'
+include { MGEMS                 } from './modules/mgems.nf'
 
 //
 // SUBWORKFLOWS
@@ -56,9 +56,9 @@ include { validate_params;
 */
 
 workflow {
-    params.each { key, value ->
-    log.info "PARAM ${key} = ${value}" // for dev/ debugging
-    }
+    // params.each { key, value ->
+    // log.info "PARAM ${key} = ${value}" // for dev/ debugging
+    // }
 
     if (params.help) {
         printHelp()
@@ -67,7 +67,7 @@ workflow {
 
    validate_params()
 
-   //reads_ch = MIXED_INPUT()    // outputs channel of [meta, R1, R2] for reads_<1|2>.fastq.gz
+   reads_ch = MIXED_INPUT()    // outputs channel of [meta, R1, R2] for reads_<1|2>.fastq.gz
 
    if (params.references) {
         // Check references exist and are not duplicated or fail early
@@ -76,7 +76,6 @@ workflow {
         // Set up input channels starting from references.txt
         references_ch = channel.fromPath(params.references).first()
 
-        //pp_input_ch = PREP_REFS(references_ch)
         POPPUNK(PREP_REFS(references_ch))
         poppunk_dists_ch = POPPUNK.out.dist_matrix
         poppunk_clusters_csv = POPPUNK.out.clusters
@@ -116,65 +115,30 @@ workflow {
        // Output stats on the index (not required for anything just an additional output)
        THEMISTO_STATS(index_files_ch, index_prefix_ch)
 
-<<<<<<< HEAD
-//    } else {
-//         // Set up input channels starting from pre-built index AND provided ref_groups
-//        ref_groups_ch = channel.fromPath(params.ref_groups).first()
-//        index_files_ch = channel.fromPath("${params.themisto_index}*").collect()
-//        index_prefix_ch = channel.value(file(params.themisto_index).getName())
-
-        // Validate
-        //VALIDATE_PREBUILT_INPUT(index_files_ch, index_prefix_ch)
-
-//         // Validate inputs to ensure compatibility (kmer size, number of refs)
-//        def len_ref_groups = file(params.ref_groups).readLines().findAll { it.trim() }.size()
-=======
    } else {
         // Set up input channels starting from pre-built index AND provided ref_groups
        ref_groups_ch = channel.fromPath(params.ref_groups).first()
        index_files_ch = channel.fromPath("${params.themisto_index}*").collect()
        index_prefix_ch = channel.value(file(params.themisto_index).getName())
 
-        // Validate inputs to ensure compatibility (kmer size, number of refs)
-       def len_ref_groups = file(params.ref_groups).readLines().findAll { it.trim() }.size()
->>>>>>> 4fac209 (Fix collectFile serialisation error in handling channel files for representatives caused by nested closure)
-       
-       THEMISTO_STATS(index_files_ch, index_prefix_ch)
-           .map { file ->
-               def lines = file.readLines()
-
-               def kmer_index = lines.find { it.startsWith('Node length k:') }
-                                   .tokenize(':')[1].trim().toInteger()
-
-               def range = lines.find { it.startsWith('Color id range:') }
-                               .split(':')[1].trim()
-                               .split('\\.\\.')
-
-               def refs_index = range[1].toInteger() - range[0].toInteger() + 1
-
-               tuple(kmer_index, refs_index)
-           }
-           .map { kmer_index, refs_index ->
-               validate_index(kmer_index, params.kmer_size)
-               validate_ref_groups(refs_index, len_ref_groups)
-               tuple(kmer_index, refs_index)
-           }
+        // Validate
+        VALIDATE_PREBUILT_INPUT(index_files_ch, index_prefix_ch)
    }
 
-//     // Core Workflow
-//     pseudoaligned_ch = THEMISTO_PSEUDOALIGN(reads_ch, index_files_ch, index_prefix_ch)
+    // Core Workflow
+    pseudoaligned_ch = THEMISTO_PSEUDOALIGN(reads_ch, index_files_ch, index_prefix_ch)
     
-//     msweep_ch = MSWEEP(pseudoaligned_ch, ref_groups_ch)
+    msweep_ch = MSWEEP(pseudoaligned_ch, ref_groups_ch)
     
-//   MGEMS(
-//    reads_ch
-//    .join(pseudoaligned_ch, by: 0)
-//    .join(msweep_ch, by: 0)
-//    .map { meta, r1, r2, aln1, aln2, abund, probs ->
-//        tuple(meta, r1, r2, aln1, aln2, abund, probs)
-//    },
-//    index_files_ch,
-//    index_prefix_ch,
-//    ref_groups_ch
-//   )
+  MGEMS(
+   reads_ch
+   .join(pseudoaligned_ch, by: 0)
+   .join(msweep_ch, by: 0)
+   .map { meta, r1, r2, aln1, aln2, abund, probs ->
+       tuple(meta, r1, r2, aln1, aln2, abund, probs)
+   },
+   index_files_ch,
+   index_prefix_ch,
+   ref_groups_ch
+  )
 }
