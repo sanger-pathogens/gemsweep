@@ -1,8 +1,6 @@
-include { COLLECT_FILE                  } from '../modules_derep/collect_file.nf'
-include { SKETCH_SUBSET_TOTAL_ANI_DIST;
-          GENERATE_TOTAL_DIST_MATRIX    } from '../modules_derep/sketchlib.nf'
-include { SPLIT_DIST_MATRIX             } from '../modules_derep/split_dist_matrix.nf'
-include { SUBSELECT_GRAPH               } from '../modules_derep/plotting.nf'
+include { SPLIT_DIST_MATRIX           } from '../modules_derep/split_dist_matrix.nf'
+include { GENERATE_TOTAL_DIST_MATRIX  } from '../modules_derep/sketchlib.nf'
+include { SUBSELECT_GRAPH             } from '../modules_derep/plotting.nf'
 
 workflow DEREP_GROUPS {
     take:
