@@ -7,7 +7,7 @@ process PREP_REFS {
     path refs_txt
 
     output:
-    path 'references.tsv'
+    path 'references.tsv', emit: refs_csv
 
     script:
     """
