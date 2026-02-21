@@ -67,19 +67,20 @@ workflow {
 
    validate_params()
 
-   reads_ch = MIXED_INPUT()    // outputs channel of [meta, R1, R2] for reads_<1|2>.fastq.gz
+   //reads_ch = MIXED_INPUT()    // outputs channel of [meta, R1, R2] for reads_<1|2>.fastq.gz
 
    if (params.references) {
         // Check references exist and are not duplicated or fail early
         validate_references(params.references)
 
         // Set up input channels starting from references.txt
-        references_ch = channel.fromPath("/data/pam/team230/tm22/scratch/tickets/PAT-3113/references.txt").first()
-        //pp_input_ch = PREP_REFS(references_ch)
+        references_ch = channel.fromPath(params.references).first()
 
-        //poppunk_ch = POPPUNK(PREP_REFS(references_ch))
-        poppunk_dists_ch = channel.fromPath("/data/pam/team230/cc52/scratch/dev_tests/msweep-mgems/python_derep/218_ref_pp_database.dists.npy")
-        poppunk_clusters_csv = channel.fromPath("/data/pam/team230/cc52/scratch/dev_tests/msweep-mgems/python_derep/218_ref_pp_database_clusters.csv")
+        //pp_input_ch = PREP_REFS(references_ch)
+        POPPUNK(PREP_REFS(references_ch))
+        poppunk_dists_ch = POPPUNK.out.dist_matrix
+        poppunk_clusters_csv = POPPUNK.out.clusters
+
         DEREP_GROUPS(poppunk_clusters_csv, poppunk_dists_ch)
 
         references_ch
