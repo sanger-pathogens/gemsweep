@@ -1,4 +1,5 @@
 process MSWEEP {
+    tag "${meta.id}"
     label 'cpu_16'
     label 'mem_4'
     label 'time_12'

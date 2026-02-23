@@ -1,4 +1,5 @@
 process MGEMS {
+    tag "${meta.id}"
     label 'cpu_1'
     label 'mem_2'
     label 'time_12'
