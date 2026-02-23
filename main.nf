@@ -69,7 +69,7 @@ workflow {
 
     reads_ch = MIXED_INPUT()    // outputs channel of [meta, R1, R2] for reads_<1|2>.fastq.gz
 
-   if (params.references) {
+    if (params.references) {
         // Check references exist and are not duplicated or fail early
         validate_references(params.references)
 
@@ -131,7 +131,7 @@ workflow {
 
         // Validate
         VALIDATE_PREBUILT_INPUT(index_files_ch, index_prefix_ch)
-   }
+    }
 
     // Core Workflow
     pseudoaligned_ch = THEMISTO_PSEUDOALIGN(reads_ch, index_files_ch, index_prefix_ch)

@@ -4,10 +4,6 @@ process SUBSELECT_GRAPH {
     label "mem_16"
     label "time_30m"
 
-    publishDir "${params.outdir}/clusters/${meta.cluster}", pattern: "*.png", mode: 'copy', overwrite: true
-    publishDir "${params.outdir}/clusters/${meta.cluster}", pattern: "*.gif", mode: 'copy', overwrite: true
-    publishDir "${params.outdir}/clusters/${meta.cluster}", pattern: "*.txt", mode: 'copy', overwrite: true
-
     container 'quay.io/sangerpathogens/python_graphics:1.1.4'
 
     input:
