@@ -1,5 +1,5 @@
 process MSWEEP {
-    label 'cpu_1'
+    label 'cpu_16'
     label 'mem_4'
     label 'time_12'
 
@@ -18,7 +18,7 @@ process MSWEEP {
 
     script:
     output_prefix = "${meta.ID}_mSWEEP"
-    command = "mSWEEP --themisto-1 ${pseudoalignment_1} --themisto-2 ${pseudoalignment_2} -o ${output_prefix} -i ${ref_groups} --write-probs"
+    command = "mSWEEP --themisto-1 ${pseudoalignment_1} --themisto-2 ${pseudoalignment_2} -o ${output_prefix} -i ${ref_groups} --write-probs -t ${task.cpus}"
 
     """
     ${command}
