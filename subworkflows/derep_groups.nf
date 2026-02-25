@@ -53,7 +53,7 @@ workflow DEREP_GROUPS {
     | collect
     | flatMap
     | mix(single_representatives)
-    | ifEmpty { error("Error: No representatives found for any bin") }
+    | ifEmpty { error("Error: No representatives found") }
     | set { chosen_representatives }
 
     emit:
