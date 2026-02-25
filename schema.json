@@ -21,6 +21,16 @@
         "help_text": "Path to top directory containing all results, by default 'results' within the launch directory."
       }
     },
+    "Reference refinement options": {
+      "refine_refs": {
+        "default": "false",
+        "help_text": "Set to true to switch on reference refinement."
+      },
+      "representatives": {
+        "default": "20",
+        "help_text": "Number of representatives at which to cap each reference cluster."
+      }
+    },
     "Clustering options": {
       "poppunk_model": {
         "default": "dbscan",

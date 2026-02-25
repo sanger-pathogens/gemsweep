@@ -1,4 +1,4 @@
-# mSWEEP-mGEMS (WIP name)
+# gemsweep
 
 [![Nextflow](https://img.shields.io/badge/nextflow%20DSL2-%E2%89%A521.04.0-23aa62.svg?labelColor=000000)](https://www.nextflow.io/)
 [![run with docker](https://img.shields.io/badge/run%20with-docker-0db7ed?labelColor=000000&logo=docker)](https://www.docker.com/)
@@ -8,7 +8,11 @@
 
 ## Pipeline summary
 
-This workflow deconvolutes mixed read sets (e.g. plate sweep sequencing data) and resolves these into strain-level resolution bins. It implements Themisto pseudoalignment of reads to a curated set of references, mSWEEP to estimate relative abundances and mGEMS to bin reads.
+This workflow deconvolutes mixed read sets (e.g. plate sweep sequencing data) and resolves these into strain-level resolution bins. At it's core it implements Themisto pseudoalignment of reads to a curated set of references, mSWEEP to estimate relative abundances and mGEMS to bin reads.
+
+Indexing references with Themisto and clustering with PopPUNK are optionally automated, however if you have these inputs you may provide these and skip some computation.
+
+Additionally, for large reference datasets with significant redundancy we offer a reference refinement option. This involves subsetting references to a configurable number of maximally distant representatives from the PopPUNK clusters - to conserve some within-cluster diversity whilst reducing compute demands.
 
 <!--- Insert Workflow Diagram Here --->
 
@@ -38,6 +42,7 @@ To run the pipeline from source (this repository):
     nextflow run <path/to/main.nf> \
         -profile docker \
         --manifest <path/to/manifest.csv>
+        --references <path/to/references.txt>
     ```
 
     Other profiles are also supported (`docker`, `singularity`).  
@@ -113,6 +118,14 @@ mkdir mGEMs_bins_manifest
 
 ---
 
+**Reference refinement options**
+| Flag | Type | Default | Description |
+| ----------------- | -------- | -------- | ------------------------------------------------------------------------------- |
+| `refine_refs` | `bool` | `false` | Set to `true` to switch on reference refinement. |
+| `representatives` | `integer` | `20` | Number of representatives at which to cap each reference cluster. |
+
+---
+
 **Clustering options**
 
 | Flag              | Type     | Default  | Description                                                                     |
@@ -168,8 +181,8 @@ The current version of the pipeline uses the following software dependencies:
 | PopPUNK  | 2.7.8   | quay.io/biocontainers/poppunk:2.7.8--py310h4d0eb5b_0 |
 
 <!---
-| XXX       | X.X.X   | quay.io/...                                           |
-| XXX       | X.X.X   | quay.io/...                                           |
+| XXX       | X.X.X   | quay.io/...                                         |
+| XXX       | X.X.X   | quay.io/...                                         |
 --->
 
 <!--- Uncomment in next version:
