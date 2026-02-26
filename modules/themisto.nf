@@ -1,8 +1,12 @@
 process THEMISTO_BUILD_INDEX {
     label 'cpu_16'
     label "mem_32"
-    label 'time_12'
-    label 'request_temp'
+    label 'time_queue_from_normal'
+
+    // Only request /tmp space if /tmp is being used (assumes TMPDIR is not set)
+    if (file(params.temp_dir).startsWith("/tmp") or !(params.temp_dir)) {
+        label 'request_temp'
+    }
 
     // scratch used for fast node-local temp storage
     scratch true
@@ -43,9 +47,12 @@ process THEMISTO_PSEUDOALIGN {
     tag "${meta.ID}"
     label 'cpu_16'
     label 'mem_32'
-    label 'time_48'
-    label 'request_temp'
     label 'time_queue_from_long'
+
+    // Only request /tmp space if /tmp is being used (assumes TMPDIR is not set)
+    if (file(params.temp_dir).startsWith("/tmp") or !(params.temp_dir)) {
+        label 'request_temp'
+    }
 
     // scratch used for fast node-local temp storage
     scratch true
