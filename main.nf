@@ -104,10 +104,12 @@ workflow {
             // split out clusters and paths into seperate files for positionally consistent files in index and core workflow
             clusters_rep_paths
             | collectFile { cluster, rep_path -> ["representatives.txt", "${rep_path}\n"] }
+            | first()
             | set { representatives_ch }
             
             clusters_rep_paths
             | collectFile { cluster, rep_path -> ["groups.txt", "${cluster}\n"] }
+            | first()
             | set {ref_groups_ch} // groups file for representatives only
 
         } else {
