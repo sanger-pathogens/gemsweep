@@ -46,6 +46,10 @@
         "default": "null",
         "help_text": "Absolute path to custom temporary storage directory to be used during runtime. Otherwise local /tmp will be used."
       },
+      "temp_space": {
+        "default": "10000",
+        "help_text": "Amount of /tmp space (MB) that will be reserved for index creation and pseudoalignment, if /tmp is being used as the temporary storage directory."
+      },
       "themisto_index": {
         "default": "null",
         "help_text": "Path to a pre-built Themisto index including the index prefix (without exts). Skips indexing if provided."
