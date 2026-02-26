@@ -40,6 +40,7 @@ process THEMISTO_BUILD_INDEX {
 }
 
 process THEMISTO_PSEUDOALIGN {
+    tag "${meta.ID}"
     label 'cpu_16'
     label 'mem_32'
     label 'time_48'

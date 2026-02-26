@@ -7,7 +7,7 @@ process PREP_REFS {
     path refs_txt
 
     output:
-    path 'references.tsv'
+    path 'references.tsv', emit: refs_csv
 
     script:
     """
@@ -28,8 +28,9 @@ process POPPUNK {
     path ref_tsv
 
     output:
-    path "${out}/${out}_clusters.csv", emit: clusters // for downstream
-    path "${out}/*"                              // for publishing
+    path "${out}/${out}_clusters.csv", emit: clusters     // for downstream
+    path "${out}/${out}.dists.npy",    emit: dist_matrix
+    path "${out}/*"                                       // for publishing
 
     script:
     out = "pp_database"
