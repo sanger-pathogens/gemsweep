@@ -29,6 +29,8 @@ include { MIXED_INPUT           } from './assorted-sub-workflows/mixed_input/mix
 include { PREP_REFS;             
           POPPUNK;                
           ORDER_GROUPS          } from './modules/poppunk.nf'
+include { PUBLISH_GROUPS;
+          PUBLISH_REPS          } from './modules/publish_intermediates.nf'
 include { THEMISTO_BUILD_INDEX; 
           THEMISTO_PSEUDOALIGN;
           THEMISTO_STATS        } from './modules/themisto.nf'
@@ -106,11 +108,15 @@ workflow {
             | collectFile { cluster, rep_path -> ["representatives.txt", "${rep_path}\n"] }
             | first()
             | set { representatives_ch }
+
+            PUBLISH_REPS(representatives_ch)
             
             clusters_rep_paths
             | collectFile { cluster, rep_path -> ["groups.txt", "${cluster}\n"] }
             | first()
             | set {ref_groups_ch} // groups file for representatives only
+
+            PUBLISH_GROUPS(ref_groups_ch)
 
         } else {
         
