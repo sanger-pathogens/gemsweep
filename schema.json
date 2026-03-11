@@ -65,6 +65,44 @@
         "help_text": "Grouped references text file, one line per reference. Mandatory when pre-built index is supplied to --themisto_index."
       }
     },
+    "Sylph options": {
+      "sylph_db": {
+        "default": "/data/pam/software/sylph/gtdb-r226-c200-dbv1/gtdb-r226-c200-dbv1.syldb",
+        "help_text": "Path to a pre-built Sylph database (.syldb)."
+      },
+      "sylph_db_custom": {
+        "default": "null",
+        "help_text": "Optional custom Sylph database (.syldb). Overrides --sylph_db when set."
+      },
+      "assemblies": {
+        "default": "null",
+        "help_text": "Optional path to a text file listing assemblies for building a Sylph database (one path per line). Overrides sylph_db when set."
+      },
+      "sketch_size": {
+        "default": "31",
+        "help_text": "Sketch k-mer size (21|31)."
+      },
+      "sylph_primary_ani": {
+        "default": "99",
+        "help_text": "Primary ANI threshold for Sylph filtering."
+      },
+      "sylph_primary_cov": {
+        "default": "1",
+        "help_text": "Primary coverage threshold for Sylph filtering."
+      },
+      "sylph_secondary_ani": {
+        "default": "95",
+        "help_text": "Secondary ANI threshold for Sylph filtering."
+      },
+      "sylph_secondary_cov": {
+        "default": "0.7",
+        "help_text": "Secondary coverage threshold for Sylph filtering."
+      },
+      "save_sylph_sketches": {
+        "default": "true",
+        "help_text": "Keep Sylph sketches."
+      }
+    },
     "mGEMS options": {
       "get_assignments": {
         "default": "false",
