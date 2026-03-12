@@ -26,9 +26,7 @@ def printHelp() {
 ========================================================================================
 */
 include { MIXED_INPUT               } from './assorted-sub-workflows/mixed_input/mixed_input.nf'
-include { SYLPH_SKETCH_DB;
-          SYLPH_PROFILE_PRIMARY;
-          SYLPH_SUMMARIZE } from './modules/sylph.nf'
+include { SYLPH_DB_REFINEMENT } from './assorted-sub-workflows/sylph_db_refinement/sylph.nf'
 include { PREP_REFS;                
           POPPUNK;                  
           ORDER_GROUPS              } from './modules/poppunk.nf'
@@ -74,21 +72,7 @@ workflow {
 
     // Sylph profiling to derive references from reads
     if (!params.references) {
-        def sylph_db_ch
-        if (params.assemblies) {
-            def assemblies_ch = channel.fromPath(params.assemblies).first()
-            SYLPH_SKETCH_DB(assemblies_ch)
-            sylph_db_ch = SYLPH_SKETCH_DB.out.db_sketch
-        } else if (params.sylph_db_custom) {
-            sylph_db_ch = channel.fromPath(params.sylph_db_custom).first()
-        } else {
-            sylph_db_ch = channel.fromPath(params.sylph_db).first()
-        }
-
-        SYLPH_PROFILE_PRIMARY(reads_ch, sylph_db_ch)
-        | map { meta, report -> report }
-        | collect()
-        | SYLPH_SUMMARIZE
+        SYLPH_DB_REFINEMENT(reads_ch)
     }
 
     if (params.references) {

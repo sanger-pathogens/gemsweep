@@ -82,21 +82,13 @@
         "default": "31",
         "help_text": "Sketch k-mer size (21|31)."
       },
-      "sylph_primary_ani": {
-        "default": "99",
-        "help_text": "Primary ANI threshold for Sylph filtering."
-      },
-      "sylph_primary_cov": {
-        "default": "1",
-        "help_text": "Primary coverage threshold for Sylph filtering."
-      },
-      "sylph_secondary_ani": {
+      "sylph_ani": {
         "default": "95",
-        "help_text": "Secondary ANI threshold for Sylph filtering."
+        "help_text": "ANI threshold for Sylph filtering."
       },
-      "sylph_secondary_cov": {
-        "default": "0.7",
-        "help_text": "Secondary coverage threshold for Sylph filtering."
+      "sylph_cov": {
+        "default": "0.01",
+        "help_text": "Coverage threshold for Sylph filtering."
       },
       "save_sylph_sketches": {
         "default": "true",
