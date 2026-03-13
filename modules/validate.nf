@@ -6,13 +6,16 @@
         // General options
         if (params.references && !(params.themisto_index || params.ref_groups)) {
             validate_path_exists("--references", params.references, validation_errors)
-        } else if (params.ref_groups && params.themisto_index && !params.references) {
+        } else if (params.ref_groups && params.themisto_index && !params.references && !params.sylph_refset) {
             // use prebuilt index
             validate_path_exists("--ref_groups", params.ref_groups, validation_errors)
             validate_index_exists("--themisto_index", params.themisto_index, ["tdbg","tcolors"], validation_errors)
+        } else if (params.sylph_refset && !params.references && !(params.ref_groups || params.themisto_index)) {
+            // generate references via Sylph refset
+            // no additional path validation needed here
         } else {
             // error if insufficient combo of inputs provided
-            validation_errors << "You must supply either --references alone or both of --ref_groups and --themisto_index."
+            validation_errors << "You must supply either --references alone, enable --sylph_refset, or provide both --ref_groups and --themisto_index."
         }
 
         // Clustering options

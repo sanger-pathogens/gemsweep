@@ -14,7 +14,7 @@
       },
       "references": {
         "default": "null",
-        "help_text": "Path to text file containing paths to references, one per line. If provided, ref_groups and themisto_index will be ignored."
+        "help_text": "Path to text file containing paths to references, one per line. Optional if --sylph_refset is true. If provided, ref_groups and themisto_index will be ignored."
       },
       "outdir": {
         "default": "./results",
@@ -66,17 +66,13 @@
       }
     },
     "Sylph options": {
+      "sylph_refset": {
+        "default": "true",
+        "help_text": "Generate reference set with Sylph before clustering. Set false to skip Sylph and rely on --references or prebuilt inputs."
+      },
       "sylph_db": {
         "default": "/data/pam/software/sylph/gtdb-r226-c200-dbv1/gtdb-r226-c200-dbv1.syldb",
         "help_text": "Path to a pre-built Sylph database (.syldb)."
-      },
-      "sylph_db_custom": {
-        "default": "null",
-        "help_text": "Optional custom Sylph database (.syldb). Overrides --sylph_db when set."
-      },
-      "assemblies": {
-        "default": "null",
-        "help_text": "Optional path to a text file listing assemblies for building a Sylph database (one path per line). Overrides sylph_db when set."
       },
       "sketch_size": {
         "default": "31",
@@ -89,6 +85,10 @@
       "sylph_cov": {
         "default": "0.01",
         "help_text": "Coverage threshold for Sylph filtering."
+      },
+      "sylph_tax_metadata": {
+        "default": "/data/pam/software/sylph-tax/v1/gtdb_r226_metadata.tsv",
+        "help_text": "Path to the sylph-tax metadata TSV to use for taxprof."
       },
       "save_sylph_sketches": {
         "default": "true",
