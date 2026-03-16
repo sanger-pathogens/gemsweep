@@ -26,7 +26,7 @@ def printHelp() {
 ========================================================================================
 */
 include { MIXED_INPUT           } from './assorted-sub-workflows/mixed_input/mixed_input.nf'
-include { SYLPH_REFSET          } from './assorted-sub-workflows/sylph_refset/sylph_refset.nf'
+include { SYLPH_REF_SELECTION   } from './assorted-sub-workflows/sylph_refset/sylph_refset.nf'
 include { PREP_REFS;             
           POPPUNK;                
           ORDER_GROUPS          } from './modules/poppunk.nf'
@@ -81,8 +81,8 @@ workflow {
             references_ch = channel.fromPath(params.references).first()
         } else {
             // Generate candidate references from reads via Sylph.
-            SYLPH_REFSET(reads_ch)
-            references_ch = SYLPH_REFSET.out.references
+            SYLPH_REF_SELECTION(reads_ch)
+            references_ch = SYLPH_REF_SELECTION.out.references
         }
 
         PREP_REFS(references_ch)
