@@ -65,36 +65,6 @@
         "help_text": "Grouped references text file, one line per reference. Mandatory when pre-built index is supplied to --themisto_index."
       }
     },
-    "Sylph options": {
-      "sylph_refset": {
-        "default": "true",
-        "help_text": "Generate reference set with Sylph before clustering. Set false to skip Sylph and rely on --references or prebuilt inputs."
-      },
-      "sylph_db": {
-        "default": "/data/pam/software/sylph/gtdb-r226-c200-dbv1/gtdb-r226-c200-dbv1.syldb",
-        "help_text": "Path to a pre-built Sylph database (.syldb)."
-      },
-      "sketch_size": {
-        "default": "31",
-        "help_text": "Sketch k-mer size (21|31)."
-      },
-      "sylph_ani": {
-        "default": "95",
-        "help_text": "ANI threshold for Sylph filtering."
-      },
-      "sylph_cov": {
-        "default": "0.01",
-        "help_text": "Coverage threshold for Sylph filtering."
-      },
-      "sylph_tax_metadata": {
-        "default": "/data/pam/software/sylph-tax/v1/gtdb_r226_metadata.tsv",
-        "help_text": "Path to the sylph-tax metadata TSV to use for taxprof."
-      },
-      "save_sylph_sketches": {
-        "default": "true",
-        "help_text": "Keep Sylph sketches."
-      }
-    },
     "mGEMS options": {
       "get_assignments": {
         "default": "false",
