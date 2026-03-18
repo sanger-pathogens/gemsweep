@@ -42,7 +42,7 @@ process SKETCHLIB_CLUSTER {
 
     """
     # Get IDs only for ref_ids
-    cut -f1 ${refs_tsv} > refs_ids.txt
+    cut -f1 ${refs_tsv} > ref_ids.txt
 
     ${sketchlib_cluster} \
         --sketch ${sketch_prefix} \
@@ -53,6 +53,6 @@ process SKETCHLIB_CLUSTER {
         --threads ${task.cpus} \
         --log ${sketch_prefix}_sketchlib_cluster
 
-    cut -f1 > ${sketch_prefix}_clusters.tsv > groups.txt
+    cut -f2 ${sketch_prefix}_clusters.tsv | tail -n +2 > groups.txt
     """
 }
