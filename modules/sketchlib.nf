@@ -9,7 +9,7 @@ process SKETCH_REFS {
     path(refs_tsv) // from poppunk.nf PREP_REFS? must be in form 'name  file.fasta' once per line
 
     output:
-    tuple path("${sketch_db}.skm"), path("${sketch_db}.skd"), emit: sketchlib_sketch
+    tuple path(refs_tsv), path("${sketch_db}.skm"), path("${sketch_db}.skd")
 
     script:
     sketch_db = "references_sketch" // need to make this per taxon if this runs per taxon after sylph
@@ -26,10 +26,10 @@ process SKETCHLIB_CLUSTER {
     // TODO: container python with packages
 
     input:
-    tuple path(refs_txt), path(sketch) // TODO: sketch is 2 files skm and skd
+    tuple path(refs_tsv), path(skm), path(skd)
 
     output:
-    path("clusters.csv"), emit: clusters_csv // TODO: need to change to match outputs
+    path("clusters.csv"), emit: clusters_csv // TODO: need to change script to match outputs
     path("groups.txt"), emit: groups
 
     script:
@@ -38,16 +38,20 @@ process SKETCHLIB_CLUSTER {
         sketchlib_cluster += " --strict_mode"
         }
 
-    //TODO: def sketch_prefix ...
+    def sketch_prefix = skm.baseName.replace('.skm', '')
 
     """
+    cut -f1 refs_tsv > refs.txt
+
     ${sketchlib_cluster} \
         --sketch ${sketch_prefix} \
-        --refs_txt ${refs_txt} \
+        --refs_txt refs.txt \
         --ani_threshold ${params.ani_threshold} \
         --kmer_size ${params.sketchlib_kmer_size} \
         --out ${sketch_prefix}_clusters.tsv \
         --threads ${task.cpus} \
         --log ${sketch_prefix}_sketchlib_cluster
+
+    cut -f1 > ${sketch_prefix}_clusters.tsv > groups.txt
     """
 }
