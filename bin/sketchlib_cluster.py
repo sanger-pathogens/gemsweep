@@ -8,7 +8,7 @@ Example usage:
     ./sketchlib_cluster.py \
         --sketch <pre-sketched_refs> \
         --ani_threshold 0.05 \
-        --refs_txt <path/to/refs_txt> \
+        --ref_ids <path/to/refs_ids.txt> \
         --kmer_size 17 \
         --out .
 
@@ -28,7 +28,7 @@ def main():
     setup_logging(args.log, args.debug)
 
     # Load genome names
-    with open(args.refs_txt) as f:
+    with open(args.ref_ids) as f:
         ref_ids = [line.strip() for line in f]
 
     # Query pairwise distances using ANI (single k-mer = no core/accessory decomposition)
@@ -128,7 +128,7 @@ def parse_args():
         help="ANI distance threshold for clustering (default 0.05, clusters of 95% ANI)"
     )
     parser.add_argument(
-        "--refs_txt",
+        "--ref_ids",
         type=Path,
         required=True,
         help="Text file list of references, one ID per line in same order as supplied for sketch."

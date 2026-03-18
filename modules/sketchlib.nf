@@ -41,11 +41,12 @@ process SKETCHLIB_CLUSTER {
     def sketch_prefix = skm.baseName.replace('.skm', '')
 
     """
-    cut -f1 refs_tsv > refs.txt
+    # Get IDs only for ref_ids
+    cut -f1 ${refs_tsv} > refs_ids.txt
 
     ${sketchlib_cluster} \
         --sketch ${sketch_prefix} \
-        --refs_txt refs.txt \
+        --ref_ids ref_ids.txt \
         --ani_threshold ${params.ani_threshold} \
         --kmer_size ${params.sketchlib_kmer_size} \
         --out ${sketch_prefix}_clusters.tsv \
