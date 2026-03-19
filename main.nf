@@ -94,6 +94,8 @@ workflow {
             // Generate candidate references from reads via Sylph.
             SYLPH_REF_SELECTION(reads_ch)
             references_ch = SYLPH_REF_SELECTION.out.references
+        } else {
+            log.error("If a themisto index is not supplied, references must be supplied using either --references or --sylph_refset for an index to be built.")
         }
 
         // Cluster references
