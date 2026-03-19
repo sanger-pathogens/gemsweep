@@ -19,6 +19,8 @@
         }
         if (params.references) {
             validate_path_exists("--references", params.references, validation_errors)
+            // Check references exist and are not duplicated or fail early
+            validate_references(params.references)
         }
 
         // Clustering options

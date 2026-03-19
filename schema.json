@@ -16,6 +16,10 @@
         "default": "null",
         "help_text": "Path to text file containing paths to references, one per line. Optional if --sylph_refset is true, or if --themisto_index and --ref_groups are provided."
       },
+      "ref_mode": {
+        "default": "index",
+        "help_text": "Mode for processing of reference or index inputs. Choose from: 'index', 'no_derep', 'single_species_derep', 'sylph_autoselect'."
+      },
       "outdir": {
         "default": "./results",
         "help_text": "Path to top directory containing all results, by default 'results' within the launch directory."
