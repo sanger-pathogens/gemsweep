@@ -11,7 +11,7 @@ process PREP_REFS {
 
     script:
     """
-    python3 ${projectDir}/bin/poppunk_helper.py ${refs_txt} .
+    python3 ${projectDir}/bin/poppunk_helper.py --input ${refs_txt} --outdir .
     """
 }
 
