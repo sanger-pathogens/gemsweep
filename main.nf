@@ -72,23 +72,36 @@ workflow {
 
     reads_ch = MIXED_INPUT()    // outputs channel of [meta, R1, R2] for reads_<1|2>.fastq.gz
 
-    if (params.references || params.sylph_refset) {
+    if (params.themisto_index && params.ref_groups) {
+        // Set up input channels starting from pre-built index AND provided ref_groups
+        ref_groups_ch = channel.fromPath(params.ref_groups).first()
+        index_files_ch = channel.fromPath("${params.themisto_index}*{tdbg,tcolors}").collect()
+        index_prefix_ch = channel.value(file(params.themisto_index).getName())
+
+        // Validate
+        VALIDATE_PREBUILT_INPUT(index_files_ch, index_prefix_ch)
+    } else {
+        // Build index from supplied references
+        index_prefix_ch = channel.value("index") // needs to be identical to what index is set as in indexing process
+
         if (params.references) {
             // Check references exist and are not duplicated or fail early
             validate_references(params.references)
 
             // Set up input channels starting from references.txt
             references_ch = channel.fromPath(params.references).first()
-        } else {
+        } else if (params.sylph_refset) {
             // Generate candidate references from reads via Sylph.
             SYLPH_REF_SELECTION(reads_ch)
             references_ch = SYLPH_REF_SELECTION.out.references
         }
 
+        // Cluster references
         PREP_REFS(references_ch)
         POPPUNK(PREP_REFS.out.refs_csv)
         poppunk_clusters_csv = POPPUNK.out.clusters
 
+        // Dereplicate references
         if (params.refine_refs) {
             poppunk_dists_ch = POPPUNK.out.dist_matrix
             DEREP_GROUPS(poppunk_clusters_csv, poppunk_dists_ch)
@@ -110,7 +123,7 @@ workflow {
             }
             | set { clusters_rep_paths }
 
-            // split out clusters and paths into seperate files for positionally consistent files in index and core workflow
+            // Split out clusters and paths into separate files for positionally consistent files in index and core workflow
             clusters_rep_paths
             | collectFile { cluster, rep_path -> ["representatives.txt", "${rep_path}\n"] }
             | first()
@@ -124,29 +137,16 @@ workflow {
             | set {ref_groups_ch} // groups file for representatives only
 
             PUBLISH_GROUPS(ref_groups_ch)
-
         } else {
-        
             ref_groups_ch = ORDER_GROUPS(PREP_REFS.out.refs_csv, poppunk_clusters_csv).groups
             representatives_ch = references_ch // no dereplication
-
         }
 
-        index_prefix_ch = channel.value("index") // needs to be identical to what index is set as in indexing process
         index_files_ch = THEMISTO_BUILD_INDEX(index_prefix_ch, representatives_ch).collect()
-        
-        // Output stats on the index (not required for anything just an additional output)
-        THEMISTO_STATS(index_files_ch, index_prefix_ch)
-
-    } else {
-        // Set up input channels starting from pre-built index AND provided ref_groups
-        ref_groups_ch = channel.fromPath(params.ref_groups).first()
-        index_files_ch = channel.fromPath("${params.themisto_index}*{tdbg,tcolors}").collect()
-        index_prefix_ch = channel.value(file(params.themisto_index).getName())
-
-        // Validate
-        VALIDATE_PREBUILT_INPUT(index_files_ch, index_prefix_ch)
     }
+
+    // Output stats on the index (not required for anything just an additional output)
+    THEMISTO_STATS(index_files_ch, index_prefix_ch)
 
     // Core Workflow
     pseudoaligned_ch = THEMISTO_PSEUDOALIGN(reads_ch, index_files_ch, index_prefix_ch)
