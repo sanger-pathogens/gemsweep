@@ -3,19 +3,22 @@
         // accumulate any param-related error messages, error the pipeline with any/all messages together
         def validation_errors = []
 
-        // General options
-        if (params.references && !(params.themisto_index || params.ref_groups)) {
-            validate_path_exists("--references", params.references, validation_errors)
-        } else if (params.ref_groups && params.themisto_index && !params.references && !params.sylph_refset) {
+        // Validate option combinations
+        if (params.references && params.sylph_refset) {
+            validation_errors << "--references and --sylph_refset are mutually exclusive options"
+        }
+        if (!(params.ref_groups && params.themisto_index) && !(params.references || params.sylph_refset)) {
+            validation_errors << "You must supply either --references alone, enable --sylph_refset, or provide both --ref_groups and --themisto_index."
+        }
+
+        // Validate option arguments
+        if (params.ref_groups && params.themisto_index) {
             // use prebuilt index
             validate_path_exists("--ref_groups", params.ref_groups, validation_errors)
             validate_index_exists("--themisto_index", params.themisto_index, ["tdbg","tcolors"], validation_errors)
-        } else if (params.sylph_refset && !params.references && !(params.ref_groups || params.themisto_index)) {
-            // generate references via Sylph refset
-            // no additional path validation needed here
-        } else {
-            // error if insufficient combo of inputs provided
-            validation_errors << "You must supply either --references alone, enable --sylph_refset, or provide both --ref_groups and --themisto_index."
+        }
+        if (params.references) {
+            validate_path_exists("--references", params.references, validation_errors)
         }
 
         // Clustering options
@@ -27,7 +30,6 @@
             validate_path_exists("--temp_dir", params.temp_dir, validation_errors)
         }
         // TODO: validate requested tmp space is in MB (or GB if changing) NOT CURRENTLY PARAMETERISED
-
 
         if (validation_errors) {
             validation_errors.each { log.error " - $it " }
