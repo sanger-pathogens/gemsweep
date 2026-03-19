@@ -14,7 +14,7 @@
       },
       "references": {
         "default": "null",
-        "help_text": "Path to text file containing paths to references, one per line. Optional if --sylph_refset is true. If provided, ref_groups and themisto_index will be ignored."
+        "help_text": "Path to text file containing paths to references, one per line. Optional if --sylph_refset is true, or if --themisto_index and --ref_groups are provided."
       },
       "outdir": {
         "default": "./results",
