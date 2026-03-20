@@ -2,7 +2,7 @@
 
 """
 Cluster genomes in a pre-sketched sketchlib database by pairwise ANI distance
-using connected components. Outputs a TSV mapping each genome ID to a cluster ID.
+using connected components. Outputs a CSV mapping each genome ID to a cluster ID.
 
 Example usage:
     ./sketchlib_cluster.py \
@@ -18,7 +18,7 @@ from pathlib import Path
 import sys
 import logging
 import pp_sketchlib
-import numpy as np
+# import numpy as np
 import scipy.sparse.csgraph as csgraph
 import pandas as pd
 import argparse
@@ -66,7 +66,7 @@ def main():
         sys.exit(1)
     
     # Write output
-    df.to_csv(args.out, sep='\t', index=False)
+    df.to_csv(args.out, sep=',', index=False)
     logging.info(f"Assigned {len(ref_ids)} genomes to {n_components} clusters")
 
 def validate_log_filename(log_filename:str):
@@ -96,7 +96,7 @@ def setup_logging(log_filename: str, debug:bool):
     )
     logging.info("Logging initialized.")
 
-def parse_args():
+def parse_args() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         description="Pairwise ANI distance-based connected components clustering.",
         formatter_class=argparse.ArgumentDefaultsHelpFormatter
@@ -143,7 +143,7 @@ def parse_args():
         "--out",
         type=Path,
         required=True,
-        help="Name for the output TSV"
+        help="Name for the output CSV"
     )
     parser.add_argument(
         "--threads",
@@ -158,7 +158,7 @@ def parse_args():
     )
     return parser.parse_args()
 
-def validate_clusters(clusters_df: pd.DataFrame, num_refs: int, ani_threshold: float):
+def validate_clusters(clusters_df: pd.DataFrame, num_refs: int, ani_threshold: float) -> bool:
     checks_passed = True
 
     cluster_counts = clusters_df['cluster_id'].value_counts()
