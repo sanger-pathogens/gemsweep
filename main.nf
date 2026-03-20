@@ -152,8 +152,10 @@ workflow {
         log.error("Unrecognized input mode '${params.ref_mode}'.")
     }
 
-    // Output stats on the index (not required for anything just an additional output)
-    THEMISTO_STATS(index_files_ch, index_prefix_ch)
+    if (!params.ref_mode == "index") {
+        // Output stats on the index (not required for anything just an additional output)
+        THEMISTO_STATS(index_files_ch, index_prefix_ch)
+    }
 
     // Core Workflow
     pseudoaligned_ch = THEMISTO_PSEUDOALIGN(reads_ch, index_files_ch, index_prefix_ch)
