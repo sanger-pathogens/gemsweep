@@ -7,7 +7,11 @@ process PREP_REFS {
     tuple val(meta), path(refs_txt)
 
     output:
+<<<<<<< HEAD
     tuple val(meta), path('references.tsv'), emit: refs_csv
+=======
+    path 'references.tsv', emit: refs_tsv
+>>>>>>> c355ddc (Standardise the mentions of refs_tsv the output of PREP_REFS)
 
     script:
     """
@@ -36,7 +40,7 @@ process POPPUNK {
     out = "pp_database"
 
     """
-    poppunk --create-db --output ${out} --r-files ${ref_tsv} --threads ${task.cpus}
+    poppunk --create-db --output ${out} --r-files ${refs_tsv} --threads ${task.cpus}
     poppunk --fit-model ${params.poppunk_model} --ref-db ${out} --threads ${task.cpus}
     """
 }
