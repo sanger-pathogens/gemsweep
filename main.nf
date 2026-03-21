@@ -49,8 +49,7 @@ include { VALIDATE_PREBUILT_INPUT } from './subworkflows/validate_prebuilt_input
 Helper Scripts
 */
 
-include { validate_params;
-          validate_references } from './modules/validate.nf'
+include { validate_params } from './modules/validate.nf'
 
 /*
 ========================================================================================
