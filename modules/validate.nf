@@ -91,22 +91,8 @@ def validate_incompatible(ref_mode, incompatible_params, all_errors) {
         }
     }
 
-}
-
-// Pre-built index validation:
-def validate_index(kmer_index, kmer_arg) {
-    if (kmer_index != kmer_arg.toInteger()) {
-        error("Unexpected K-mer length for pre-built index. Please use the option '--kmer_size' in your command to supply the index's K-mer size: ${kmer_index}")
-    }
-}
-def validate_ref_groups(num_refs_index, len_ref_groups) {
-    if (num_refs_index != len_ref_groups) {
-        error("Unexpected number of references assigned groups in file supplied to --ref_groups. One line per reference required, stating the cluster assigned.")
-    }
-}
-
-// References manifest validation:
-def validate_references(ref_paths_txt) {
+// Check for duplicates and missing references within refs_txt
+def validate_references(ref_paths_txt, all_errors) {
 
     def lines = file(ref_paths_txt)
         .readLines()
@@ -119,14 +105,27 @@ def validate_references(ref_paths_txt) {
         .keySet()
 
     if (!duplicates.isEmpty()) {
-        error("Duplicated references in ${ref_paths_txt}:\n${duplicates.join('\n')}")
+        all_errors << "Duplicated references in ${ref_paths_txt}:\n${duplicates.join('\n')}"
     }
 
     def missing = lines.findAll { path -> !file(path).exists() }
 
     if (!missing.isEmpty()) {
-        error("The following reference files do not exist:\n${missing.join('\n')}")
+        all_errors << "The following reference files do not exist:\n${missing.join('\n')}"
     }
 
     return lines
+
+}
+
+// Pre-built index validation:
+def validate_index(kmer_index, kmer_arg) {
+    if (kmer_index != kmer_arg.toInteger()) {
+        error("Unexpected K-mer length for pre-built index. Please use the option '--kmer_size' in your command to supply the index's K-mer size: ${kmer_index}")
+    }
+}
+def validate_ref_groups(num_refs_index, len_ref_groups) {
+    if (num_refs_index != len_ref_groups) {
+        error("Unexpected number of references assigned groups in file supplied to --ref_groups. One line per reference required, stating the cluster assigned.")
+    }
 }
