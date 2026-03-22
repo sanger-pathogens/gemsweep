@@ -79,7 +79,8 @@ workflow {
 
         // Validate
         VALIDATE_PREBUILT_INPUT(index_files_ch, index_prefix_ch)
-    } else if (params.ref_mode == "no_derep") {
+
+    } else if ((params.ref_mode == "all") && (params.species_scope == "single")) {
         // Set up input channels starting from references.txt
         references_ch = channel.fromPath(params.references).first()
 
@@ -93,7 +94,7 @@ workflow {
         index_prefix_ch = channel.value("index") // needs to be identical to what index is set as in indexing process
         index_files_ch = THEMISTO_BUILD_INDEX(index_prefix_ch, representatives_ch).collect()
 
-    } else if (params.ref_mode == "single_species_derep") {
+    } else if ((params.ref_mode == "refine") && (params.species_scope == "single")) {
         // Set up input channels starting from references.txt
         references_ch = channel.fromPath(params.references).first()
 
@@ -114,11 +115,11 @@ workflow {
         index_prefix_ch = channel.value("index") // needs to be identical to what index is set as in indexing process
         index_files_ch = THEMISTO_BUILD_INDEX(index_prefix_ch, representatives_ch).collect()
 
-    } else if (params.ref_mode == "multispecies_derep") {
+    } else if ((params.ref_mode == "refine") && (params.species_scope == "multi")) {
         // To populate
-        log.error("Input option 'multispecies_derep' not implemented yet! Watch this space :)")
+        error("Input multi-species reference refinement not implemented yet! Watch this space :)")
 
-    } else if (params.ref_mode == "sylph_autoselect") {
+    } else if (params.ref_mode == "autoselect") {
         // Generate candidate references from reads via Sylph.
         SYLPH_REF_SELECTION(reads_ch)
         references_ch = SYLPH_REF_SELECTION.out.references
@@ -130,25 +131,23 @@ workflow {
         POPPUNK(PREP_REFS.out.refs_csv)
         poppunk_clusters_csv = POPPUNK.out.clusters
 
-        if (params.refine_refs) {
-            REFINE_REFS(
-                references_ch,
-                poppunk_clusters_csv,
-                POPPUNK.out.dist_matrix
-            )
-            representatives_ch = REFINE_REFS.out.representatives_ch
-            ref_groups_ch = REFINE_REFS.out.ref_groups_ch
+        // TODO: dereplication instead of optional/param-based automate based on num genomes per species?
+        // if (params.refine_refs) {
+        //     REFINE_REFS(
+        //         references_ch,
+        //         poppunk_clusters_csv,
+        //         POPPUNK.out.dist_matrix
+        //     )
+        //     representatives_ch = REFINE_REFS.out.representatives_ch
+        //     ref_groups_ch = REFINE_REFS.out.ref_groups_ch
 
-        } else {
+        // } else {
             representatives_ch = references_ch
             ref_groups_ch = ORDER_GROUPS(PREP_REFS.out.refs_csv, poppunk_clusters_csv).groups
-        }
+        // }
 
         index_prefix_ch = channel.value("index") // needs to be identical to what index is set as in indexing process
         index_files_ch = THEMISTO_BUILD_INDEX(index_prefix_ch, representatives_ch).collect()
-
-    } else {
-        log.error("Unrecognized input mode '${params.ref_mode}'.")
     }
 
     if (!params.ref_mode == "index") {
