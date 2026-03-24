@@ -118,10 +118,9 @@ def validate_choice_param(flag, value, choices, all_errors) {
 }
 
 def validate_incompatible(ref_mode, incompatible_params, all_errors) {
-    incompatible_params.each {
-        if (params[it] != null) {
-            all_errors << "Your chosen ref_mode `${ref_mode}` is incompatible with the following params: ${incompatible_params}" 
-        }
+    def provided = incompatible_params.findAll { params[it] != null }
+    if (provided) {
+        all_errors << "Your chosen ref_mode `${ref_mode}` is incompatible with the following params: ${provided.join(', ')}"
     }
 }
 // Check for duplicates and missing references within refs_txt
