@@ -5,24 +5,22 @@ def validate_params() {
 
     // Reference inputs
     def ref_mode_options = ["index", "full", "refine", "autoselect"]
+
     validate_choice_param("--ref_mode", params.ref_mode, ref_mode_options, validation_errors)
 
-    if (!params.ref_mode) {
-        validation_errors << "You must explicitly supply a mode for references to --ref_mode. Options: ${ref_mode_options}"
-    } else {
-        if (params.ref_mode == "index") {
-            validate_index_ref_mode(validation_errors)
+    if (params.ref_mode == "index") {
+        validate_index_ref_mode(validation_errors)
 
-        } else if (params.ref_mode == "full") {
-            validate_full_ref_mode(validation_errors)
+    } else if (params.ref_mode == "full") {
+        validate_full_ref_mode(validation_errors)
 
-        } else if (params.ref_mode == "refine") {
-            validate_refine_ref_mode(validation_errors)
+    } else if (params.ref_mode == "refine") {
+        validate_refine_ref_mode(validation_errors)
 
-        } else if (params.ref_mode == "autoselect") { 
-            validate_autoselect_ref_mode(validation_errors)
-        }
+    } else if (params.ref_mode == "autoselect") { 
+        validate_autoselect_ref_mode(validation_errors)
     }
+
 
     // Themisto options
     validate_choice_param("--kmer_size", params.kmer_size, [21,31,51], validation_errors)
@@ -47,7 +45,7 @@ def validate_index_ref_mode(all_errors) {
         validate_index_exists("--themisto_index", params.themisto_index, ["tdbg","tcolors"], all_errors)
     }
     // Check no additional, incompatible ref params are given
-    validate_incompatible("index", ["references"], validation_errors)
+    validate_incompatible("index", ["references"], all_errors)
 
 }
 
@@ -60,26 +58,26 @@ def validate_full_ref_mode(all_errors) {
         validate_references(params.references, all_errors) // Checks missing/duplicates in refs
     }
     if (!params.cluster_tool) {
-        all_errors << "You must supply -.cluster_tool for chosen ref_mode ${params.ref_mode}"
+        all_errors << "You must supply --cluster_tool for chosen ref_mode ${params.ref_mode}"
     } else {
-        validate_choice_param("-.cluster_tool", params.cluster_tool, ["sketchlib", "poppunk"], all_errors)
+        validate_choice_param("--cluster_tool", params.cluster_tool, ["sketchlib", "poppunk"], all_errors)
     }
     if (params.cluster_tool == "poppunk") {
         validate_choice_param("--poppunk_model", params.poppunk_model, ["dbscan","bgmm"], all_errors)
 
     }
     // Check no additional, incompatible ref params are given
-    validate_incompatible("refine", ["themisto_index", "ref_groups"], all_errors)
+    validate_incompatible("full", ["themisto_index", "ref_groups"], all_errors)
 }
 
 def validate_refine_ref_mode(all_errors) {
     // Check required params given and paths exist
     if (!params.cluster_tool) {
-        all_errors << "You must supply -.cluster_tool for chosen ref_mode ${params.ref_mode}"
+        all_errors << "You must supply --cluster_tool for chosen ref_mode ${params.ref_mode}"
     } else {
-        validate_choice_param("-.cluster_tool", params.cluster_tool, ["sketchlib", "poppunk"], all_errors)
+        validate_choice_param("--cluster_tool", params.cluster_tool, ["sketchlib", "poppunk"], all_errors)
     }
-    if (params.cluster_tool == "single") {
+    if (params.cluster_tool == "poppunk") {
         validate_choice_param("--poppunk_model", params.poppunk_model, ["dbscan","bgmm"], all_errors)
 
     }
