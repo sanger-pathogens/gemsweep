@@ -12,23 +12,19 @@
         "default": "null",
         "help_text": "Input manifest CSV with (required) header line 'ID,R1,R2', containing per sample paths to .fastq.gz files"
       },
-      "references": {
-        "default": "null",
-        "help_text": "Path to text file containing paths to references, one per line. Optional if --sylph_refset is true, or if --themisto_index and --ref_groups are provided."
-      },
-      "ref_mode": {
-        "default": "index",
-        "help_text": "Mode for processing of reference or index inputs. Choose from: 'index', 'no_derep', 'single_species_derep', 'sylph_autoselect'."
-      },
       "outdir": {
         "default": "./results",
         "help_text": "Path to top directory containing all results, by default 'results' within the launch directory."
       }
     },
-    "Reference refinement options": {
-      "refine_refs": {
-        "default": "false",
-        "help_text": "Set to true to switch on reference refinement."
+    "References options": {
+      "ref_mode": {
+        "default": "null",
+        "help_text": "Mode for processing of reference or index inputs. Choose from: 'index', 'no_derep', 'single_species_derep', 'sylph_autoselect'."
+      },
+      "references": {
+        "default": "null",
+        "help_text": "Path to text file containing paths to references, one per line. Optional if --sylph_refset is true, or if --themisto_index and --ref_groups are provided."
       },
       "representatives": {
         "default": "20",
