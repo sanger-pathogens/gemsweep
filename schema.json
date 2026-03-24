@@ -36,6 +36,10 @@
       }
     },
     "Clustering options": {
+      "cluster_tool": {
+        "default": "poppunk",
+        "help_text": "Tool to use for clustering references when ref_mode is `refine` or `full` (poppunk|sketchlib)"
+      },
       "poppunk_model": {
         "default": "dbscan",
         "help_text": "Clustering model for poppunk to use (dbscan|bgmm)"

@@ -59,12 +59,12 @@ def validate_full_ref_mode(all_errors) {
         validate_path_exists("--references", params.references, all_errors)
         validate_references(params.references, all_errors) // Checks missing/duplicates in refs
     }
-    if (!params.species_scope) {
-        all_errors << "You must supply --species_scope for chosen ref_mode ${params.ref_mode}"
+    if (!params.cluster_tool) {
+        all_errors << "You must supply -.cluster_tool for chosen ref_mode ${params.ref_mode}"
     } else {
-        validate_choice_param("--species_scope", params.species_scope, ["multi", "single"], all_errors)
+        validate_choice_param("-.cluster_tool", params.cluster_tool, ["sketchlib", "poppunk"], all_errors)
     }
-    if (params.species_scope == "single") {
+    if (params.cluster_tool == "poppunk") {
         validate_choice_param("--poppunk_model", params.poppunk_model, ["dbscan","bgmm"], all_errors)
 
     }
@@ -74,12 +74,12 @@ def validate_full_ref_mode(all_errors) {
 
 def validate_refine_ref_mode(all_errors) {
     // Check required params given and paths exist
-    if (!params.species_scope) {
-        all_errors << "You must supply --species_scope for chosen ref_mode ${params.ref_mode}"
+    if (!params.cluster_tool) {
+        all_errors << "You must supply -.cluster_tool for chosen ref_mode ${params.ref_mode}"
     } else {
-        validate_choice_param("--species_scope", params.species_scope, ["multi", "single"], all_errors)
+        validate_choice_param("-.cluster_tool", params.cluster_tool, ["sketchlib", "poppunk"], all_errors)
     }
-    if (params.species_scope == "single") {
+    if (params.cluster_tool == "single") {
         validate_choice_param("--poppunk_model", params.poppunk_model, ["dbscan","bgmm"], all_errors)
 
     }
