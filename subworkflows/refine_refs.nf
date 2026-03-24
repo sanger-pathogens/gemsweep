@@ -1,6 +1,6 @@
-include { SPLIT_DIST_MATRIX           } from '../modules_derep/split_dist_matrix.nf'
-include { GENERATE_TOTAL_DIST_MATRIX  } from '../modules_derep/sketchlib.nf'
-include { SUBSELECT_GRAPH             } from '../modules_derep/plotting.nf'
+include { SPLIT_DIST_MATRIX           } from '../modules/refine_refs.nf'
+include { GENERATE_TOTAL_DIST_MATRIX  } from '../modules/refine_refs.nf'
+include { SUBSELECT_GRAPH             } from '../modules/refines_refs.nf'
 include { PUBLISH_GROUPS;
           PUBLISH_REPS                } from '../modules/publish_intermediates.nf'
 
