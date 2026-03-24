@@ -125,6 +125,8 @@ def validate_incompatible(ref_mode, incompatible_params, all_errors) {
 }
 // Check for duplicates and missing references within refs_txt
 def validate_references(ref_paths_txt, all_errors) {
+    // Avoid a hard error before errors can accumulate in validate_params()
+    if (!file(ref_paths_txt).exists()) return
 
     def lines = file(ref_paths_txt)
         .readLines()
