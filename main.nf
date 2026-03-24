@@ -41,7 +41,7 @@ include { MGEMS                 } from './modules/mgems.nf'
 //
 // SUBWORKFLOWS
 //
-include { REFINE_REFS } from './subworkflows/derep_groups.nf'
+include { REFINE_REFS } from './subworkflows/refine_refs.nf'
 
 include { VALIDATE_PREBUILT_INPUT } from './subworkflows/validate_prebuilt_input.nf'
 
