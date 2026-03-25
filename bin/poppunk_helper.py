@@ -5,7 +5,7 @@ Generate a references TSV file from a text file of FASTA file paths
 
 
 Usage:
-    poppunk_helper.py <input_txt_file> <output_directory>
+    poppunk_helper.py --input <input_txt_file> --outdir <output_directory> --path_prefix <path_prefix>
 
 """
 
