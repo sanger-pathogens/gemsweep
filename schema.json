@@ -20,7 +20,7 @@
     "References options": {
       "ref_mode": {
         "default": "null",
-        "help_text": "Mode for processing of reference or index inputs. Choose from: 'index', 'no_derep', 'single_species_derep', 'sylph_autoselect'."
+        "help_text": "Mode for processing of reference or index inputs. Choose from: 'index', 'full', 'refine', 'autoselect'."
       },
       "references": {
         "default": "null",
