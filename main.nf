@@ -16,7 +16,7 @@ NextflowTool.commandLineParams(workflow.commandLine, log, params.monochrome_logs
 
 def printHelp() {
     NextflowTool.help_message("${workflow.ProjectDir}/schema.json", 
-                               [${workflow.ProjectDir}/assorted-sub-workflows/sylph_refset/schema.json],
+                               ["${workflow.ProjectDir}/assorted-sub-workflows/sylph_refset/schema.json"],
     params.monochrome_logs, log)
 }
 
