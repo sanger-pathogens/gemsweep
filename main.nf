@@ -73,7 +73,7 @@ workflow {
 
     if (params.ref_mode == "index") {
         // Set up input channels starting from pre-built index AND provided ref_groups
-        ref_groups_ch = channel.fromPath(params.ref_groups).first()
+        ref_groups_ch = channel.fromPath(params.ref_groups).first() // using .first() to get a value channel
         index_files_ch = channel.fromPath("${params.themisto_index}*{tdbg,tcolors}").collect()
         index_prefix_ch = channel.value(file(params.themisto_index).getName())
 
@@ -100,7 +100,7 @@ workflow {
 
     } else if ((params.ref_mode == "refine") && (params.cluster_tool == "poppunk")) {
         // Set up input channels starting from references.txt
-        references_ch = channel.fromPath(params.references).first()
+        references_ch = channel.fromPath(params.references).first() // using .first() to get a value channel
 
         // Cluster references
         PREP_REFS(references_ch)
