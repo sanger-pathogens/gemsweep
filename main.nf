@@ -82,7 +82,7 @@ workflow {
 
     } else if ((params.ref_mode == "full") && (params.cluster_tool == "poppunk")) {
         // Set up input channels starting from references.txt
-        references_ch = channel.fromPath(params.references).first()
+        references_ch = channel.fromPath(params.references).first() // using .first() to get a value channel
 
         // Cluster references
         PREP_REFS(references_ch)
