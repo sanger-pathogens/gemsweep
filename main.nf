@@ -80,7 +80,7 @@ workflow {
         // Validate
         VALIDATE_PREBUILT_INPUT(index_files_ch, index_prefix_ch)
 
-    } else if ((params.ref_mode == "all") && (params.cluster_tool == "poppunk")) {
+    } else if ((params.ref_mode == "full") && (params.cluster_tool == "poppunk")) {
         // Set up input channels starting from references.txt
         references_ch = channel.fromPath(params.references).first()
 
@@ -94,7 +94,7 @@ workflow {
         index_prefix_ch = channel.value("index") // needs to be identical to what index is set as in indexing process
         index_files_ch = THEMISTO_BUILD_INDEX(index_prefix_ch, representatives_ch).collect()
 
-    } else if ((params.ref_mode == "all") && (params.cluster_tool == "sketchlib")) {
+    } else if ((params.ref_mode == "full") && (params.cluster_tool == "sketchlib")) {
         // To populate
         error("Sketchlib reference clustering not implemented yet! Watch this space :)")
 
