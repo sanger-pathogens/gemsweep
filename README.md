@@ -139,11 +139,11 @@ mkdir mGEMs_bins_manifest
 
 **Clustering options**
 
-| Flag              | Type     | Default   | Description                                                                                                  |
-| ----------------- | -------- | --------- | ------------------------------------------------------------------------------------------------------------ |
-| `cluster_tool`    | `str`    | `poppunk` | Tool to use for clustering references when ref_mode is `refine` or `full`. Options: `poppunk` or `sketchlib` |
-| `poppunk_model`   | `str` | `dbscan`  | Clustering model for poppunk to use (either `dbscan` or `bgmm`)                                              |
-| `publish_poppunk` | `bool`   | `false`   | Optionally publish full poppunk output, group assignments are always published.                              |
+| Flag              | Type   | Default   | Description                                                                                                  |
+| ----------------- | ------ | --------- | ------------------------------------------------------------------------------------------------------------ |
+| `cluster_tool`    | `str`  | `poppunk` | Tool to use for clustering references when ref_mode is `refine` or `full`. Options: `poppunk` or `sketchlib` |
+| `poppunk_model`   | `str`  | `dbscan`  | Clustering model for poppunk to use (either `dbscan` or `bgmm`)                                              |
+| `publish_poppunk` | `bool` | `false`   | Optionally publish full poppunk output, group assignments are always published.                              |
 
 ---
 
