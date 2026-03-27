@@ -23,7 +23,7 @@ process SKETCHLIB_CLUSTER {
     label 'mem_8'
     label 'time_12'
 
-    // TODO: container python with packages
+    container 'quay.io/sangerpathogens/pp-sketchlib-python:2.1.5'
 
     input:
     tuple path(refs_tsv), path(skm), path(skd)
