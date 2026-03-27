@@ -3,7 +3,7 @@ process SKETCH_REFS {
     label 'mem_500M'
     label 'time_30m'
 
-    container 'quay.io/ssd28/experimental/pp-sketchlib-rust:0.1.2_sd28_fix'
+    container 'quay.io/sangerpathogens/pp-sketchlib-rust:0.1.2_sd28_fix'
 
     input:
     path(refs_tsv) // from poppunk.nf PREP_REFS? must be in form 'name  file.fasta' once per line
