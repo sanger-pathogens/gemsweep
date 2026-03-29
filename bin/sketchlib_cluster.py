@@ -20,6 +20,7 @@ import logging
 import pp_sketchlib
 # import numpy as np
 import scipy.sparse.csgraph as csgraph
+import scipy.sparse as sp
 import pandas as pd
 import argparse
 
@@ -32,23 +33,28 @@ def main():
         ref_ids = [line.strip() for line in f]
 
     # Query pairwise distances using ANI (single k-mer = no core/accessory decomposition)
-    # queryDatabaseSparse returns a COO sparse matrix — only distances BELOW threshold
-    # Avoids a full n^2 matrix for large reference sets
-    dist_sparse = pp_sketchlib.queryDatabaseSparse(
-        rListFile  = args.sketch,
-        qListFile  = args.sketch,
-        rList      = ref_ids,
-        qList      = ref_ids,
-        kmers      = [args.kmer_size],   # single Kmer: ANI only, no regression, no core/accessory
-        threshold  = args.ani_threshold,
-        jaccard    = False,              # return ANI distance, not raw Jaccard
-        cpus       = args.threads,
-        use_gpu    = False
+    # querySelfSparse returns a tuple of three lists (rows, cols, dists) — only distances BELOW threshold
+    # Avoids a full/dense n^2 matrix which would be slow for large reference sets
+    rows, cols, dists = pp_sketchlib.querySelfSparse(
+        ref_db_name    = args.sketch,
+        rList          = ref_ids,
+        kList          = [args.kmer_size],
+        random_correct = True,
+        dist_cutoff    = args.ani_threshold,  # only return pairs below this distance
+        jaccard        = False,              # return ANI distance, not raw Jaccard
+        num_threads    = args.threads,
+        use_gpu        = False,
+        device_id      = 0,
+        kNN            = 0,
+        dist_col       = 0
     )
 
-    # dist_sparse is a COO matrix of distances < threshold
+    # Convert returned tuple of lists to a COO matrix
+    n = len(ref_ids)
+    coo = sp.coo_matrix((dists, (rows, cols)), shape=(n, n))
+
     # Convert to compressed sparse row (CSR) format for connected_components
-    csr = dist_sparse.tocsr()
+    csr = coo.tocsr()
 
     # Connected components = clusters
     # Any two genomes connected by distance < threshold end up in the same cluster
