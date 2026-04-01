@@ -3,18 +3,22 @@ process SKETCH_REFS {
     label 'mem_500M'
     label 'time_30m'
 
-    container 'quay.io/sangerpathogens/pp-sketchlib-rust:0.1.2_sd28_fix'
+    container 'quay.io/sangerpathogens/pp-sketchlib-python:2.1.5'
 
     input:
-    path(refs_tsv) // from poppunk.nf PREP_REFS? must be in form 'name  file.fasta' once per line
+    path(refs_tsv) // has shape 'name  file.fasta' per line
 
     output:
-    tuple path(refs_tsv), path("${sketch_db}.skm"), path("${sketch_db}.skd")
+    tuple path(refs_tsv), path("${sketch_db}.h5")
 
     script:
     sketch_db = "references_sketch" // need to make this per taxon if this runs per taxon after sylph
     """
-    sketchlib sketch -k ${params.sketchlib_kmer_size} -o ${sketch_db} -s 1024 -f ${refs_tsv} --threads ${task.cpus}
+	sketchlib sketch \
+		-l ${refs_tsv} \
+		-o "${sketch_db}" \
+		--kmer "${params.sketchlib_kmer_size}" \
+		--cpus "${task.cpus}"
     """
 }
 
@@ -26,10 +30,10 @@ process SKETCHLIB_CLUSTER {
     container 'quay.io/sangerpathogens/pp-sketchlib-python:2.1.5'
 
     input:
-    tuple path(refs_tsv), path(skm), path(skd)
+    tuple path(refs_tsv), path(h5_db)
 
     output:
-    path("clusters.csv"), emit: clusters_csv // TODO: need to change script to match outputs
+    path("${sketch_prefix}_clusters.csv"), emit: clusters_csv
     path("groups.txt"), emit: groups
 
     script:
@@ -38,7 +42,7 @@ process SKETCHLIB_CLUSTER {
         sketchlib_cluster += " --strict_mode"
         }
 
-    def sketch_prefix = skm.baseName.replace('.skm', '')
+    def sketch_prefix = h5_db.baseName.replace('.h5', '')
 
     """
     # Get IDs only for ref_ids
@@ -49,7 +53,7 @@ process SKETCHLIB_CLUSTER {
         --ref_ids ref_ids.txt \
         --ani_threshold ${params.ani_threshold} \
         --kmer_size ${params.sketchlib_kmer_size} \
-        --out ${sketch_prefix}_clusters.tsv \
+        --out ${sketch_prefix}_clusters.csv \
         --threads ${task.cpus} \
         --log ${sketch_prefix}_sketchlib_cluster
 
