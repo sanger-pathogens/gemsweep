@@ -39,7 +39,7 @@ def main():
         ref_db_name    = args.sketch,
         rList          = ref_ids,
         kList          = [args.kmer_size],
-        random_correct = True,
+        random_correct = False,
         dist_cutoff    = args.ani_threshold,  # only return pairs below this distance
         jaccard        = False,              # return ANI distance, not raw Jaccard
         num_threads    = args.threads,
@@ -50,8 +50,8 @@ def main():
     )
 
     # Convert returned tuple of lists to a COO matrix
-    n = len(ref_ids)
-    coo = sp.coo_matrix((dists, (rows, cols)), shape=(n, n))
+    l = len(ref_ids)
+    coo = sp.coo_matrix((dists, (rows, cols)), shape=(l, l))
 
     # Convert to compressed sparse row (CSR) format for connected_components
     csr = coo.tocsr()
@@ -123,14 +123,14 @@ def parse_args() -> argparse.ArgumentParser:
     )
     parser.add_argument(
         "--sketch", 
-        type=Path, 
+        type=str, 
         required=True, 
-        help="Sketchlib db prefix for .skm and .skd files"
+        help="Sketchlib db path up including prefix but not extensions for .skm and .skd files"
     )
     parser.add_argument(
         "--ani_threshold",
         type=float,
-        required=True,
+        default=0.05,
         help="ANI distance threshold for clustering (default 0.05, clusters of 95% ANI)"
     )
     parser.add_argument(
@@ -142,7 +142,7 @@ def parse_args() -> argparse.ArgumentParser:
     parser.add_argument(
         "--kmer_size",
         type=int,
-        required=True,
+        default=17,
         help="Kmer length to use for computing ANI"
     )
     parser.add_argument(
