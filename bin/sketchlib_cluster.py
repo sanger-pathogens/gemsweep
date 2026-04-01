@@ -32,14 +32,17 @@ def main():
     with open(args.ref_ids) as f:
         ref_ids = [line.strip() for line in f]
 
+    klist = args.klist
+    logging.info(f"Using kmer lengths: {klist}")
+
     # Query pairwise distances using ANI (single k-mer = no core/accessory decomposition)
     # querySelfSparse returns a tuple of three lists (rows, cols, dists) — only distances BELOW threshold
     # Avoids a full/dense n^2 matrix which would be slow for large reference sets
     rows, cols, dists = pp_sketchlib.querySelfSparse(
         ref_db_name    = args.sketch,
         rList          = ref_ids,
-        kList          = [args.kmer_size],
-        random_correct = False,
+        klist          = args.klist,
+        random_correct = True,
         dist_cutoff    = args.ani_threshold,  # only return pairs below this distance
         jaccard        = False,              # return ANI distance, not raw Jaccard
         num_threads    = args.threads,
@@ -140,10 +143,11 @@ def parse_args() -> argparse.ArgumentParser:
         help="Text file list of references, one ID per line in same order as supplied for sketch."
     )
     parser.add_argument(
-        "--kmer_size",
+        "--klist",
         type=int,
-        default=17,
-        help="Kmer length to use for computing ANI"
+        nargs='+',
+        default=[13, 17, 21, 25, 29],    # Matches PopPUNK default
+        help="Kmer lengths to use for computing ANI"
     )
     parser.add_argument(
         "--out",

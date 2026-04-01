@@ -52,11 +52,11 @@ process SKETCHLIB_CLUSTER {
         --sketch ${sketch_prefix} \
         --ref_ids ref_ids.txt \
         --ani_threshold ${params.ani_threshold} \
-        --kmer_size ${params.sketchlib_kmer_size} \
+        --klist ${params.sketchlib_klist} \
         --out ${sketch_prefix}_clusters.csv \
         --threads ${task.cpus} \
         --log ${sketch_prefix}_sketchlib_cluster
 
-    cut -f2 ${sketch_prefix}_clusters.tsv | tail -n +2 > groups.txt
+    cut -f2 ${sketch_prefix}_clusters.csv | tail -n +2 > groups.txt
     """
 }
