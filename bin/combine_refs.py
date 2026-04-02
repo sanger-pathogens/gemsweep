@@ -9,7 +9,7 @@ import pandas as pd
 
 
 def parse_args():
-    parser = argparse.ArgumentParser()
+    parser = argparse.ArgumentParser(description="Combine references and groups to preserve group identity.")
     parser.add_argument("--refs", help="Path to file containing list of reference files to combine.", type=Path, required=True)
     parser.add_argument("--groups", help="Path to file containing list of groups files to combine (same order as --refs file).", type=Path, required=True)
     parser.add_argument("--outdir", type=Path, default=".")
