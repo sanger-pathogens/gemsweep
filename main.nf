@@ -82,15 +82,22 @@ workflow {
 
     } else if ((params.ref_mode == "full") && (params.cluster_tool == "poppunk")) {
         // Set up input channels starting from references.txt
-        references_ch = channel.fromPath(params.references).first() // using .first() to get a value channel
+        channel.fromPath(params.references)
+        | first() // using .first() to get a value channel
+        | map { ref -> [ ["ID": "all_refs"], ref ] }
+        | set { references_ch }
 
         // Cluster references
         PREP_REFS(references_ch)
         POPPUNK(PREP_REFS.out.refs_csv)
-        poppunk_clusters_csv = POPPUNK.out.clusters
+
+        PREP_REFS.out.refs_csv
+        | join(POPPUNK.out.clusters)
+        | ORDER_GROUPS
 
         representatives_ch = references_ch // no dereplication
-        ref_groups_ch = ORDER_GROUPS(PREP_REFS.out.refs_csv, poppunk_clusters_csv).groups
+        ref_groups_ch = ORDER_GROUPS.out.groups
+
         index_prefix_ch = channel.value("index") // needs to be identical to what index is set as in indexing process
         index_files_ch = THEMISTO_BUILD_INDEX(index_prefix_ch, representatives_ch).collect()
 
@@ -100,18 +107,22 @@ workflow {
 
     } else if ((params.ref_mode == "refine") && (params.cluster_tool == "poppunk")) {
         // Set up input channels starting from references.txt
-        references_ch = channel.fromPath(params.references).first() // using .first() to get a value channel
+        channel.fromPath(params.references)
+        | first() // using .first() to get a value channel
+        | map { ref -> [ ["ID": "all_refs"], ref ] }
+        | set { references_ch }
 
         // Cluster references
         PREP_REFS(references_ch)
         POPPUNK(PREP_REFS.out.refs_csv)
-        poppunk_clusters_csv = POPPUNK.out.clusters
 
-        REFINE_REFS(
-            references_ch,
-            poppunk_clusters_csv,
-            POPPUNK.out.dist_matrix
-        )
+        // Select representatives from clusters
+        references_ch
+        | join(POPPUNK.out.clusters)
+        | join(POPPUNK.out.dist_matrix)
+        | set { refine_refs_input }
+
+        REFINE_REFS(refine_refs_input)
 
         representatives_ch = REFINE_REFS.out.representatives_ch
         ref_groups_ch = REFINE_REFS.out.ref_groups_ch
@@ -136,23 +147,26 @@ workflow {
         poppunk_clusters_csv = POPPUNK.out.clusters
 
         // TODO: dereplication instead of optional/param-based automate based on num genomes per species?
-        // if (params.refine_refs) {
-        //     REFINE_REFS(
-        //         references_ch,
-        //         poppunk_clusters_csv,
-        //         POPPUNK.out.dist_matrix
-        //     )
-        //     representatives_ch = REFINE_REFS.out.representatives_ch
-        //     ref_groups_ch = REFINE_REFS.out.ref_groups_ch
+        if (params.refine_refs) {
+            references_ch
+            | join(POPPUNK.out.clusters)
+            | join(POPPUNK.out.dist_matrix)
+            | set { refine_refs_input }
 
-        // } else {
+            REFINE_REFS(refine_refs_input)
+
+            representatives_ch = REFINE_REFS.out.representatives_ch
+            ref_groups_ch = REFINE_REFS.out.ref_groups_ch
+
+        } else {
             representatives_ch = references_ch
-            ref_groups_ch = ORDER_GROUPS(PREP_REFS.out.refs_csv, poppunk_clusters_csv).groups
-        // }
 
-        index_prefix_ch = channel.value("index") // needs to be identical to what index is set as in indexing process
-        index_files_ch = THEMISTO_BUILD_INDEX(index_prefix_ch, representatives_ch).collect()
-    }
+            PREP_REFS.out.refs_csv
+            | join(POPPUNK.out.clusters)
+            | ORDER_GROUPS
+
+            ref_groups_ch = ORDER_GROUPS.out.groups
+        }
 
     if (!params.ref_mode == "index") {
         // Output stats on the index (not required for anything just an additional output)

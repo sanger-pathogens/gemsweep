@@ -4,10 +4,10 @@ process PREP_REFS {
     label 'time_30m'
 
     input:
-    path refs_txt
+    tuple val(meta), path(refs_txt)
 
     output:
-    path 'references.tsv', emit: refs_csv
+    tuple val(meta), path('references.tsv'), emit: refs_csv
 
     script:
     """
@@ -25,12 +25,12 @@ process POPPUNK {
     publishDir "${params.outdir}/poppunk/", mode: 'copy', pattern: 'pp_database/*', enabled: params.publish_poppunk
 
     input:
-    path ref_tsv
+    tuple val(meta), path(ref_tsv)
 
     output:
-    path "${out}/${out}_clusters.csv", emit: clusters     // for downstream
-    path "${out}/${out}.dists.npy",    emit: dist_matrix
-    path "${out}/*"                                       // for publishing
+    tuple val(meta), path("${out}/${out}_clusters.csv"), emit: clusters     // for downstream
+    tuple val(meta), path("${out}/${out}.dists.npy"),    emit: dist_matrix
+    tuple val(meta), path("${out}/*")                                       // for publishing
 
     script:
     out = "pp_database"
@@ -49,14 +49,11 @@ process ORDER_GROUPS {
     publishDir "${params.outdir}/poppunk/", mode: 'copy', overwrite: true
 
     input:
-    path refs_tsv
-    path clusters_csv
+    tuple val(meta), path(refs_tsv), path(clusters_csv)
 
 
     output:
-    path "groups.txt", emit: groups
-    path clusters_csv
-
+    tuple val(meta), path("groups.txt"), emit: groups
 
     script:
     """
