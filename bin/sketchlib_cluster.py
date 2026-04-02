@@ -18,7 +18,6 @@ from pathlib import Path
 import sys
 import logging
 import pp_sketchlib
-# import numpy as np
 import scipy.sparse.csgraph as csgraph
 import scipy.sparse as sp
 import pandas as pd
@@ -28,6 +27,7 @@ def main():
     args = parse_args()
     setup_logging(args.log, args.debug)
 
+    logging.info("Loading reference genomes...")
     # Load genome names
     with open(args.ref_ids) as f:
         ref_ids = [line.strip() for line in f]
@@ -38,6 +38,7 @@ def main():
     # Query pairwise distances using ANI (single k-mer = no core/accessory decomposition)
     # querySelfSparse returns a tuple of three lists (rows, cols, dists) — only distances BELOW threshold
     # Avoids a full/dense n^2 matrix which would be slow for large reference sets
+    logging.info(f"Querying sketch to return pairs with distances below {args.ani_threshold}...")
     rows, cols, dists = pp_sketchlib.querySelfSparse(
         ref_db_name    = args.sketch,
         rList          = ref_ids,
@@ -61,6 +62,7 @@ def main():
 
     # Connected components = clusters
     # Any two genomes connected by distance < threshold end up in the same cluster
+    logging.info("Forming clusters of references connected by the returned distances...")
     n_components, labels = csgraph.connected_components(
         csgraph  = csr,
         directed = False
@@ -69,6 +71,7 @@ def main():
     df = pd.DataFrame({'genome_id': ref_ids, 'cluster_id': labels})
 
     # Trigger exit pipeline if in strict mode i.e. cluster check failures stop pipeline there
+    logging.info("Validating clusters...")
     num_refs = len(ref_ids)
     validated = validate_clusters(clusters_df=df, num_refs=num_refs, ani_threshold=args.ani_threshold)
     if not validated and args.strict_mode:
