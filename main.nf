@@ -37,6 +37,7 @@ include { THEMISTO_BUILD_INDEX;
           THEMISTO_STATS        } from './modules/themisto.nf'
 include { MSWEEP                } from './modules/msweep.nf'
 include { MGEMS                 } from './modules/mgems.nf'
+include { COMBINE_REFS          } from './modules/helper_processes.nf'
 
 //
 // SUBWORKFLOWS
@@ -167,6 +168,24 @@ workflow {
 
             ref_groups_ch = ORDER_GROUPS.out.groups
         }
+
+        PREP_REFS.out.refs_csv
+        | join(ref_groups_ch)
+        | multiMap { meta, refs, groups ->
+            refs: refs
+            groups: groups
+        }
+        | set { ref_groups }
+
+        ref_groups.refs
+        | collectFile(name: "refs.txt")
+        | set { refs }
+
+        ref_groups.refs
+        | collectFile(name: "groups.txt")
+        | set { groups }
+
+        COMBINE_REFS(refs, groups)
 
         // index_prefix_ch = channel.value("index") // needs to be identical to what index is set as in indexing process
         // index_files_ch = THEMISTO_BUILD_INDEX(index_prefix_ch, representatives_ch).collect()
