@@ -178,11 +178,13 @@ workflow {
         | set { ref_groups }
 
         ref_groups.refs
-        | collectFile(name: "refs.txt")
+        | map { refs_file -> refs_file.path }
+        | collectFile(name: "refs.txt", newLine: true)
         | set { refs }
 
-        ref_groups.refs
-        | collectFile(name: "groups.txt")
+        ref_groups.groups
+        | map { groups_file -> groups_file.path }
+        | collectFile(name: "groups.txt", newLine: true)
         | set { groups }
 
         COMBINE_REFS(refs, groups)
