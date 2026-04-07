@@ -1,5 +1,5 @@
 process SUBSELECT_GRAPH {
-    tag "${meta.cluster}"
+    tag "${meta.ID} - cluster ${meta.cluster}"
     label "cpu_1"
     label "mem_16"
     label "time_30m"
@@ -20,7 +20,7 @@ process SUBSELECT_GRAPH {
     """
 }
 process GENERATE_TOTAL_DIST_MATRIX {
-    tag "${meta.cluster}"
+    tag "${meta.ID} - cluster ${meta.cluster}"
     label "cpu_4"
     label "mem_8"
     label "time_1"
@@ -40,6 +40,7 @@ process GENERATE_TOTAL_DIST_MATRIX {
     """
 }
 process SPLIT_DIST_MATRIX {
+    tag "${meta.ID}"
     label "cpu_1"
     label "mem_16"
     label "time_queue_from_small"
@@ -47,11 +48,10 @@ process SPLIT_DIST_MATRIX {
     container "quay.io/sangerpathogens/pandas:2.2.1"
 
     input:
-    path pp_dist_matrix
-    path cluster_assignments
+    tuple val(meta), path(pp_dist_matrix), path(cluster_assignments)
 
     output:
-    path "cluster_dists/*.tsv",  emit: cluster_dists
+    tuple val(meta), path("cluster_dists/*.tsv"),  emit: cluster_dists
     
     script:
     get_submatrix_script = "${workflow.projectDir}/bin/get_submatrix.py"
