@@ -169,7 +169,7 @@ workflow {
             ref_groups_ch = ORDER_GROUPS.out.groups
         }
 
-        PREP_REFS.out.refs_csv
+        representatives_ch
         | join(ref_groups_ch)
         | multiMap { meta, refs, groups ->
             refs: refs
