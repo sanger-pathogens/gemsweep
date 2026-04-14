@@ -20,6 +20,7 @@ process COMBINE_REFS {
     ${projectDir}/bin/combine_refs.py \\
         --refs input/refs.txt \\
         --groups input/groups.txt \\
+        --prefix_groups \\
         --outdir .
     """
 }
