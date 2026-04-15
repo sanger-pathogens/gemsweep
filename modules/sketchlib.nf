@@ -45,7 +45,7 @@ process SKETCHLIB_CLUSTER {
         sketchlib_cluster += " --strict_mode"
         }
 
-    def sketch_prefix = h5_db.baseName.replace('.h5', '')
+    sketch_prefix = h5_db.baseName
 
     """
     # Get IDs only for ref_ids
