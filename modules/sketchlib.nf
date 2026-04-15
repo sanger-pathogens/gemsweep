@@ -19,6 +19,9 @@ process SKETCH_REFS {
 		-o "${sketch_db}" \
 		--kmer "${params.sketchlib_kmer_size}" \
 		--cpus "${task.cpus}"
+
+    # Add random match chances calcs for correction
+    sketchlib add random "${sketch_db}"
     """
 }
 
