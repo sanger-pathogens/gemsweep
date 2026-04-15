@@ -137,7 +137,7 @@ def parse_args() -> argparse.ArgumentParser:
         "--ani_threshold",
         type=float,
         default=0.05,
-        help="ANI distance threshold for clustering (default 0.05, clusters of 95% ANI)"
+        help="maximum ANI distance threshold for clustering (default 0.05, meaning clusters of genomes sharing at least 95% ANI similarity)"
     )
     parser.add_argument(
         "--ref_ids",

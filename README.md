@@ -138,12 +138,14 @@ mkdir mGEMs_bins_manifest
 ---
 
 **Clustering options**
-
-| Flag              | Type   | Default   | Description                                                                                                  |
-| ----------------- | ------ | --------- | ------------------------------------------------------------------------------------------------------------ |
+| Flag              | Type     | Default                | Description                                                                                           |
+| ----------------- | -------- | ---------------------- | ----------------------------------------------------------------------------------------------------- |
 | `cluster_tool`    | `str`  | `poppunk` | Tool to use for clustering references when ref_mode is `refine` or `full`. Options: `poppunk` or `sketchlib` |
-| `poppunk_model`   | `str`  | `dbscan`  | Clustering model for poppunk to use (either `dbscan` or `bgmm`)                                              |
-| `publish_poppunk` | `bool` | `false`   | Optionally publish full poppunk output, group assignments are always published.                              |
+| `poppunk_model`   | `string` | `dbscan`               | Clustering model for poppunk to use (either dbscan or bgmm)                                           |
+| `publish_poppunk` | `bool`   | `false`                | Optionally publish full poppunk output, group assignments are always published.                       |
+| `ani_threshold`   | `float`  | `0.02`                 | Max ANI distance threshold for clustering (default 0.2 clusters genomes sharing >98% ANI similarity). |
+| `sketchlib_klist` | `str`    | `"13, 17, 21, 25, 29"` | List of kmer sizes at which sketchlib will sketch the reference set.                                  |
+| `cluster_strict`  | `bool`   | `false`                | Fail early if all genomes form a single cluster, or each genome is a singleton.                       |
 
 ---
 
