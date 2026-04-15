@@ -52,6 +52,7 @@ def main():
         kNN            = 0,
         dist_col       = 0
     )
+    logging.debug(f"Distance stats: min={min(dists):.6f}, max={max(dists):.6f}, mean={sum(dists)/len(dists):.6f}")
 
     # Convert returned tuple of lists to a COO matrix
     l = len(ref_ids)
@@ -184,6 +185,8 @@ def validate_clusters(clusters_df: pd.DataFrame, num_refs: int, ani_threshold: f
     if num_clusters == num_refs:
         logging.error(f"Each reference is in it's own cluster - ANI threshold of {ani_threshold} is likely too low")
         checks_passed=False
+
+    logging.debug(f"Cluster sizes:\n{cluster_counts.to_string()}")
 
     return checks_passed
 
