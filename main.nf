@@ -37,6 +37,7 @@ include { THEMISTO_BUILD_INDEX;
           THEMISTO_STATS        } from './modules/themisto.nf'
 include { MSWEEP                } from './modules/msweep.nf'
 include { MGEMS                 } from './modules/mgems.nf'
+include { COMBINE_REFS          } from './modules/helper_processes.nf'
 
 //
 // SUBWORKFLOWS
@@ -168,29 +169,49 @@ workflow {
             ref_groups_ch = ORDER_GROUPS.out.groups
         }
 
-        // index_prefix_ch = channel.value("index") // needs to be identical to what index is set as in indexing process
-        // index_files_ch = THEMISTO_BUILD_INDEX(index_prefix_ch, representatives_ch).collect()
+        representatives_ch
+        | join(ref_groups_ch)
+        | multiMap { meta, refs, groups ->
+            refs: refs
+            groups: groups
+        }
+        | set { ref_groups }
+
+        ref_groups.refs
+        | map { refs_file -> refs_file.path }
+        | collectFile(name: "refs.txt", newLine: true)
+        | set { refs }
+
+        ref_groups.groups
+        | map { groups_file -> groups_file.path }
+        | collectFile(name: "groups.txt", newLine: true)
+        | set { groups }
+
+        COMBINE_REFS(refs, groups)
+
+        index_prefix_ch = channel.value("index") // needs to be identical to what index is set as in indexing process
+        index_files_ch = THEMISTO_BUILD_INDEX(index_prefix_ch, representatives_ch).collect()
     }
 
-    // if (!params.ref_mode == "index") {
-    //     // Output stats on the index (not required for anything just an additional output)
-    //     THEMISTO_STATS(index_files_ch, index_prefix_ch)
-    // }
+    if (!params.ref_mode == "index") {
+        // Output stats on the index (not required for anything just an additional output)
+        THEMISTO_STATS(index_files_ch, index_prefix_ch)
+    }
 
-    // // Core Workflow
-    // pseudoaligned_ch = THEMISTO_PSEUDOALIGN(reads_ch, index_files_ch, index_prefix_ch)
+    // Core Workflow
+    pseudoaligned_ch = THEMISTO_PSEUDOALIGN(reads_ch, index_files_ch, index_prefix_ch)
     
-    // msweep_ch = MSWEEP(pseudoaligned_ch, ref_groups_ch)
+    msweep_ch = MSWEEP(pseudoaligned_ch, ref_groups_ch)
     
-    // MGEMS(
-    //     reads_ch
-    //         .join(pseudoaligned_ch, by: 0)
-    //         .join(msweep_ch, by: 0)
-    //         .map { meta, r1, r2, aln1, aln2, abund, probs ->
-    //             tuple(meta, r1, r2, aln1, aln2, abund, probs)
-    //         },
-    //         index_files_ch,
-    //         index_prefix_ch,
-    //         ref_groups_ch
-    // )
+    MGEMS(
+        reads_ch
+            .join(pseudoaligned_ch, by: 0)
+            .join(msweep_ch, by: 0)
+            .map { meta, r1, r2, aln1, aln2, abund, probs ->
+                tuple(meta, r1, r2, aln1, aln2, abund, probs)
+            },
+            index_files_ch,
+            index_prefix_ch,
+            ref_groups_ch
+    )
 }

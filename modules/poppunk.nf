@@ -22,7 +22,7 @@ process POPPUNK {
 
     container 'quay.io/biocontainers/poppunk:2.7.8--py310h4d0eb5b_0'
 
-    publishDir "${params.outdir}/poppunk/", mode: 'copy', pattern: 'pp_database/*', enabled: params.publish_poppunk
+    publishDir "${params.outdir}/poppunk/${meta.ID}", mode: 'copy', pattern: 'pp_database/*', enabled: params.publish_poppunk
 
     input:
     tuple val(meta), path(ref_tsv)
@@ -46,7 +46,7 @@ process ORDER_GROUPS {
     label 'mem_1'
     label 'time_30m'
 
-    publishDir "${params.outdir}/poppunk/", mode: 'copy', overwrite: true
+    publishDir "${params.outdir}/poppunk/${meta.ID}", mode: 'copy', overwrite: true
 
     input:
     tuple val(meta), path(refs_tsv), path(clusters_csv)
