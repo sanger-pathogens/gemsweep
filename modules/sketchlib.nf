@@ -1,4 +1,4 @@
-process SKETCH_REFS {
+process SKETCHLIB_SKETCH {
     label 'cpu_2'
     label 'mem_500M'
     label 'time_30m'
