@@ -4,14 +4,14 @@ process PREP_REFS {
     label 'time_30m'
 
     input:
-    path refs_txt
+    tuple val(meta), path(refs_txt)
 
     output:
-    path 'references.tsv', emit: refs_csv
+    tuple val(meta), path('references.tsv'), emit: refs_csv
 
     script:
     """
-    python3 ${projectDir}/bin/poppunk_helper.py ${refs_txt} .
+    python3 ${projectDir}/bin/poppunk_helper.py --input ${refs_txt} --outdir .
     """
 }
 
@@ -22,15 +22,15 @@ process POPPUNK {
 
     container 'quay.io/biocontainers/poppunk:2.7.8--py310h4d0eb5b_0'
 
-    publishDir "${params.outdir}/poppunk/", mode: 'copy', pattern: 'pp_database/*', enabled: params.publish_poppunk
+    publishDir "${params.outdir}/poppunk/${meta.ID}", mode: 'copy', pattern: 'pp_database/*', enabled: params.publish_poppunk
 
     input:
-    path ref_tsv
+    tuple val(meta), path(ref_tsv)
 
     output:
-    path "${out}/${out}_clusters.csv", emit: clusters     // for downstream
-    path "${out}/${out}.dists.npy",    emit: dist_matrix
-    path "${out}/*"                                       // for publishing
+    tuple val(meta), path("${out}/${out}_clusters.csv"), emit: clusters     // for downstream
+    tuple val(meta), path("${out}/${out}.dists.npy"),    emit: dist_matrix
+    tuple val(meta), path("${out}/*")                                       // for publishing
 
     script:
     out = "pp_database"
@@ -46,17 +46,14 @@ process ORDER_GROUPS {
     label 'mem_1'
     label 'time_30m'
 
-    publishDir "${params.outdir}/poppunk/", mode: 'copy', overwrite: true
+    publishDir "${params.outdir}/poppunk/${meta.ID}", mode: 'copy', overwrite: true
 
     input:
-    path refs_tsv
-    path clusters_csv
+    tuple val(meta), path(refs_tsv), path(clusters_csv)
 
 
     output:
-    path "groups.txt", emit: groups
-    path clusters_csv
-
+    tuple val(meta), path("groups.txt"), emit: groups
 
     script:
     """
