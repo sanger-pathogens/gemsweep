@@ -107,7 +107,7 @@ workflow DEREP_GROUPS {
     clusters.no_derep
     | transpose
     | map { meta, rep, cluster -> 
-        def new_meta = meta.copy()
+        def new_meta = meta.clone()
         new_meta.cluster = cluster
         [new_meta, rep]
     }
