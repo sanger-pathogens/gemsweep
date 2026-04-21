@@ -142,9 +142,81 @@ workflow {
         error("Sketchlib reference refinement not implemented yet! Watch this space :)")
 
     } else if (params.ref_mode == "autoselect") {
+
         // Generate candidate references from reads via Sylph.
         SYLPH_REF_SELECTION(reads_ch)
-        references_ch = SYLPH_REF_SELECTION.out.references
+
+// For each detected species/taxon (meta.ID), check whether cached
+// references.txt and groups.txt already exist under params.species_ref_cache.
+//
+// If cached:
+// - reuse the stored species-level files
+//
+// If uncached:
+// - run the normal downstream species-prep path
+// - write the new species references.txt and groups.txt into the cache
+//
+// After that:
+// - combine cached + newly generated species references into one final references.txt
+// - combine cached + newly generated species groups into one final groups.txt
+// - use those combined files for Themisto index building
+//
+// Cache layout (current proposal):
+// species_ref_cache/
+// ├── escherichia_coli/
+// │   ├── references.txt
+// │   └── groups.txt
+// ├── klebsiella_pneumoniae/
+// │   ├── references.txt
+// │   └── groups.txt
+// └── staphylococcus_aureus/
+//     ├── references.txt
+//     └── groups.txt
+//
+// Optional future extension:
+// - add per-species metadata and/or version history if provenance/versioning is needed
+
+        if (params.species_ref_cache) {
+            // cache lookup logic here
+            sylph_references_ch = SYLPH_REF_SELECTION.out.references
+
+            sylph_references_ch
+            | map {meta, refs ->
+                def species_dir = file("${params.species_ref_cache}/${meta.ID}")
+                def cached_refs = file("${species_dir}/references.txt")
+                def cached_groups = file("${species_dir}/groups.txt")
+                tuple(meta, refs, cached_refs, cached_groups)
+            }
+            // split species reference genomes into cached vs uncached paths for downstream processing 
+            | branch {
+                cached: it[2].exists() && it[3].exists()
+                uncached: !(it[2].exists() && it[3].exists())
+            }
+            | set {cache_status}
+
+            // each branch gets its own downstream handling
+            cache_status.cached
+            | map { meta, refs, cached_refs, cached_groups ->
+                [meta, cached_refs]
+            }
+            | set { cached_references_ch }
+
+            cache_status.cached
+            | map { meta, refs, cached_refs, cached_groups ->
+                [meta, cached_groups]
+            }
+            | set { cached_groups_ch }
+        
+            cache_status.uncached
+            | map { meta, refs, cached_refs, cached_groups ->
+                [meta, refs]
+            }
+            | set { uncached_references_ch }
+
+        } else {
+            references_ch = SYLPH_REF_SELECTION.out.references
+        }
+        
 
         // Cluster references
         PREP_REFS(references_ch)
@@ -173,7 +245,7 @@ workflow {
         index_files_ch = THEMISTO_BUILD_INDEX(index_prefix_ch, representatives_ch).collect()
     }
 
-    if (!params.ref_mode == "index") {
+    if (params.ref_mode !== "index") {
         // Output stats on the index (not required for anything just an additional output)
         THEMISTO_STATS(index_files_ch, index_prefix_ch)
     }
