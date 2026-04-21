@@ -35,6 +35,12 @@
         "help_text": "Number of representatives at which to cap each reference cluster."
       }
     },
+    "Cache options": {
+      "species_ref_cache": {
+        "default": "null",
+        "help_text": "Path to a cache directory containing per-species subdirectories with references.txt and groups.txt files for reuse in autoselect mode."
+      }
+    },
     "Clustering options": {
       "cluster_tool": {
         "default": "poppunk",

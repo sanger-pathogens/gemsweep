@@ -138,6 +138,22 @@ mkdir mGEMs_bins_manifest
 
 ---
 
+---
+
+**Cache options**
+| Flag | Type | Default | Description |
+| ----------------- | -------- | -------- | ------------------------------------------------------------------------------- |
+| `species_ref_cache` | `path` | `null` | Path to a cache directory containing per-species `references.txt` and `groups.txt` files for reuse in `autoselect` mode. |
+
+Expected layout:
+```
+<species_ref_cache>/
+  <species_id>/
+    references.txt
+    groups.txt
+```
+---
+
 **Clustering options**
 
 | Flag              | Type   | Default   | Description                                                                                                  |
