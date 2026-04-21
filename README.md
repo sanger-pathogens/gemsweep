@@ -135,6 +135,7 @@ mkdir mGEMs_bins_manifest
 | `ref_mode` | `str` | `null` | Required. Choose a reference input mode. Options: `index`,`full`,`refine`,`autoselect` . |
 | `references` | `path` | `null` | Path to text file containing paths to references, one per line. |
 | `representatives` | `integer` | `20` | Number of representatives at which to cap each reference cluster. |
+| `refine_refs` | `bool` | `false` | Set to `true` to subselect representative genomes from clustered references. |
 
 ---
 
