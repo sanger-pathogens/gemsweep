@@ -178,9 +178,9 @@ workflow {
 
         if (params.species_ref_cache) {
             // cache lookup logic here
-            sylph_references_ch = SYLPH_REF_SELECTION.out.references
+            candidate_references_ch = SYLPH_REF_SELECTION.out.references
 
-            sylph_references_ch
+            candidate_references_ch
             | map {meta, refs ->
                 def species_dir = file("${params.species_ref_cache}/${meta.ID}")
                 def cached_refs = file("${species_dir}/references.txt")
@@ -199,7 +199,7 @@ workflow {
             | map { meta, refs, cached_refs, cached_groups ->
                 [meta, cached_refs]
             }
-            | set { cached_references_ch }
+            | set { cached_refs_ch }
 
             cache_status.cached
             | map { meta, refs, cached_refs, cached_groups ->
@@ -211,15 +211,17 @@ workflow {
             | map { meta, refs, cached_refs, cached_groups ->
                 [meta, refs]
             }
-            | set { uncached_references_ch }
+            | set { uncached_refs_ch }
+
+            refs_to_cluster_ch = uncached_refs_ch
 
         } else {
-            references_ch = SYLPH_REF_SELECTION.out.references
+            refs_to_cluster_ch = SYLPH_REF_SELECTION.out.references
         }
-        
+
 
         // Cluster references
-        PREP_REFS(references_ch)
+        PREP_REFS(refs_to_cluster_ch)
         POPPUNK(PREP_REFS.out.refs_csv)
         poppunk_clusters_csv = POPPUNK.out.clusters
 
@@ -231,14 +233,49 @@ workflow {
 
         REFINE_REFS(refine_refs_input)
 
-        // Split into references and groups, then combine across all taxa
-        REFINE_REFS.out.rep_refs_and_groups
-        | map { meta, ref_groups_file -> ref_groups_file}
-        | collect
-        | COMBINE_REFS
+            new_refs_ch = REFINE_REFS.out.representatives_ch
+            new_groups_ch = REFINE_REFS.out.ref_groups_ch
 
-        representatives_ch = COMBINE_REFS.out.references.first()
-        ref_groups_ch = COMBINE_REFS.out.groups.first()
+        // if refine_refs is false, refinement step is skipped 
+        } else {
+            // need to merge caches species into here
+            new_refs_ch = refs_to_cluster_ch
+
+            PREP_REFS.out.refs_csv
+            | join(POPPUNK.out.clusters)
+            | ORDER_GROUPS
+
+            new_groups_ch = ORDER_GROUPS.out.groups
+        }
+
+        // channel should accept both caches species refs/groups and uncached.
+        if (params.species_ref_cache) {
+            representatives_ch = cached_refs_ch.mix(new_refs_ch)
+            ref_groups_ch = cached_groups_ch.mix(new_groups_ch)
+        } else {
+            representatives_ch = new_refs_ch
+            ref_groups_ch = new_groups_ch
+        }
+
+        representatives_ch
+        | join(ref_groups_ch)
+        | multiMap { meta, refs, groups ->
+            refs: refs
+            groups: groups
+        }
+        | set { ref_groups }
+
+        ref_groups.refs
+        | map { refs_file -> refs_file.path }
+        | collectFile(name: "refs.txt", newLine: true)
+        | set { refs }
+
+        ref_groups.groups
+        | map { groups_file -> groups_file.path }
+        | collectFile(name: "groups.txt", newLine: true)
+        | set { groups }
+
+        COMBINE_REFS(refs, groups)
 
         // Build themisto index
         index_prefix_ch = channel.value("index") // needs to be identical to what index is set as in indexing process
