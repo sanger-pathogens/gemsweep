@@ -43,6 +43,7 @@ process SUBSELECT_GRAPH {
     ${subselect_graph} --phylip ${phylip} --methods ${params.cluster_method} ${representatives}
     """
 }
+
 process GENERATE_TOTAL_DIST_MATRIX {
     tag "${meta.ID} - cluster ${meta.cluster}"
     label "cpu_4"
@@ -63,6 +64,7 @@ process GENERATE_TOTAL_DIST_MATRIX {
     ${ani_tree_tools} --dist_tsv_path ${betweenness_tsv} --meta_ID ${meta.cluster} --core_accession --header
     """
 }
+
 process SPLIT_DIST_MATRIX {
     tag "${meta.ID}"
     label "cpu_1"
