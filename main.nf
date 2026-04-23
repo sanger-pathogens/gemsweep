@@ -173,9 +173,8 @@ workflow {
             // From this point, candidate_references_ch means:
             // "candidate references that were NOT found in cache and still need clustering".
             candidate_references_ch = CACHE_LOOKUP.out.misses
-                | splitCsv(header: true, sep: '\t')
-                | map { row ->
-                    tuple([ID: row.species_id], file(row.sylph_refs))
+                | map { meta, cache_miss_tsv, sylph_refs ->
+                    tuple(meta, sylph_refs)
                 }
         } else {
             // Cache-disabled path: all Sylph refs continue to clustering.

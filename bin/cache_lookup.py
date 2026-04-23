@@ -37,7 +37,7 @@ def write_hit(species: str, cached_refs: Path, cached_groups: Path):
 def write_miss(species: str, refs: Path):
     with open("cache_miss.tsv", "w") as out_f:
         out_f.write("species_id\tsylph_refs\n")
-        out_f.write(f"{species}\t{refs}\n")
+        out_f.write(f"{species}\t{refs.resolve()}\n")
 
 
 def cache_entry_exists(effective_cache_dir: Path, species: str) -> tuple[bool, Path, Path]:
