@@ -35,14 +35,14 @@
         "help_text": "Number of representatives at which to cap each reference cluster."
       },
       "refine_refs": {
-      "default": "false",
-      "help_text": "Set to true to subselect representative genomes from clustered references."
+        "default": "false",
+        "help_text": "Set to true to subselect representative genomes from clustered references."
       }
     },
     "Cache options": {
-      "species_ref_cache": {
+      "cache_dir": {
         "default": "null",
-        "help_text": "Path to a cache directory containing per-species subdirectories with references.txt and groups.txt files for reuse in autoselect mode."
+        "help_text": "Path to a cache root for autoselect mode. The pipeline creates a config-specific subdirectory containing metadata.json and per-species references.txt/groups.txt entries for cache reuse."
       }
     },
     "Clustering options": {

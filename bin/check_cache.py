@@ -39,7 +39,7 @@ A cache hit requires references.txt, groups.txt, and valid matching cache
 config. If no valid entry exists, the species is emitted as uncached and
 continues through the normal autoselect clustering path.
 
-PUBLISH_CACHE_ENTRY consumes generated representatives/groups plus
+WRITE_CACHE_ENTRY consumes generated representatives/groups plus
 cache_config.json, then writes new entries into:
 
 effective_cache_dir/species/<species_id>/

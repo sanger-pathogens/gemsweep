@@ -144,16 +144,22 @@ mkdir mGEMs_bins_manifest
 **Cache options**
 | Flag | Type | Default | Description |
 | ----------------- | -------- | -------- | ------------------------------------------------------------------------------- |
-| `species_ref_cache` | `path` | `null` | Path to a cache directory containing per-species `references.txt` and `groups.txt` files for reuse in `autoselect` mode. |
+| `cache_dir` | `path` | `null` | Path to a cache root for autoselect mode. The pipeline creates a config-specific subdirectory containing cache metadata and per-species reference/group entries for reuse. |
 
-Expected layout:
+Cache Layout:
+
 ```
-<species_ref_cache>/
-  <species_id>/
-    references.txt
-    groups.txt
+<cache_root>/
+  poppunk_network_based_trim_bgmm_reps20/
+    metadata.json
+    species/
+      escherichia_coli/
+        references.txt
+        groups.txt
+        metadata.json
 ```
----
+
+## The config-level `metadata.json` records the clustering settings used for that cache directory. Each species-level `metadata.json` records cache write/update details for that species, including update counts and added reference IDs.
 
 **Clustering options**
 
