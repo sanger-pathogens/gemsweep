@@ -153,22 +153,37 @@ workflow {
         // call cache search process if cache_dir is provided, otherwise skip to clustering with Sylph outputs as input.
         // if cache s enables, split sylph candidate into cached and uncached.
         if (params.cache_dir) {
+            // Cache-enabled path: seed ref/group channels with cache hits and cluster cache misses.
             CHECK_CACHE()
-            CACHE_LOOKUP(candidate_references_ch)
+            cache_config_ch = CHECK_CACHE.out.config.first()
+            CACHE_LOOKUP(candidate_references_ch, cache_config_ch)
 
-            cached_rep_refs_ch    = CACHE_LOOKUP.out.cached_rep_refs
-            cached_ref_groups_ch  = CACHE_LOOKUP.out.cached_ref_groups
+            rep_refs_ch = CACHE_LOOKUP.out.hits
+                | splitCsv(header: true, sep: '\t')
+                | map { row ->
+                    tuple([ID: row.species_id], file(row.cached_refs))
+                }
+
+            ref_groups_ch = CACHE_LOOKUP.out.hits
+                | splitCsv(header: true, sep: '\t')
+                | map { row ->
+                    tuple([ID: row.species_id], file(row.cached_groups))
+                }
 
             // From this point, candidate_references_ch means:
             // "candidate references that were NOT found in cache and still need clustering".
-            candidate_references_ch = CACHE_LOOKUP.out.uncached_refs
-
+            candidate_references_ch = CACHE_LOOKUP.out.misses
+                | splitCsv(header: true, sep: '\t')
+                | map { row ->
+                    tuple([ID: row.species_id], file(row.sylph_refs))
+                }
         } else {
-            // no cache: everything from sylph needs to be clustered.
-            cached_rep_refs_ch   = Channel.empty()
-            cached_ref_groups_ch = Channel.empty()
+            // Cache-disabled path: all Sylph refs continue to clustering.
+            rep_refs_ch = Channel.empty()
+            ref_groups_ch = Channel.empty()
         }
-    
+
+
         // Cluster references
         // only uncaches candidate references go through PREP_REFS and clustering
         PREP_REFS(candidate_references_ch)
@@ -210,8 +225,9 @@ workflow {
         }
 
         // Build the current-run reference set from cached + generated.
-        representatives_ch = cached_rep_refs_ch.mix(generated_rep_refs_ch)
-        ref_groups_ch = cached_ref_groups_ch.mix(generated_ref_groups_ch)
+        representatives_ch = rep_refs_ch.mix(generated_rep_refs_ch)
+        ref_groups_ch = ref_groups_ch.mix(generated_ref_groups_ch)
+
 
         representatives_ch
         | join(ref_groups_ch)

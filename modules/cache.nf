@@ -1,3 +1,4 @@
+// calls check_cache.py to create or validate a config-specific cache directory, write cache metadata, and emit cache_config.json 
 process CHECK_CACHE {
     output:
     path("cache_config.json"), emit: config
@@ -15,6 +16,30 @@ process CHECK_CACHE {
         --out cache_config.json
     """
 }
+// receives Sylph species refs
+//  reads cache_config.json
+//  checks actual files under effective_cache_dir/species/<species_id>/
+process CACHE_LOOKUP {
+    tag "${meta.ID}"
+
+    input:
+    tuple val(meta), path(refs_file)
+    path(cache_config)
+
+    output:
+    path("cache_hit.tsv"), optional: true, emit: hits
+    path("cache_miss.tsv"), optional: true, emit: misses
+
+    script:
+    """
+    python3 ${projectDir}/bin/cache_lookup.py \\
+        --species '${meta.ID}' \\
+        --refs '${refs_file}' \\
+        --cache-config '${cache_config}'
+    """
+}
+
+
 
 /*
 Then CACHE_LOOKUP and PUBLISH_CACHE_ENTRY should consume that cache_config.json instead of directly using params.cache_dir.
@@ -29,22 +54,6 @@ PUBLISH_CACHE_ENTRY
   reads cache_config.json
   writes to effective_cache_dir/species/<species_id>/
 
-
-process CHECK_CACHE {
-    // per species decision engine
-// idk if this rpocess would work best with groovy language or as a python script
-// does the cache_dir exist? no create it,yes continue
-// compare metadata of current run using params against metadata of cached entry. if they match, cache can run if they dont match cache disabled, normal autoselect mode process
-// pass onto cache lookup if resolve cache checks pass
-// pass back to main.nf if checks dont pass and run sylph outputs normally through autoselect mode process
-
-// RESOLVE_CACHE should only return a cache hit when the cached entry belongs to the same clustering configuration as the current run.
-// <cache_dir>/
-//  species/
-//    escherichia_coli/
-//      references.txt
-//      groups.txt
-//      metadata.json
 
 process CACHE_LOOKUP{
     // call resolve cache output which will pass in the sylph output here if it passed the checks
