@@ -27,6 +27,8 @@ def printHelp() {
 */
 include { MIXED_INPUT           } from './assorted-sub-workflows/mixed_input/mixed_input.nf'
 include { SYLPH_REF_SELECTION   } from './assorted-sub-workflows/sylph_refset/sylph_refset.nf'
+include { CACHE_LOOKUP;
+          PUBLISH_CACHE_ENTRY   } from './modules/cache.nf'
 include { PREP_REFS;             
           POPPUNK;                
           ORDER_GROUPS          } from './modules/poppunk.nf'
@@ -145,117 +147,69 @@ workflow {
 
         // Generate candidate references from reads via Sylph.
         SYLPH_REF_SELECTION(reads_ch)
+        candidate_references_ch = SYLPH_REF_SELECTION.out.references
 
-// For each detected species/taxon (meta.ID), check whether cached
-// references.txt and groups.txt already exist under params.species_ref_cache.
-//
-// If cached:
-// - reuse the stored species-level files
-//
-// If uncached:
-// - run the normal downstream species-prep path
-// - write the new species references.txt and groups.txt into the cache
-//
-// After that:
-// - combine cached + newly generated species references into one final references.txt
-// - combine cached + newly generated species groups into one final groups.txt
-// - use those combined files for Themisto index building
-//
-// Cache layout (current proposal):
-// species_ref_cache/
-// ├── escherichia_coli/
-// │   ├── references.txt
-// │   └── groups.txt
-// ├── klebsiella_pneumoniae/
-// │   ├── references.txt
-// │   └── groups.txt
-// └── staphylococcus_aureus/
-//     ├── references.txt
-//     └── groups.txt
-//
-// Optional future extension:
-// - add per-species metadata and/or version history if provenance/versioning is needed
+        // call cache search process if cache_dir is provided, otherwise skip to clustering with Sylph outputs as input.
+        // if cache s enables, split sylph candidate into cached and uncached.
+        if (params.cache_dir) {
+            CACHE_LOOKUP(candidate_references_ch)
 
-        if (params.species_ref_cache) {
-            // cache lookup logic here
-            candidate_references_ch = SYLPH_REF_SELECTION.out.references
+            cached_rep_refs_ch    = CACHE_LOOKUP.out.cached_rep_refs
+            cached_ref_groups_ch  = CACHE_LOOKUP.out.cached_ref_groups
 
-            candidate_references_ch
-            | map {meta, refs ->
-                def species_dir = file("${params.species_ref_cache}/${meta.ID}")
-                def cached_refs = file("${species_dir}/references.txt")
-                def cached_groups = file("${species_dir}/groups.txt")
-                tuple(meta, refs, cached_refs, cached_groups)
-            }
-            // split species reference genomes into cached vs uncached paths for downstream processing 
-            | branch {
-                cached: it[2].exists() && it[3].exists()
-                uncached: !(it[2].exists() && it[3].exists())
-            }
-            | set {cache_status}
-
-            // each branch gets its own downstream handling
-            cache_status.cached
-            | map { meta, refs, cached_refs, cached_groups ->
-                [meta, cached_refs]
-            }
-            | set { cached_refs_ch }
-
-            cache_status.cached
-            | map { meta, refs, cached_refs, cached_groups ->
-                [meta, cached_groups]
-            }
-            | set { cached_groups_ch }
-        
-            cache_status.uncached
-            | map { meta, refs, cached_refs, cached_groups ->
-                [meta, refs]
-            }
-            | set { uncached_refs_ch }
-
-            refs_to_cluster_ch = uncached_refs_ch
+            // From this point, candidate_references_ch means:
+            // "candidate references that were NOT found in cache and still need clustering".
+            candidate_references_ch = CACHE_LOOKUP.out.uncached_refs
 
         } else {
-            refs_to_cluster_ch = SYLPH_REF_SELECTION.out.references
+            // no cache: everything from sylph needs to be clustered.
+            cached_rep_refs_ch   = Channel.empty()
+            cached_ref_groups_ch = Channel.empty()
         }
-
-
+    
         // Cluster references
-        PREP_REFS(refs_to_cluster_ch)
+        // only uncaches candidate references go through PREP_REFS and clustering
+        PREP_REFS(candidate_references_ch)
         POPPUNK(PREP_REFS.out.refs_csv)
+
+        //why is this here? it's not being used anywhere else in the code.
         poppunk_clusters_csv = POPPUNK.out.clusters
 
-        // Dereplicate/Refine references per cluster
-        references_ch
-        | join(POPPUNK.out.clusters)
-        | join(POPPUNK.out.dist_matrix)
-        | set { refine_refs_input }
+        // TODO: dereplication instead of optional/param-based automate based on num genomes per species?
+        // Build reference/groups for uncached species only and for sylph run with cache_dir not enabled
+        if (params.refine_refs) {
+            candidate_references_ch
+            | join(POPPUNK.out.clusters)
+            | join(POPPUNK.out.dist_matrix)
+            | set { refine_refs_input }
 
         REFINE_REFS(refine_refs_input)
 
-            new_refs_ch = REFINE_REFS.out.representatives_ch
-            new_groups_ch = REFINE_REFS.out.ref_groups_ch
+            generated_rep_refs_ch = REFINE_REFS.out.representatives_ch
+            generated_ref_groups_ch = REFINE_REFS.out.ref_groups_ch
 
-        // if refine_refs is false, refinement step is skipped 
         } else {
-            // need to merge caches species into here
-            new_refs_ch = refs_to_cluster_ch
+            generated_rep_refs_ch = candidate_references_ch
 
             PREP_REFS.out.refs_csv
             | join(POPPUNK.out.clusters)
             | ORDER_GROUPS
 
-            new_groups_ch = ORDER_GROUPS.out.groups
+            generated_ref_groups_ch = ORDER_GROUPS.out.groups
         }
 
-        // channel should accept both caches species refs/groups and uncached.
-        if (params.species_ref_cache) {
-            representatives_ch = cached_refs_ch.mix(new_refs_ch)
-            ref_groups_ch = cached_groups_ch.mix(new_groups_ch)
-        } else {
-            representatives_ch = new_refs_ch
-            ref_groups_ch = new_groups_ch
+        // store newly generated species cache entries for future runs.
+        if (params.cache_dir) {
+            generated_rep_refs_ch
+            | join(generated_ref_groups_ch)
+            | set { generated_cache_entries_ch}
+            
+            PUBLISH_CACHE_ENTRY(generated_cache_entries_ch)
         }
+
+        // Build the current-run reference set from cached + generated.
+        representatives_ch = cached_rep_refs_ch.mix(generated_rep_refs_ch)
+        ref_groups_ch = cached_ref_groups_ch.mix(generated_ref_groups_ch)
 
         representatives_ch
         | join(ref_groups_ch)
@@ -282,7 +236,7 @@ workflow {
         index_files_ch = THEMISTO_BUILD_INDEX(index_prefix_ch, representatives_ch).collect()
     }
 
-    if (params.ref_mode !== "index") {
+    if (params.ref_mode != "index") {
         // Output stats on the index (not required for anything just an additional output)
         THEMISTO_STATS(index_files_ch, index_prefix_ch)
     }
