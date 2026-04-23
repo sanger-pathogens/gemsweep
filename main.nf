@@ -27,7 +27,8 @@ def printHelp() {
 */
 include { MIXED_INPUT           } from './assorted-sub-workflows/mixed_input/mixed_input.nf'
 include { SYLPH_REF_SELECTION   } from './assorted-sub-workflows/sylph_refset/sylph_refset.nf'
-include { CACHE_LOOKUP;
+include { CHECK_CACHE;
+          CACHE_LOOKUP;
           PUBLISH_CACHE_ENTRY   } from './modules/cache.nf'
 include { PREP_REFS;             
           POPPUNK;                
@@ -152,6 +153,7 @@ workflow {
         // call cache search process if cache_dir is provided, otherwise skip to clustering with Sylph outputs as input.
         // if cache s enables, split sylph candidate into cached and uncached.
         if (params.cache_dir) {
+            CHECK_CACHE()
             CACHE_LOOKUP(candidate_references_ch)
 
             cached_rep_refs_ch    = CACHE_LOOKUP.out.cached_rep_refs
