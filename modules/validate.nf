@@ -116,8 +116,8 @@ def validate_autoselect_ref_mode(all_errors) {
     validate_choice_param("--sketch_size", params.sketch_size, [21,31], all_errors)
     
     // check cache path exists if provided
-    if (params.species_ref_cache != null) {
-        validate_path_exists("--species_ref_cache", params.species_ref_cache, all_errors)
+    if (params.cache_dir != null) {
+        validate_path_exists("--cache_dir", params.cache_dir, all_errors)
     }
     // Check no additional, incompatible ref params are given
     validate_incompatible("autoselect", ["references", "themisto_index", "ref_groups"], all_errors)
