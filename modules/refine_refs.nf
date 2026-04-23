@@ -1,3 +1,27 @@
+process SPLIT_CLUSTERS_CSV {
+    tag "${meta.ID}"
+    label "cpu_1"
+    label "mem_1"
+    label "time_queue_from_small"
+
+    container "quay.io/sangerpathogens/pandas:2.2.1"
+
+    input:
+    tuple val(meta), path(cluster_assignments)
+
+    output:
+    tuple val(meta), path("clusters/*.csv"),  emit: split_cluster_csv
+
+    script:
+    split_clusters_csv_script = "${workflow.projectDir}/bin/split_clusters_csv.py"
+    """
+    ${split_clusters_csv_script} \\
+        --outdir clusters \\
+        --clusters ${cluster_assignments} \\
+        --header
+    """
+}
+
 process SUBSELECT_GRAPH {
     tag "${meta.ID} - cluster ${meta.cluster}"
     label "cpu_1"
@@ -48,18 +72,18 @@ process SPLIT_DIST_MATRIX {
     container "quay.io/sangerpathogens/pandas:2.2.1"
 
     input:
-    tuple val(meta), path(pp_dist_matrix), path(cluster_assignments)
+    tuple val(meta), path(pp_dist_matrix), path(cluster_assignments), path(references)
 
     output:
     tuple val(meta), path("cluster_dists/*.tsv"),  emit: cluster_dists
-    
+
     script:
     get_submatrix_script = "${workflow.projectDir}/bin/get_submatrix.py"
     """
     ${get_submatrix_script} \
         --matrix ${pp_dist_matrix} \
         --clusters ${cluster_assignments} \
-        --references ${params.references} \
+        --references ${references} \
         --outdir cluster_dists
     """
 }

@@ -1,6 +1,7 @@
-include { SPLIT_DIST_MATRIX           } from '../modules/refine_refs.nf'
-include { GENERATE_TOTAL_DIST_MATRIX  } from '../modules/refine_refs.nf'
-include { SUBSELECT_GRAPH             } from '../modules/refine_refs.nf'
+include { SPLIT_CLUSTERS_CSV;
+          SPLIT_DIST_MATRIX;
+          GENERATE_TOTAL_DIST_MATRIX;
+          SUBSELECT_GRAPH;            } from '../modules/refine_refs.nf'
 include { PUBLISH_GROUPS;
           PUBLISH_REPS                } from '../modules/publish_intermediates.nf'
 
@@ -16,7 +17,7 @@ workflow REFINE_REFS {
     }
     | set { refs_info }
 
-    DEREP_GROUPS(refs_info.clusters_with_dist_matrix)
+    DEREP_GROUPS(clustered_refs)
 
     refs_info.references
     | splitCsv
@@ -27,12 +28,29 @@ workflow REFINE_REFS {
     }
     | set { ref_label_paths }
 
+    // TODO DELETE DEBUG CODE...
+    // ref_label_paths
+    // | randomSample(10)
+    // | view()
+
     // DEREP_GROUPS.out.chosen_representatives
-    // | join(ref_label_paths, by: 1)
+    // | randomSample(10)
+    // | view()
+
+    // DEREP_GROUPS.out.chosen_representatives
+    // | splitCsv
+    // | randomSample(10)
+    // | view()
+
+    // TODO Uncomment the below to test the next part of the pipeline
+    // DEREP_GROUPS.out.chosen_representatives
+    // | join(ref_label_paths, by: 2)
     // | map { ref_label, meta, rep_path ->
     //     [meta.cluster, rep_path]
     // }
     // | set { clusters_rep_paths }
+
+    // clusters_rep_paths.view()
 
 
     // // Split out clusters and paths into separate files for positionally consistent files in index and core workflow
@@ -42,7 +60,7 @@ workflow REFINE_REFS {
     // | set { representatives_ch }
 
     // PUBLISH_REPS(representatives_ch)
-    
+
     // clusters_rep_paths
     // | collectFile { cluster, rep_path -> ["groups.txt", "${cluster}\n"] }
     // | first()
@@ -57,44 +75,37 @@ workflow REFINE_REFS {
 
 workflow DEREP_GROUPS {
     take:
-    clusters_with_dist_matrix  // tuple(meta, clusters_csv, pp_dist_matrix)
+    clustered_refs  // tuple(meta, references, clusters_csv, pp_dist_matrix)
 
     main:
-    clusters_with_dist_matrix
-    | multiMap { meta, clusters_csv, pp_dist_matrix ->
+    // Idea - split clusters_csv into multiple smaller CSVs (one per cluster)
+    // Then split the distance matrix per cluster - this would allow SPLIT_DIST_MATRIX to output just one CSV instead of multiple and should simplify whole workflow...
+
+    clustered_refs
+    | multiMap { meta, references, clusters_csv, pp_dist_matrix ->
+        references: [meta, references]
         clusters_csv: [meta, clusters_csv]
         pp_dist_matrix: [meta, pp_dist_matrix]
     }
     | set { clusters_info }
 
-    clusters_info.clusters_csv
-    | splitCsv(header: true)
-    | map { meta, row -> [meta, row.Taxon, row.Cluster] }  // Taxon = reference label
-    | groupTuple(by:2)
-    | map { metas, ref_labels, cluster -> [metas[0], ref_labels, cluster] }  // Get only first meta in list (remove duplicate metas)
-    | branch {
-        no_derep: it[1].size() < params.representatives
-        derep: it[1].size() > params.representatives
+    SPLIT_CLUSTERS_CSV(clusters_info.clusters_csv)
+
+    SPLIT_CLUSTERS_CSV.out.split_cluster_csv
+    | transpose // Emit one cluster CSV file at a time
+    | branch { meta, cluster_csv ->
+        no_derep: cluster_csv.readLines().size() <= params.representatives
+        derep: cluster_csv.readLines().size() > params.representatives
     }
     | set { clusters }
 
-    clusters.derep
-    | transpose
-    | collectFile { meta, sample, cluster ->
-        [ "${meta.ID}_derep_samples.csv", [sample, cluster].join(",") + "\n" ]
-    }
-    | map { derep_samples_file ->
-        def new_meta = ["ID": derep_samples_file.baseName.replace("_derep_samples", "")]
-        [ new_meta, derep_samples_file ]
-    }
-    | set { clusters_multiple_samples }
-
     clusters_info.pp_dist_matrix
-    | join(clusters_multiple_samples)
+    | join(clusters.derep)
+    | join(clusters_info.references)
     | SPLIT_DIST_MATRIX
 
     SPLIT_DIST_MATRIX.out.cluster_dists
-    | flatMap
+    | transpose
     | map { meta, path ->
         def new_meta = [:]
         new_meta.ID = meta.ID
@@ -103,28 +114,14 @@ workflow DEREP_GROUPS {
     }
     | GENERATE_TOTAL_DIST_MATRIX
     | SUBSELECT_GRAPH
-    
-    clusters.no_derep
-    | transpose
-    | map { meta, rep, cluster -> 
-        def new_meta = meta.clone()
-        new_meta.cluster = cluster
-        [new_meta, rep]
-    }
-    | set { no_derep_representatives }
 
+    // Ensure we represent the genomes that are not to be dereplicated
+    // TODO: Potentially group representatives per species and join to the clusters that have not been dereplicated, instead of mixing as we are currently doing.
     SUBSELECT_GRAPH.out.representatives
-    | splitCsv()
-    | view()
-    // | map { meta, reps -> 
-    //     [[meta, reps[0]]]
-    // }
-    // | collect
-    // | flatMap
-    // | mix(no_derep_representatives)
-    // | ifEmpty { error("Error: No representatives found") }
-    // | set { chosen_representatives }
+    | mix(clusters.no_derep)
+    | collectFile
+    | set { chosen_representatives }
 
-    // emit:
-    // chosen_representatives
+    emit:
+    chosen_representatives
 }
