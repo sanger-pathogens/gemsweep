@@ -1,5 +1,11 @@
 // calls check_cache.py to create or validate a config-specific cache directory, write cache metadata, and emit cache_config.json.
 process CHECK_CACHE {
+    label 'cpu_1'
+    label 'mem_4'
+    label 'time_queue_from_small'
+
+    container 'quay.io/sangerpathogens/pandas:2.2.1'
+
     output:
     path("cache_config.json"), emit: config
 
@@ -22,6 +28,11 @@ process CHECK_CACHE {
 
 process CACHE_LOOKUP {
     tag "${meta.ID}"
+    label 'cpu_1'
+    label 'mem_4'
+    label 'time_queue_from_small'
+
+    container 'quay.io/sangerpathogens/pandas:2.2.1'
 
     input:
     tuple val(meta), path(refs_file)
@@ -42,6 +53,11 @@ process CACHE_LOOKUP {
 
 process WRITE_CACHE_ENTRY {
     tag "${meta.ID}"
+    label 'cpu_1'
+    label 'mem_4'
+    label 'time_queue_from_small'
+
+    container 'quay.io/sangerpathogens/pandas:2.2.1'
 
     input:
     tuple val(meta), path(refs_file), path(groups_file)
