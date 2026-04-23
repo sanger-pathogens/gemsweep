@@ -29,7 +29,7 @@ include { MIXED_INPUT           } from './assorted-sub-workflows/mixed_input/mix
 include { SYLPH_REF_SELECTION   } from './assorted-sub-workflows/sylph_refset/sylph_refset.nf'
 include { CHECK_CACHE;
           CACHE_LOOKUP;
-          PUBLISH_CACHE_ENTRY   } from './modules/cache.nf'
+          WRITE_CACHE_ENTRY     } from './modules/cache.nf'
 include { PREP_REFS;             
           POPPUNK;                
           ORDER_GROUPS          } from './modules/poppunk.nf'
@@ -221,7 +221,7 @@ workflow {
             | join(generated_ref_groups_ch)
             | set { generated_cache_entries_ch}
             
-            PUBLISH_CACHE_ENTRY(generated_cache_entries_ch)
+            WRITE_CACHE_ENTRY(generated_cache_entries_ch, cache_config_ch)
         }
 
         // Build the current-run reference set from cached + generated.
