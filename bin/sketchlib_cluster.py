@@ -2,15 +2,19 @@
 
 """
 Cluster genomes in a pre-sketched sketchlib database by pairwise ANI distance
-using connected components. Outputs a CSV mapping each genome ID to a cluster ID.
+using connected components. Outputs a CSV mapping each genome ID to a cluster 
+ID. Also performs cluster checks; warning or failing if each genome is in it's 
+own cluster or all genomes fall into a single cluster, and either logging a 
+warning or, in strict mode, failing.
 
 Example usage:
-    ./sketchlib_cluster.py \
-        --sketch <pre-sketched_refs> \
-        --ani_threshold 0.05 \
-        --ref_ids <path/to/refs_ids.txt> \
-        --kmer_size 17 \
-        --out .
+    sketchlib_cluster.py \
+        --sketch reference_sketch \
+        --ani_threshold 0.01 \
+        --ref_ids path/to/refs_ids.txt \
+        --kstep 17,20,1 \
+        --out . \
+        --strict_mode
 
 """
 
@@ -32,7 +36,7 @@ def main():
     with open(args.ref_ids) as f:
         ref_ids = [line.strip() for line in f]
 
-    klist = args.klist
+    klist = parse_kmer_sizes(args.kstep)
     logging.info(f"Using kmer lengths: {klist}")
 
     # Query pairwise distances using ANI (single k-mer = no core/accessory decomposition)
@@ -42,7 +46,7 @@ def main():
     rows, cols, dists = pp_sketchlib.querySelfSparse(
         ref_db_name    = args.sketch,
         rList          = ref_ids,
-        klist          = args.klist,
+        klist          = klist,
         random_correct = True,
         dist_cutoff    = args.ani_threshold,  # only return pairs below this distance
         jaccard        = False,              # return ANI distance, not raw Jaccard
@@ -137,21 +141,20 @@ def parse_args() -> argparse.ArgumentParser:
     parser.add_argument(
         "--ani_threshold",
         type=float,
-        default=0.05,
-        help="maximum ANI distance threshold for clustering (default 0.05, meaning clusters of genomes sharing at least 95% ANI similarity)"
+        default=0.02,
+        help="maximum ANI distance threshold for clustering (default 0.02, meaning clusters of genomes sharing at least 98%% ANI similarity)"
     )
     parser.add_argument(
         "--ref_ids",
         type=Path,
         required=True,
-        help="Text file list of references, one ID per line in same order as supplied for sketch."
+        help="Text file list of references, one ID per line in same order as supplied for sketch"
     )
     parser.add_argument(
-        "--klist",
-        type=int,
-        nargs='+',
-        default=[13, 17, 21, 25, 29],    # Matches PopPUNK default
-        help="Kmer lengths to use for computing ANI"
+        "--kstep",
+        type=str,
+        default="13,29,4",    # Matches PopPUNK default
+        help="Kmer lengths to use for computing ANI in the format start,stop,step"
     )
     parser.add_argument(
         "--out",
@@ -163,14 +166,26 @@ def parse_args() -> argparse.ArgumentParser:
         "--threads",
         type=int,
         default=1,
-        help="Number of threads to use."
+        help="Number of threads to use"
     )
     parser.add_argument(
         "--strict_mode",
         action='store_true',
-        help="Turn on to produce exit code 1 on failure of cluster checks."
+        help="Produce exit code 1 on failure of cluster checks"
     )
     return parser.parse_args()
+
+def parse_kmer_sizes(kstep: str) -> list[int]:
+    parsed_k = kstep.split(',')
+    k_start = int(parsed_k[0])
+    k_stop = int(parsed_k[1])
+    step = int(parsed_k[2])
+
+    kmer_sizes = list(range(k_start, k_stop + 1, step))
+
+    return kmer_sizes
+        
+
 
 def validate_clusters(clusters_df: pd.DataFrame, num_refs: int, ani_threshold: float) -> bool:
     checks_passed = True

@@ -17,7 +17,7 @@ process SKETCHLIB_SKETCH {
 	sketchlib sketch \
 		-l ${refs_tsv} \
 		-o "${sketch_db}" \
-		--kmer "${params.sketchlib_kmer_size}" \
+		--kmer "${params.sketchlib_kstep}" \
 		--cpus "${task.cpus}"
 
     # Add random match chances calcs for correction
@@ -55,7 +55,7 @@ process SKETCHLIB_CLUSTER {
         --sketch ${sketch_prefix} \
         --ref_ids ref_ids.txt \
         --ani_threshold ${params.ani_threshold} \
-        --klist ${params.sketchlib_klist} \
+        --klist ${params.sketchlib_kstep} \
         --out ${sketch_prefix}_clusters.csv \
         --threads ${task.cpus} \
         --log ${sketch_prefix}_sketchlib_cluster
