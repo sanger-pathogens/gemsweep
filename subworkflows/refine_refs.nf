@@ -58,64 +58,24 @@ workflow REFINE_REFS {
     | join(clusters_csv)
     | BUILD_REFERENCE_CLUSTER_FILES
 
-    // TODO DELETE DEBUG CODE...
-    // ref_label_paths
-    // | randomSample(10)
-    // | view()
+    // Split out clusters and paths into separate files for positionally consistent files in index and core workflow
+    BUILD_REFERENCE_CLUSTER_FILES.out.references
+    | collectFile { cluster, rep_path -> ["representatives.txt", "${rep_path}\n"] }
+    | first()
+    | set { representatives_ch }
 
-    // DEREP_GROUPS.out.chosen_representatives
-    // | randomSample(10)
-    // | view()
+    PUBLISH_REPS(representatives_ch)
 
-    // DEREP_GROUPS.out.chosen_representatives
-    // | splitCsv
-    // | map -> { ref_label, cluster ->
-    //     ref_label
-    // }
-    // | randomSample(10)
-    // | view()
+    BUILD_REFERENCE_CLUSTER_FILES.out.clusters
+    | collectFile { cluster, rep_path -> ["groups.txt", "${cluster}\n"] }
+    | first()
+    | set {ref_groups_ch} // groups file for representatives only
 
-    // TODO Uncomment the below to test the next part of the pipeline
-    // DEREP_GROUPS.out.chosen_representatives
-    // | splitCsv
-    // | map { tuple_output ->
-    //     tuple_output[0]
-    // }
-    // | randomSample(10)
-    // | view()
-
-    // DEREP_GROUPS.out.chosen_representatives
-    // | splitCsv
-    // | map { tuple_output ->
-    //     tuple_output[0]
-    // }
-    // | join(ref_label_paths)
-    // | map { ref_label, meta, rep_path ->
-    //     [meta, rep_path]
-    // }
-    // | set { clusters_rep_paths }
-
-    // clusters_rep_paths.view()
-
-
-    // // Split out clusters and paths into separate files for positionally consistent files in index and core workflow
-    // clusters_rep_paths
-    // | collectFile { cluster, rep_path -> ["representatives.txt", "${rep_path}\n"] }
-    // | first()
-    // | set { representatives_ch }
-
-    // PUBLISH_REPS(representatives_ch)
-
-    // clusters_rep_paths
-    // | collectFile { cluster, rep_path -> ["groups.txt", "${cluster}\n"] }
-    // | first()
-    // | set {ref_groups_ch} // groups file for representatives only
-
-    // PUBLISH_GROUPS(ref_groups_ch)
+    PUBLISH_GROUPS(ref_groups_ch)
 
     // emit:
-    // representatives_ch
-    // ref_groups_ch
+    representatives_ch
+    ref_groups_ch
 }
 
 workflow DEREP_GROUPS {
