@@ -1,7 +1,7 @@
 process SKETCHLIB_SKETCH {
-    label 'cpu_2'
-    label 'mem_500M'
-    label 'time_30m'
+    label 'cpu_4'
+    label 'mem_1'
+    label 'time_queue_from_small'
 
     container 'quay.io/sangerpathogens/pp-sketchlib-python:2.1.5'
 
