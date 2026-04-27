@@ -60,7 +60,9 @@ process ORDER_GROUPS {
     tuple val(meta), path("groups.txt"), emit: groups
 
     script:
+    order_groups = "${projectDir}/bin/order_groups.py"
+    
     """
-    python3 ${projectDir}/bin/order_groups.py ${refs_tsv} ${clusters_csv} .
+    ${order_groups} --references_tsv ${refs_tsv} --groups_csv ${clusters_csv} --cluster_tool ${params.cluster_tool} --outdir .
     """
 }
