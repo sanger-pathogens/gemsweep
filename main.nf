@@ -156,8 +156,8 @@ workflow {
 
             REFINE_REFS(refine_refs_input)
 
-            // representatives_ch = REFINE_REFS.out.representatives_ch
-            // ref_groups_ch = REFINE_REFS.out.ref_groups_ch
+            representatives_ch = REFINE_REFS.out.representatives_ch
+            ref_groups_ch = REFINE_REFS.out.ref_groups_ch
 
         } else {
             representatives_ch = references_ch
@@ -169,6 +169,7 @@ workflow {
             ref_groups_ch = ORDER_GROUPS.out.groups
         }
 
+        // Probably need to make sure order is appropriate
         representatives_ch
         | join(ref_groups_ch)
         | multiMap { meta, refs, groups ->
@@ -177,17 +178,17 @@ workflow {
         }
         | set { ref_groups }
 
-        // ref_groups.refs
-        // | map { refs_file -> refs_file.path }
-        // | collectFile(name: "refs.txt", newLine: true)
-        // | set { refs }
+        ref_groups.refs
+        | map { refs_file -> refs_file.path }
+        | collectFile(name: "refs.txt", newLine: true)
+        | set { refs }
 
-        // ref_groups.groups
-        // | map { groups_file -> groups_file.path }
-        // | collectFile(name: "groups.txt", newLine: true)
-        // | set { groups }
+        ref_groups.groups
+        | map { groups_file -> groups_file.path }
+        | collectFile(name: "groups.txt", newLine: true)
+        | set { groups }
 
-        // COMBINE_REFS(refs, groups)
+        COMBINE_REFS(refs, groups)
 
         index_prefix_ch = channel.value("index") // needs to be identical to what index is set as in indexing process
         index_files_ch = THEMISTO_BUILD_INDEX(index_prefix_ch, representatives_ch).collect()
