@@ -43,24 +43,9 @@ workflow REFINE_REFS {
     | join(clusters_csv)
     | BUILD_REFERENCE_CLUSTER_FILES
 
-    // Split out clusters and paths into separate files for positionally consistent files in index and core workflow
-    BUILD_REFERENCE_CLUSTER_FILES.out.references
-    | collectFile { cluster, rep_path -> ["representatives.txt", "${rep_path}\n"] }
-    | first()
-    | set { representatives_ch }
-
-    PUBLISH_REPS(representatives_ch)
-
-    BUILD_REFERENCE_CLUSTER_FILES.out.clusters
-    | collectFile { cluster, rep_path -> ["groups.txt", "${cluster}\n"] }
-    | first()
-    | set {ref_groups_ch} // groups file for representatives only
-
-    PUBLISH_GROUPS(ref_groups_ch)
-
-    // emit:
-    representatives_ch
-    ref_groups_ch
+    emit:
+    representatives_ch = BUILD_REFERENCE_CLUSTER_FILES.out.references
+    ref_groups_ch = BUILD_REFERENCE_CLUSTER_FILES.out.clusters
 }
 
 workflow DEREP_GROUPS {
