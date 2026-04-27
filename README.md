@@ -144,7 +144,7 @@ mkdir mGEMs_bins_manifest
 **Cache options**
 | Flag | Type | Default | Description |
 | ----------------- | -------- | -------- | ------------------------------------------------------------------------------- |
-| `cache_dir` | `path` | `null` | Path to a cache root for autoselect mode. The pipeline creates a config-specific subdirectory containing cache metadata and per-species reference/group entries for reuse. |
+| `cache_dir` | `path` | `null` | Path to a cache root or an existing config-specific cache directory for autoselect mode. The pipeline reuses a matching cache directory containing cache metadata and per-species reference/group entries. |
 
 Cache Layout:
 

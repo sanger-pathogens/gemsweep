@@ -3,10 +3,13 @@
 """
 Prepare the reference cache for the current clustering configuration.
 
-This script treats params.cache_dir as a cache root, derives a
-configuration-specific effective_cache_dir, creates the cache root if missing,
-creates the effective cache directory if missing, writes or validates
-metadata.json, and emits cache_config.json.
+This script accepts either:
+
+1. a cache root, where it derives a configuration-specific subdirectory, or
+2. an already configuration-specific cache directory.
+
+It writes or validates metadata.json and emits cache_config.json describing
+the effective cache directory for this run.
 
 Expected layout:
 
@@ -55,7 +58,12 @@ from pathlib import Path
 
 def parse_args():
     parser = argparse.ArgumentParser(description="Prepare a configuration-specific reference cache.")
-    parser.add_argument("--cache-root", type=Path, required=True, help="User-provided cache root.")
+    parser.add_argument(
+        "--cache-root",
+        type=Path,
+        required=True,
+        help="User-provided cache root or configuration-specific cache directory.",
+    )
     parser.add_argument("--cluster-tool", required=True, help="Clustering tool for this run.")
     parser.add_argument("--cluster-method", required=True, help="Clustering method for this run.")
     parser.add_argument("--cluster-model", default="", help="Clustering model for this run.")
@@ -97,6 +105,25 @@ def build_effective_cache_dir(cache_root: Path, metadata: dict) -> Path:
         ]
     )
     return cache_root / cache_name
+
+
+def resolve_cache_paths(cache_root: Path, metadata: dict) -> tuple[Path, Path]:
+    expected_cache_name = "_".join(
+        [
+            safe_path_part(metadata["cluster_tool"]),
+            safe_path_part(metadata["cluster_method"]),
+            safe_path_part(metadata["cluster_model"]),
+            f"reps{safe_path_part(metadata['representatives'])}",
+        ]
+    )
+
+    # Backward-compatible behavior: if the provided path already names the
+    # configuration-specific cache directory, reuse it directly instead of
+    # nesting the same suffix under itself.
+    if cache_root.name == expected_cache_name:
+        return cache_root.parent, cache_root
+
+    return cache_root, build_effective_cache_dir(cache_root, metadata)
 
 
 def read_json(path: Path) -> dict:
@@ -151,9 +178,9 @@ def initialise_cache_dir(effective_cache_dir: Path, metadata: dict, note: dict |
 
 def main():
     args = parse_args()
-    cache_root = args.cache_root.resolve()
+    requested_cache_path = args.cache_root.resolve()
     metadata = build_metadata(args)
-    effective_cache_dir = build_effective_cache_dir(cache_root, metadata)
+    cache_root, effective_cache_dir = resolve_cache_paths(requested_cache_path, metadata)
     metadata_file = effective_cache_dir / "metadata.json"
 
     cache_root.mkdir(parents=True, exist_ok=True)

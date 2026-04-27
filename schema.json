@@ -42,7 +42,7 @@
     "Cache options": {
       "cache_dir": {
         "default": "null",
-        "help_text": "Path to a cache root for autoselect mode. The pipeline creates a config-specific subdirectory containing metadata.json and per-species references.txt/groups.txt entries for cache reuse."
+        "help_text": "Path to a cache root or an existing config-specific cache directory for autoselect mode. The pipeline reuses a matching cache directory containing metadata.json and per-species references.txt/groups.txt entries."
       }
     },
     "Clustering options": {
