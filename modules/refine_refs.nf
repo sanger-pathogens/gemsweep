@@ -89,3 +89,72 @@ process SPLIT_DIST_MATRIX {
         --outdir cluster_dists
     """
 }
+
+process EXTRACT_REF_LABEL {
+    tag "${meta.ID}"
+    label "cpu_1"
+    label "mem_1"
+    label "time_queue_from_small"
+
+    container "quay.io/sangerpathogens/pandas:2.2.1"
+
+    input:
+    tuple val(meta), path(references)
+
+    output:
+    tuple val(meta), path(output_csv),  emit: ref_label_paths
+
+    script:
+    output_csv = "${meta.ID}_reference_paths.csv"
+    """
+    "${projectDir}/bin/extract_ref_label.py" \\
+        --references ${references} \\
+        --output ${output_csv}
+    """
+}
+
+process NORMALISE_REFERENCE_LIST {
+    tag "${meta.ID}"
+    label "cpu_1"
+    label "mem_1"
+    label "time_queue_from_small"
+
+    container "quay.io/sangerpathogens/pandas:2.2.1"  // TODO Only needs to rely on ubuntu...
+
+    input:
+    tuple val(meta), path(reference_list)
+
+    output:
+    tuple val(meta), path("references.txt")
+
+    script:
+    """
+    cut -d',' -f1 $reference_list > references.txt
+    """
+}
+
+process BUILD_REFERENCE_CLUSTER_FILES {
+    tag "${meta.ID}"
+    label "cpu_1"
+    label "mem_1"
+    label "time_queue_from_small"
+
+    container "quay.io/sangerpathogens/pandas:2.2.1"
+
+    input:
+    tuple val(meta), path(ref_labels), path(reference_list), path(clusters_csv)
+
+    output:
+    tuple val(meta), path("${meta.ID}_reference_clusters.csv"), emit: reference_clusters
+    tuple val(meta), path("${meta.ID}_references.txt"), emit: references
+    tuple val(meta), path("${meta.ID}_clusters.txt"), emit: clusters
+
+    script:
+    """
+    ${projectDir}/bin/join_reference_cluster.py \
+        --ref_labels ${ref_labels} \
+        --reference_list ${reference_list} \
+        --clusters_csv ${clusters_csv} \
+        --output_prefix ${meta.ID}
+    """
+}
