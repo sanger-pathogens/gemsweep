@@ -47,7 +47,7 @@ def main():
         ref_db_name    = args.sketch,
         rList          = ref_ids,
         klist          = klist,
-        random_correct = True,
+        random_correct = args.random_correct,
         dist_cutoff    = args.ani_threshold,  # only return pairs below this distance
         jaccard        = False,              # return ANI distance, not raw Jaccard
         num_threads    = args.threads,
@@ -172,6 +172,11 @@ def parse_args() -> argparse.ArgumentParser:
         "--strict_mode",
         action='store_true',
         help="Produce exit code 1 on failure of cluster checks"
+    )
+    parser.add_argument(
+        "--random_correct",
+        action='store_true',
+        help="Apply random match correction, only use if sketch includes random match calculations"
     )
     return parser.parse_args()
 

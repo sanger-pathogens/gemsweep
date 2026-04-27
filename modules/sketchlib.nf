@@ -13,6 +13,11 @@ process SKETCHLIB_SKETCH {
 
     script:
     sketch_db = "references_sketch" // need to make this per taxon if this runs per taxon after sylph
+
+    // Add random match chances calcs for correction only when there are enough references to do so:
+    def num_refs = refs_tsv.readLines().findAll { line -> line.trim() }.size()
+    def random_match_calcs = (num_refs > 5) ? "sketchlib add random ${sketch_db}" : ""
+
     """
 	sketchlib sketch \
 		-l ${refs_tsv} \
@@ -20,8 +25,7 @@ process SKETCHLIB_SKETCH {
 		-k "${params.sketchlib_kstep}" \
 		--cpus "${task.cpus}"
 
-    # Add random match chances calcs for correction
-    sketchlib add random "${sketch_db}"
+    ${random_match_calcs}
     """
 }
 
@@ -40,11 +44,19 @@ process SKETCHLIB_CLUSTER {
     path("groups.txt"), emit: groups
 
     script:
-    sketchlib_cluster = "${projectDir}/bin/sketchlib_cluster.py" 
+    // Check number of references is suitable for random match correction
+    def num_refs = refs_tsv.readLines().findAll { line -> line.trim() }.size()
+
+    // Add conditional flags to command
+    def sketchlib_cluster = "${projectDir}/bin/sketchlib_cluster.py" 
     if (params.cluster_strict) {
         sketchlib_cluster += " --strict_mode"
         }
+    if (num_refs > 5) {
+        sketchlib_cluster += " --random_correct"
+    }
 
+    // reuse the sketch name for the clusters csv output
     sketch_prefix = h5_db.baseName
 
     """
