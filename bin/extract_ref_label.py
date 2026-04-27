@@ -60,14 +60,14 @@ def make_ref_label(reference_path: str) -> str:
     Current behaviour imitates ref_label extraction of poppunk:
       1. Extract filename
       2. Remove suffix, e.g. '.gz'
-      3. Replace dashes and dots with underscores
+      3. Replace dots with underscores
 
     Example:
         GCA_035419305.1_ASM3541930v1_genomic.fna.gz
         -> GCA_035419305_1_ASM3541930v1_genomic_fna
     """
     stem = Path(reference_path).stem
-    label = re.sub(r"[-.]", "_", stem)
+    label = re.sub(r"[.]", "_", stem)
     return label
 
 
