@@ -186,8 +186,8 @@ workflow {
 
         COMBINE_REFS(refs, groups)
 
-        representatives_ch = COMBINE_REFS.out.references
-        ref_groups_ch = COMBINE_REFS.out.groups
+        representatives_ch = COMBINE_REFS.out.references.first()
+        ref_groups_ch = COMBINE_REFS.out.groups.first()
 
         // Build themisto index
         index_prefix_ch = channel.value("index") // needs to be identical to what index is set as in indexing process
