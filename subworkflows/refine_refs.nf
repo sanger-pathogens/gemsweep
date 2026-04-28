@@ -5,8 +5,6 @@ include { SPLIT_CLUSTERS_CSV;
           NORMALISE_REFERENCE_LIST;
           EXTRACT_REF_LABEL;
           BUILD_REFERENCE_CLUSTER_FILES; } from '../modules/refine_refs.nf'
-include { PUBLISH_GROUPS;
-          PUBLISH_REPS                } from '../modules/publish_intermediates.nf'
 
 workflow REFINE_REFS {
     take:
