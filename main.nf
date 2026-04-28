@@ -156,22 +156,22 @@ workflow {
 
             REFINE_REFS(refine_refs_input)
 
-            representatives_ch = REFINE_REFS.out.representatives_ch
-            ref_groups_ch = REFINE_REFS.out.ref_groups_ch
+            representatives_ch_per_taxon = REFINE_REFS.out.representatives_ch
+            ref_groups_ch_per_taxon = REFINE_REFS.out.ref_groups_ch
 
         } else {
-            representatives_ch = references_ch
+            representatives_ch_per_taxon = references_ch
 
             PREP_REFS.out.refs_csv
             | join(POPPUNK.out.clusters)
             | ORDER_GROUPS
 
-            ref_groups_ch = ORDER_GROUPS.out.groups
+            ref_groups_ch_per_taxon = ORDER_GROUPS.out.groups
         }
 
         // Probably need to make sure order is appropriate
-        representatives_ch
-        | join(ref_groups_ch)
+        representatives_ch_per_taxon
+        | join(ref_groups_ch_per_taxon)
         | multiMap { meta, refs, groups ->
             refs: refs
             groups: groups
@@ -189,6 +189,9 @@ workflow {
         | set { groups }
 
         COMBINE_REFS(refs, groups)
+
+        representatives_ch = COMBINE_REFS.out.references
+        ref_groups_ch = COMBINE_REFS.out.groups
 
         index_prefix_ch = channel.value("index") // needs to be identical to what index is set as in indexing process
         index_files_ch = THEMISTO_BUILD_INDEX(index_prefix_ch, representatives_ch).collect()
