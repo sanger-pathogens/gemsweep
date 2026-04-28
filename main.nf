@@ -30,8 +30,6 @@ include { SYLPH_REF_SELECTION   } from './assorted-sub-workflows/sylph_refset/sy
 include { PREP_REFS;             
           POPPUNK;                
           ORDER_GROUPS          } from './modules/poppunk.nf'
-include { PUBLISH_GROUPS;
-          PUBLISH_REPS          } from './modules/publish_intermediates.nf'
 include { THEMISTO_BUILD_INDEX; 
           THEMISTO_PSEUDOALIGN;
           THEMISTO_STATS        } from './modules/themisto.nf'
@@ -190,9 +188,6 @@ workflow {
 
         representatives_ch = COMBINE_REFS.out.references
         ref_groups_ch = COMBINE_REFS.out.groups
-
-        PUBLISH_REPS(representatives_ch)
-        PUBLISH_GROUPS(ref_groups_ch)
 
         // Build themisto index
         index_prefix_ch = channel.value("index") // needs to be identical to what index is set as in indexing process
