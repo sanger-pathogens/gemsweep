@@ -140,14 +140,12 @@ workflow {
         SYLPH_REF_SELECTION(reads_ch)
         references_ch = SYLPH_REF_SELECTION.out.references
 
-        //TODO Need to group refs per species (or other taxon here) here for use with poppunk
-
         // Cluster references
         PREP_REFS(references_ch)
         POPPUNK(PREP_REFS.out.refs_csv)
         poppunk_clusters_csv = POPPUNK.out.clusters
 
-        // TODO: dereplication instead of optional/param-based automate based on num genomes per species?
+        // Dereplicate/Refine references per cluster
         if (params.refine_refs) {
             references_ch
             | join(POPPUNK.out.clusters)
@@ -169,7 +167,7 @@ workflow {
             ref_groups_ch_per_taxon = ORDER_GROUPS.out.groups
         }
 
-        // Probably need to make sure order is appropriate
+        // Combine reps and groups across taxon (e.g. species)
         representatives_ch_per_taxon
         | join(ref_groups_ch_per_taxon)
         | multiMap { meta, refs, groups ->
@@ -196,6 +194,7 @@ workflow {
         PUBLISH_REPS(representatives_ch)
         PUBLISH_GROUPS(ref_groups_ch)
 
+        // Build themisto index
         index_prefix_ch = channel.value("index") // needs to be identical to what index is set as in indexing process
         index_files_ch = THEMISTO_BUILD_INDEX(index_prefix_ch, representatives_ch).collect()
     }
