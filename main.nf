@@ -157,7 +157,7 @@ workflow {
         poppunk_clusters_csv = POPPUNK.out.clusters
 
         // Dereplicate/Refine references per cluster
-        if (params.refine_refs) {
+        // if (params.refine_refs) {
             references_ch
             | join(POPPUNK.out.clusters)
             | join(POPPUNK.out.dist_matrix)
@@ -165,39 +165,33 @@ workflow {
 
             REFINE_REFS(refine_refs_input)
 
-            representatives_ch_per_taxon = REFINE_REFS.out.representatives_ch
-            ref_groups_ch_per_taxon = REFINE_REFS.out.ref_groups_ch
+            // representatives_ch_per_taxon = REFINE_REFS.out.representatives_ch
+            // ref_groups_ch_per_taxon = REFINE_REFS.out.ref_groups_ch
 
-        } else {
-            representatives_ch_per_taxon = references_ch
+        // } else {
+        //     representatives_ch_per_taxon = references_ch
 
-            PREP_REFS.out.refs_csv
-            | join(POPPUNK.out.clusters)
-            | ORDER_GROUPS
+        //     PREP_REFS.out.refs_csv
+        //     | join(POPPUNK.out.clusters)
+        //     | ORDER_GROUPS
 
-            ref_groups_ch_per_taxon = ORDER_GROUPS.out.groups
-        }
+        //     ref_groups_ch_per_taxon = ORDER_GROUPS.out.groups
+        // }
 
         // Combine reps and groups across taxon (e.g. species)
-        representatives_ch_per_taxon
-        | join(ref_groups_ch_per_taxon)
-        | multiMap { meta, refs, groups ->
-            refs: refs
-            groups: groups
-        }
-        | set { ref_groups }
+        //TODO Ideally replace this with the output BUILD_REFERENCE_CLUSTER_FILES.out.reference_clusters...
+        // representatives_ch_per_taxon
+        // | join(ref_groups_ch_per_taxon)
+        // | collectFile { ref_groups_tuple ->
+        //     def (meta, refs, groups) = ref_groups_tuple
+        //     ["${meta.ID}_ref_groups.tsv", "${meta.ID},${refs},${groups}"]
+        // }
+        // | collect
+        // | set { ref_groups }
 
-        ref_groups.refs
-        | map { refs_file -> refs_file.path }
-        | collectFile(name: "refs.txt", newLine: true)
-        | set { refs }
-
-        ref_groups.groups
-        | map { groups_file -> groups_file.path }
-        | collectFile(name: "groups.txt", newLine: true)
-        | set { groups }
-
-        COMBINE_REFS(refs, groups)
+        REFINE_REFS.out.rep_refs_and_groups
+        | collect
+        | COMBINE_REFS
 
         representatives_ch = COMBINE_REFS.out.references.first()
         ref_groups_ch = COMBINE_REFS.out.groups.first()
