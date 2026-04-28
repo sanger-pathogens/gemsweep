@@ -193,6 +193,9 @@ workflow {
         representatives_ch = COMBINE_REFS.out.references
         ref_groups_ch = COMBINE_REFS.out.groups
 
+        PUBLISH_REPS(representatives_ch)
+        PUBLISH_GROUPS(ref_groups_ch)
+
         index_prefix_ch = channel.value("index") // needs to be identical to what index is set as in indexing process
         index_files_ch = THEMISTO_BUILD_INDEX(index_prefix_ch, representatives_ch).collect()
     }
