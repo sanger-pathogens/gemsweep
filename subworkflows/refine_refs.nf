@@ -42,6 +42,7 @@ workflow REFINE_REFS {
     | BUILD_REFERENCE_CLUSTER_FILES
 
     emit:
+    rep_refs_and_groups = BUILD_REFERENCE_CLUSTER_FILES.out.reference_clusters
     representatives_ch = BUILD_REFERENCE_CLUSTER_FILES.out.references
     ref_groups_ch = BUILD_REFERENCE_CLUSTER_FILES.out.clusters
 }
