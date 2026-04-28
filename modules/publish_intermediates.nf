@@ -6,10 +6,10 @@ process PUBLISH_REPS {
     label "mem_1"
     label 'time_30m'
 
-    publishDir "${params.outdir}/poppunk_representatives", mode: 'copy'
+    publishDir "${params.outdir}/representatives", mode: 'copy'
 
     input:
-    path(representatives)
+    path(representatives, stageAs: "reps_to_publish.txt")
 
     output:
     path("representatives.txt")
@@ -28,10 +28,10 @@ process PUBLISH_GROUPS {
     label "mem_1"
     label 'time_30m'
 
-    publishDir "${params.outdir}/poppunk_representatives", mode: 'copy'
+    publishDir "${params.outdir}/representatives", mode: 'copy'
 
     input:
-    path(representative_groups)
+    path(representative_groups, , stageAs: "groups_to_publish.txt")
 
     output:
     path("groups.txt")
