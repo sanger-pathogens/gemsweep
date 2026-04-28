@@ -8,8 +8,7 @@ process COMBINE_REFS {
     container 'quay.io/sangerpathogens/pandas:2.2.1'
 
     input:
-    path(refs, stageAs: "input/refs.txt")
-    path(groups, stageAs: "input/groups.txt")
+    path(refs_groups, stageAs: "input/*")
 
     output:
     path("references.txt"), emit: references
@@ -18,9 +17,9 @@ process COMBINE_REFS {
     script:
     """
     ${projectDir}/bin/combine_refs.py \\
-        --refs input/refs.txt \\
-        --groups input/groups.txt \\
+        --ref_group_files input/* \\
         --prefix_groups \\
+        --header \\
         --outdir .
     """
 }
