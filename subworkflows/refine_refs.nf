@@ -98,12 +98,10 @@ workflow DEREP_GROUPS {
 
     SUBSELECT_GRAPH.out.representatives
     | mix(clusters_no_derep)
-    | map { meta, rep_file ->
-        [meta, rep_file]
-    }
     | NORMALISE_REFERENCE_LIST  // Chosen representatives is a list of [meta, rep_file] where rep_file is heterogeneous because it contains "rep,cluster" for clusters_no_derep and "rep" alone for SUBSELECT_GRAPH.out.representatives. So quick helper to normalize.
-    | collectFile { representatives_tuple -> 
-        ["${representatives_tuple[0].ID}_representatives.txt", representatives_tuple[1].readLines().join("\n") + "\n"]  // Add last newline to ensure last line has a newline character too!
+    | collectFile { representatives_tuple ->
+        def (meta, rep_file) = representatives_tuple
+        ["${meta.ID}_representatives.txt", rep_file.readLines().join("\n") + "\n"]  // Add last newline to ensure last line has a newline character too!
     }
     | set { chosen_representatives }
 
