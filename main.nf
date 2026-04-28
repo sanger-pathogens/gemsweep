@@ -123,18 +123,21 @@ workflow {
 
         REFINE_REFS(refine_refs_input)
 
+        // Publish the representatives and groups
         REFINE_REFS.out.representatives_ch
-        | map { meta, reps -> reps }
-        | set { reps_to_publish }
-        
-        REFINE_REFS.out.representatives_ch
-        | map { meta, groups -> groups }
-        | set { groups_to_publish }
+        | map { meta, refs_file -> refs_file.path }
+        | collectFile(name: "refs.txt", newLine: true)
+        | set { refs }
 
-        COMBINE_REFS(reps_to_publish, groups_to_publish)
+        REFINE_REFS.out.ref_groups_ch
+        | map { meta, groups_file -> groups_file.path }
+        | collectFile(name: "groups.txt", newLine: true)
+        | set { groups }        
 
-        representatives_ch = COMBINE_REFS.out.references
-        ref_groups_ch = COMBINE_REFS.out.groups
+        COMBINE_REFS(refs, groups)
+
+        representatives_ch = COMBINE_REFS.out.references.first()
+        ref_groups_ch = COMBINE_REFS.out.groups.first()
 
         index_prefix_ch = channel.value("index") // needs to be identical to what index is set as in indexing process
         index_files_ch = THEMISTO_BUILD_INDEX(index_prefix_ch, representatives_ch).collect()
