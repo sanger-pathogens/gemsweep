@@ -123,7 +123,7 @@ workflow {
 
         REFINE_REFS(refine_refs_input)
 
-        // Publish the representatives and groups     
+        // Split into references and groups, then publish
         REFINE_REFS.out.rep_refs_and_groups
         | map { meta, ref_groups_file -> ref_groups_file}
         | collect
@@ -150,38 +150,14 @@ workflow {
         poppunk_clusters_csv = POPPUNK.out.clusters
 
         // Dereplicate/Refine references per cluster
-        // if (params.refine_refs) {
-            references_ch
-            | join(POPPUNK.out.clusters)
-            | join(POPPUNK.out.dist_matrix)
-            | set { refine_refs_input }
+        references_ch
+        | join(POPPUNK.out.clusters)
+        | join(POPPUNK.out.dist_matrix)
+        | set { refine_refs_input }
 
-            REFINE_REFS(refine_refs_input)
+        REFINE_REFS(refine_refs_input)
 
-            // representatives_ch_per_taxon = REFINE_REFS.out.representatives_ch
-            // ref_groups_ch_per_taxon = REFINE_REFS.out.ref_groups_ch
-
-        // } else {
-        //     representatives_ch_per_taxon = references_ch
-
-        //     PREP_REFS.out.refs_csv
-        //     | join(POPPUNK.out.clusters)
-        //     | ORDER_GROUPS
-
-        //     ref_groups_ch_per_taxon = ORDER_GROUPS.out.groups
-        // }
-
-        // Combine reps and groups across taxon (e.g. species)
-        //TODO Ideally replace this with the output BUILD_REFERENCE_CLUSTER_FILES.out.reference_clusters...
-        // representatives_ch_per_taxon
-        // | join(ref_groups_ch_per_taxon)
-        // | collectFile { ref_groups_tuple ->
-        //     def (meta, refs, groups) = ref_groups_tuple
-        //     ["${meta.ID}_ref_groups.tsv", "${meta.ID},${refs},${groups}"]
-        // }
-        // | collect
-        // | set { ref_groups }
-
+        // Split into references and groups, then combine across all taxa
         REFINE_REFS.out.rep_refs_and_groups
         | map { meta, ref_groups_file -> ref_groups_file}
         | collect
