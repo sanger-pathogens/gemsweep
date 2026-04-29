@@ -90,9 +90,9 @@ workflow {
 
         // Cluster references
         PREP_REFS(references_ch)
-        POPPUNK(PREP_REFS.out.refs_csv)
+        POPPUNK(PREP_REFS.out.refs_tsv)
 
-        PREP_REFS.out.refs_csv
+        PREP_REFS.out.refs_tsv
         | join(POPPUNK.out.clusters)
         | ORDER_GROUPS
 
@@ -115,7 +115,7 @@ workflow {
 
         // Cluster references
         PREP_REFS(references_ch)
-        POPPUNK(PREP_REFS.out.refs_csv)
+        POPPUNK(PREP_REFS.out.refs_tsv)
 
         // Select representatives from clusters
         references_ch
@@ -144,7 +144,7 @@ workflow {
 
         // Cluster references
         PREP_REFS(references_ch)
-        POPPUNK(PREP_REFS.out.refs_csv)
+        POPPUNK(PREP_REFS.out.refs_tsv)
         poppunk_clusters_csv = POPPUNK.out.clusters
 
         // TODO: dereplication instead of optional/param-based automate based on num genomes per species?
@@ -162,7 +162,7 @@ workflow {
         } else {
             representatives_ch = references_ch
 
-            PREP_REFS.out.refs_csv
+            PREP_REFS.out.refs_tsv
             | join(POPPUNK.out.clusters)
             | ORDER_GROUPS
 

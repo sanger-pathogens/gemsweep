@@ -7,11 +7,7 @@ process PREP_REFS {
     tuple val(meta), path(refs_txt)
 
     output:
-<<<<<<< HEAD
-    tuple val(meta), path('references.tsv'), emit: refs_csv
-=======
-    path 'references.tsv', emit: refs_tsv
->>>>>>> c355ddc (Standardise the mentions of refs_tsv the output of PREP_REFS)
+    tuple val(meta), path('references.tsv'), emit: refs_tsv
 
     script:
     """
@@ -29,7 +25,7 @@ process POPPUNK {
     publishDir "${params.outdir}/poppunk/${meta.ID}", mode: 'copy', pattern: 'pp_database/*', enabled: params.publish_poppunk
 
     input:
-    tuple val(meta), path(ref_tsv)
+    tuple val(meta), path(refs_tsv)
 
     output:
     tuple val(meta), path("${out}/${out}_clusters.csv"), emit: clusters     // for downstream
