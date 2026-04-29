@@ -14,18 +14,18 @@ process SKETCHLIB_SKETCH {
     script:
     sketch_db = "references_sketch" // need to make this per taxon if this runs per taxon after sylph
 
-    // Add random match chances calcs for correction only when there are enough references to do so:
-    def num_refs = refs_tsv.readLines().findAll { line -> line.trim() }.size()
-    def random_match_calcs = (num_refs > 5) ? "sketchlib add random ${sketch_db}" : ""
-
     """
 	sketchlib sketch \
 		-l ${refs_tsv} \
 		-o "${sketch_db}" \
-		-k "${params.sketchlib_kstep}" \
+		-k ${params.sketchlib_kstep} \
 		--cpus "${task.cpus}"
 
-    ${random_match_calcs}
+    # Add random match chances calcs for correction only when there are enough references to do so
+    num_refs=\$(grep -cve '^\\s*\$' ${refs_tsv})
+    if [ "\$num_refs" -gt 5 ]; then
+        sketchlib add random "${sketch_db}"
+    fi
     """
 }
 
@@ -44,17 +44,10 @@ process SKETCHLIB_CLUSTER {
     path("groups.txt"), emit: groups
 
     script:
-    // Check number of references is suitable for random match correction
-    def num_refs = refs_tsv.readLines().findAll { line -> line.trim() }.size()
-
-    // Add conditional flags to command
     def sketchlib_cluster = "${projectDir}/bin/sketchlib_cluster.py" 
     if (params.cluster_strict) {
         sketchlib_cluster += " --strict_mode"
         }
-    if (num_refs > 5) {
-        sketchlib_cluster += " --random_correct"
-    }
 
     // reuse the sketch name for the clusters csv output
     sketch_prefix = h5_db.baseName
@@ -63,6 +56,13 @@ process SKETCHLIB_CLUSTER {
     # Get IDs only for ref_ids
     cut -f1 ${refs_tsv} > ref_ids.txt
 
+    # Get number of references to determine whether to use random match calcs
+    num_refs=\$(grep -cve '^\\s*\$' ${refs_tsv})
+    random_flag=""
+    if [ "\$num_refs" -gt 5 ]; then
+        random_flag="--random_correct"
+    fi
+
     ${sketchlib_cluster} \
         --sketch ${sketch_prefix} \
         --ref_ids ref_ids.txt \
@@ -70,7 +70,8 @@ process SKETCHLIB_CLUSTER {
         --kstep ${params.sketchlib_kstep} \
         --out ${sketch_prefix}_clusters.csv \
         --threads ${task.cpus} \
-        --log ${sketch_prefix}_sketchlib_cluster
+        --log ${sketch_prefix}_sketchlib_cluster \
+        \$random_flag
 
     cut -f2 ${sketch_prefix}_clusters.csv | tail -n +2 > groups.txt
     """
