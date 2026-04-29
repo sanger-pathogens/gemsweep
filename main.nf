@@ -123,18 +123,11 @@ workflow {
 
         REFINE_REFS(refine_refs_input)
 
-        // Publish the representatives and groups
-        REFINE_REFS.out.representatives_ch
-        | map { meta, refs_file -> refs_file.path }
-        | collectFile(name: "refs.txt", newLine: true)
-        | set { refs }
-
-        REFINE_REFS.out.ref_groups_ch
-        | map { meta, groups_file -> groups_file.path }
-        | collectFile(name: "groups.txt", newLine: true)
-        | set { groups }        
-
-        COMBINE_REFS(refs, groups)
+        // Publish the representatives and groups     
+        REFINE_REFS.out.rep_refs_and_groups
+        | map { meta, ref_groups_file -> ref_groups_file}
+        | collect
+        | COMBINE_REFS
 
         representatives_ch = COMBINE_REFS.out.references.first()
         ref_groups_ch = COMBINE_REFS.out.groups.first()
@@ -190,6 +183,7 @@ workflow {
         // | set { ref_groups }
 
         REFINE_REFS.out.rep_refs_and_groups
+        | map { meta, ref_groups_file -> ref_groups_file}
         | collect
         | COMBINE_REFS
 
