@@ -48,7 +48,7 @@
         "default": "0.02",
         "help_text": "Max ANI distance threshold for clustering (default 0.2 clusters genomes sharing >98% ANI similarity)"
       },
-      "sketchlib_klist": {
+      "sketchlib_kstep": {
         "default": "13,29,4",
         "help_text": "Kmer sizes at which sketchlib will sketch the reference in the format start,stop,step"
       },
