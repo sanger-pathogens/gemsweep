@@ -158,11 +158,12 @@ workflow {
             cache_config_ch = CHECK_CACHE.out.config.first()
             CACHE_LOOKUP(candidate_references_ch, cache_config_ch)
 
-            rep_refs_ch = CACHE_LOOKUP.out.hits
-                | splitCsv(header: true, sep: '\t')
-                | map { row ->
-                    tuple([ID: row.species_id], file(row.cached_refs))
-                }
+            CACHE_LOOKUP.out.hits
+            | splitCsv(header: true, sep: '\t')
+            | map { row ->
+                tuple([ID: row.species_id], file(row.cached_refs))
+            }
+            | set { rep_refs_ch }
 
             ref_groups_ch = CACHE_LOOKUP.out.hits
                 | splitCsv(header: true, sep: '\t')
