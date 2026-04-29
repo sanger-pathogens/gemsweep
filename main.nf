@@ -38,6 +38,8 @@ include { THEMISTO_BUILD_INDEX;
 include { MSWEEP                } from './modules/msweep.nf'
 include { MGEMS                 } from './modules/mgems.nf'
 include { COMBINE_REFS          } from './modules/helper_processes.nf'
+include { SKETCHLIB_SKETCH;
+          SKETCHLIB_CLUSTER     }  from './modules/sketchlib.nf'
 
 //
 // SUBWORKFLOWS
@@ -103,8 +105,26 @@ workflow {
         index_files_ch = THEMISTO_BUILD_INDEX(index_prefix_ch, representatives_ch).collect()
 
     } else if ((params.ref_mode == "full") && (params.cluster_tool == "sketchlib")) {
-        // To populate
-        error("Sketchlib reference clustering not implemented yet! Watch this space :)")
+        // Set up input channels starting from references.txt
+        channel.fromPath(params.references)
+        | first() // using .first() to get a value channel
+        | map { ref -> [ ["ID": "all_refs"], ref ] }
+        | set { references_ch }
+
+        // Cluster references
+        PREP_REFS(references_ch)
+        SKETCHLIB_SKETCH(PREP_REFS.out.refs_tsv)
+        | SKETCHLIB_CLUSTER
+
+        PREP_REFS.out.refs_tsv
+        | join(SKETCHLIB_CLUSTER.out.clusters)
+        | ORDER_GROUPS
+
+        representatives_ch = references_ch // no dereplication
+        ref_groups_ch = ORDER_GROUPS.out.groups
+
+        index_prefix_ch = channel.value("index") // needs to be identical to what index is set as in indexing process
+        index_files_ch = THEMISTO_BUILD_INDEX(index_prefix_ch, representatives_ch).collect()
 
     } else if ((params.ref_mode == "refine") && (params.cluster_tool == "poppunk")) {
         // Set up input channels starting from references.txt

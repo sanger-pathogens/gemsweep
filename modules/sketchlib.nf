@@ -40,7 +40,7 @@ process SKETCHLIB_CLUSTER {
     tuple path(refs_tsv), path(h5_db)
 
     output:
-    path("${sketch_prefix}_clusters.csv"), emit: clusters_csv
+    path("${sketch_prefix}_clusters.csv"), emit: clusters
     path("groups.txt"), emit: groups
 
     script:
