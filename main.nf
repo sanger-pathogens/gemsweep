@@ -181,6 +181,7 @@ workflow {
             // Cache-disabled path: all Sylph refs continue to clustering.
             rep_refs_ch = Channel.empty()
             ref_groups_ch = Channel.empty()
+            candidate_refs_to_cluster = candidate_references_ch
         }
 
 
