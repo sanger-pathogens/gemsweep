@@ -11,47 +11,6 @@ workflow REFINE_REFS {
     clustered_refs  // tuple(meta, references, clusters_csv, sparse_dist_matrix)
 
     main:
-    clustered_refs
-    | multiMap { meta, references, clusters_csv, sparse_dist_matrix ->
-        references: [meta, references]
-        clusters_with_dist_matrix: [meta, clusters_csv, sparse_dist_matrix]
-    }
-    | set { refs_info }
-
-    DEREP_GROUPS(clustered_refs)
-
-    EXTRACT_REF_LABEL(refs_info.references)
-
-    refs_info.clusters_with_dist_matrix
-    | map { meta, clusters_csv, sparse_dist_matrix ->
-        [meta, clusters_csv]
-    }
-    | set { clusters_csv }
-
-    DEREP_GROUPS.out.chosen_representatives
-    | map { chosen_representatives -> 
-        def taxon = chosen_representatives.baseName.replace("_representatives", "")
-        def meta = ["ID":taxon]
-        [meta, chosen_representatives]
-    }
-    | set { chosen_representatives }
-
-    chosen_representatives 
-    | join(EXTRACT_REF_LABEL.out.ref_label_paths)
-    | join(clusters_csv)
-    | BUILD_REFERENCE_CLUSTER_FILES
-
-    emit:
-    rep_refs_and_groups = BUILD_REFERENCE_CLUSTER_FILES.out.reference_clusters
-    representatives_ch = BUILD_REFERENCE_CLUSTER_FILES.out.references
-    ref_groups_ch = BUILD_REFERENCE_CLUSTER_FILES.out.clusters
-}
-
-workflow DEREP_GROUPS {
-    take:
-    clustered_refs  // tuple(meta, references, clusters_csv, pp_dist_matrix)
-
-    main:
     // Idea - split clusters_csv into multiple smaller CSVs (one per cluster)
     // Then split the distance matrix per cluster - this would allow SPLIT_DIST_MATRIX to output just one CSV instead of multiple and should simplify whole workflow...
 
@@ -106,6 +65,23 @@ workflow DEREP_GROUPS {
     }
     | set { chosen_representatives }
 
-    emit:
+    EXTRACT_REF_LABEL(clusters_info.references)
+
     chosen_representatives
+    | map { chosen_representatives -> 
+        def taxon = chosen_representatives.baseName.replace("_representatives", "")
+        def meta = ["ID":taxon]
+        [meta, chosen_representatives]
+    }
+    | set { chosen_representatives }
+
+    chosen_representatives 
+    | join(EXTRACT_REF_LABEL.out.ref_label_paths)
+    | join(clusters_csv)
+    | BUILD_REFERENCE_CLUSTER_FILES
+
+    emit:
+    rep_refs_and_groups = BUILD_REFERENCE_CLUSTER_FILES.out.reference_clusters
+    representatives_ch = BUILD_REFERENCE_CLUSTER_FILES.out.references
+    ref_groups_ch = BUILD_REFERENCE_CLUSTER_FILES.out.clusters
 }
