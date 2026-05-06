@@ -32,20 +32,6 @@ cache_config.json contains:
   "cluster_model": "bgmm",
   "representatives": 20
 }
-
-CACHE_LOOKUP consumes Sylph candidate references plus cache_config.json and
-checks for matching species entries under:
-
-effective_cache_dir/species/<species_id>/
-
-A cache hit requires references.txt, groups.txt, and valid matching cache
-config. If no valid entry exists, the species is emitted as uncached and
-continues through the normal autoselect clustering path.
-
-WRITE_CACHE_ENTRY consumes generated representatives/groups plus
-cache_config.json, then writes new entries into:
-
-effective_cache_dir/species/<species_id>/
 """
 
 import argparse
