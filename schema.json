@@ -33,10 +33,6 @@
       "representatives": {
         "default": "20",
         "help_text": "Number of representatives at which to cap each reference cluster."
-      },
-      "refine_refs": {
-        "default": "false",
-        "help_text": "Set to true to subselect representative genomes from clustered references."
       }
     },
     "Cache options": {

@@ -151,7 +151,7 @@ workflow {
         candidate_references_ch = SYLPH_REF_SELECTION.out.references
 
         // call cache search process if cache_dir is provided, otherwise skip to clustering with Sylph outputs as input.
-        // if cache s enables, split sylph candidate into cached and uncached.
+        // if cache s enabled, split sylph candidate into cached and uncached.
         if (params.cache_dir) {
             // Cache-enabled path: seed ref/group channels with cache hits and cluster cache misses.
             CHECK_CACHE()
@@ -181,40 +181,23 @@ workflow {
             // Cache-disabled path: all Sylph refs continue to clustering.
             rep_refs_ch = Channel.empty()
             ref_groups_ch = Channel.empty()
-            candidate_refs_to_cluster = candidate_references_ch
         }
 
-
         // Cluster references
-        // only uncaches candidate references go through PREP_REFS and clustering
+        // only uncached candidate references go through PREP_REFS and clustering
         PREP_REFS(candidate_references_ch)
         POPPUNK(PREP_REFS.out.refs_csv)
 
-        //why is this here? it's not being used anywhere else in the code.
-        poppunk_clusters_csv = POPPUNK.out.clusters
-
-        // TODO: dereplication instead of optional/param-based automate based on num genomes per species?
-        // Build reference/groups for uncached species only and for sylph run with cache_dir not enabled
-        if (params.refine_refs) {
-            candidate_references_ch
-            | join(POPPUNK.out.clusters)
-            | join(POPPUNK.out.dist_matrix)
-            | set { refine_refs_input }
+        // Always refine autoselected candidate references before indexing.
+        candidate_references_ch
+        | join(POPPUNK.out.clusters)
+        | join(POPPUNK.out.dist_matrix)
+        | set { refine_refs_input }
 
         REFINE_REFS(refine_refs_input)
 
-            generated_rep_refs_ch = REFINE_REFS.out.representatives_ch
-            generated_ref_groups_ch = REFINE_REFS.out.ref_groups_ch
-
-        } else {
-            generated_rep_refs_ch = candidate_references_ch
-
-            PREP_REFS.out.refs_csv
-            | join(POPPUNK.out.clusters)
-            | ORDER_GROUPS
-
-            generated_ref_groups_ch = ORDER_GROUPS.out.groups
-        }
+        generated_rep_refs_ch = REFINE_REFS.out.representatives_ch
+        generated_ref_groups_ch = REFINE_REFS.out.ref_groups_ch
 
         // store newly generated species cache entries for future runs.
         if (params.cache_dir) {

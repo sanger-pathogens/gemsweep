@@ -68,7 +68,7 @@ To run the pipeline from source (this repository):
   | `index` | `themisto_index`, `ref_groups` | The supplied index and reference groupings will be validated and directly used in the core workflow (Themisto pseudoalignment, mSWEEP relative abundance estimation and mGEMS read binning) |
   | `full` | `references` | All references supplied will be indexed, clustered (with the tool indicated by `cluster_tool`) and the produced index and groups files will be used in the core workflow |
   | `refine` | `references` | The references supplied will be clustered (with the tool indicated by `cluster_tool`) and each cluster is dereplicated and capped to a maximum indicated by `representatives`. Index and groups file are produced for the representatives selected to use in the core workflow. |
-  | `autoselect` | N/A | The references are not supplied but rather derived from querying the reads against GTDB and using the hits as references for in indexing and clustering before the core workflow.|
+  | `autoselect` | N/A | The references are not supplied but rather derived from querying the reads against GTDB and using the hits as references for in indexing and clustering before the core workflow. A refine reference process is always enabled with autoselect mode to subselect representative genomes from clustered references. |
 
   NOTE: If supplying a prebuilt index a\) the kmer size must be identical to the argument `kmer_size` (default: 31) and b\) the reference grouping file must be in identical positional order to the references when indexed.
 
@@ -135,7 +135,7 @@ mkdir mGEMs_bins_manifest
 | `ref_mode` | `str` | `null` | Required. Choose a reference input mode. Options: `index`,`full`,`refine`,`autoselect` . |
 | `references` | `path` | `null` | Path to text file containing paths to references, one per line. |
 | `representatives` | `integer` | `20` | Number of representatives at which to cap each reference cluster. |
-| `refine_refs` | `bool` | `false` | Set to `true` to subselect representative genomes from clustered references. |
+
 
 ---
 
