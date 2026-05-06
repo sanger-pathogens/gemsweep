@@ -18,7 +18,7 @@
       },
       "skip_main": {
         "default": "false",
-        "help_text": "Run only reference preparatory steps skipping read pseudoalignment through to binning."
+        "help_text": "Run only reference preparatory steps, skipping read pseudoalignment through to binning."
       }
     },
     "References options": {

@@ -125,7 +125,7 @@ mkdir mGEMs_bins_manifest
 | ----------- | ------ | ------------- | ----------------------------------------------------------------------------------------------------- |
 | `manifest`  | `path` | `null`        | Input manifest CSV with required header `ID,R1,R2`, containing per-sample paths to `.fastq.gz` files. |
 | `outdir`    | `path` | `"./results"` | Path to top directory containing all results, by default `results` within the launch directory.       |
-| `skip_main` | `bool` | `false`       | Run only reference preparatory steps skipping read pseudoalignment through to binning.                |
+| `skip_main` | `bool` | `false`       | Run only reference preparatory steps, skipping read pseudoalignment through to binning.               |
 
 ---
 
