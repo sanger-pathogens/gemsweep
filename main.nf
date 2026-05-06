@@ -70,7 +70,9 @@ workflow {
 
     validate_params()
 
-    reads_ch = MIXED_INPUT()    // outputs channel of [meta, R1, R2] for reads_<1|2>.fastq.gz
+    if (!params.skip_main) {
+        reads_ch = MIXED_INPUT()    // outputs channel of [meta, R1, R2] for reads_<1|2>.fastq.gz
+    }
 
     if (params.ref_mode == "index") {
         // Set up input channels starting from pre-built index AND provided ref_groups
@@ -199,19 +201,21 @@ workflow {
     }
 
     // Core Workflow
-    pseudoaligned_ch = THEMISTO_PSEUDOALIGN(reads_ch, index_files_ch, index_prefix_ch)
-    
-    msweep_ch = MSWEEP(pseudoaligned_ch, ref_groups_ch)
-    
-    MGEMS(
-        reads_ch
-            .join(pseudoaligned_ch, by: 0)
-            .join(msweep_ch, by: 0)
-            .map { meta, r1, r2, aln1, aln2, abund, probs ->
-                tuple(meta, r1, r2, aln1, aln2, abund, probs)
-            },
-            index_files_ch,
-            index_prefix_ch,
-            ref_groups_ch
-    )
+    if (!params.skip_main) {
+        pseudoaligned_ch = THEMISTO_PSEUDOALIGN(reads_ch, index_files_ch, index_prefix_ch)
+        
+        msweep_ch = MSWEEP(pseudoaligned_ch, ref_groups_ch)
+        
+        MGEMS(
+            reads_ch
+                .join(pseudoaligned_ch, by: 0)
+                .join(msweep_ch, by: 0)
+                .map { meta, r1, r2, aln1, aln2, abund, probs ->
+                    tuple(meta, r1, r2, aln1, aln2, abund, probs)
+                },
+                index_files_ch,
+                index_prefix_ch,
+                ref_groups_ch
+        )
+    }
 }
