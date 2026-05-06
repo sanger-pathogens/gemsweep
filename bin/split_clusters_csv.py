@@ -28,11 +28,13 @@ def write_clusters(cluster_to_sample: dict, outdir: Path) -> None:
         with open(outdir / f"{cluster}.csv", "w") as f:
             for sample in samples:
                 f.write(f"{sample},{cluster}\n")  #TODO writing cluster inside file is redundant, but keeping for now
-
-if __name__ == "__main__":
+def main():
     args = parse_arguments()
 
     args.outdir.mkdir(parents=True, exist_ok=True)
 
     cluster_to_sample = read_clusters(args.clusters, args.header)
     write_clusters(cluster_to_sample, args.outdir)
+
+if __name__ == "__main__":
+    main()
