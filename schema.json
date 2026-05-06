@@ -28,7 +28,7 @@
       },
       "references": {
         "default": "null",
-        "help_text": "Path to text file containing paths to references, one per line. Optional if --sylph_refset is true, or if --themisto_index and --ref_groups are provided."
+        "help_text": "Path to text file containing paths to references, one per line. Required when --ref_mode is full or refine. Not used when --ref_mode is autoselect, or when --themisto_index and --ref_groups are provided for index mode."
       },
       "representatives": {
         "default": "20",
