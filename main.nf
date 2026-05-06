@@ -158,38 +158,41 @@ workflow {
             cache_config_ch = CHECK_CACHE.out.config.first()
             CACHE_LOOKUP(candidate_references_ch, cache_config_ch)
 
+            // Cached reference files for species found in the cache.
             CACHE_LOOKUP.out.hits
             | splitCsv(header: true, sep: '\t')
             | map { row ->
                 tuple([ID: row.species_id], file(row.cached_refs))
             }
-            | set { rep_refs_ch }
+            | set { cached_rep_refs_ch }
 
-            ref_groups_ch = CACHE_LOOKUP.out.hits
+            // Cached group files matching cached_rep_refs_ch by species ID.
+            cached_ref_groups_ch = CACHE_LOOKUP.out.hits
                 | splitCsv(header: true, sep: '\t')
                 | map { row ->
                     tuple([ID: row.species_id], file(row.cached_groups))
                 }
 
-            // From this point, candidate_references_ch means:
-            // "candidate references that were NOT found in cache and still need clustering".
-            candidate_references_ch = CACHE_LOOKUP.out.misses
+            // Candidate references not found in the cache; these still need clustering/refinement.
+            candidate_refs_to_cluster_ch = CACHE_LOOKUP.out.misses
                 | map { meta, cache_miss_tsv, sylph_refs ->
                     tuple(meta, sylph_refs)
                 }
         } else {
             // Cache-disabled path: all Sylph refs continue to clustering.
-            rep_refs_ch = Channel.empty()
-            ref_groups_ch = Channel.empty()
+            cached_rep_refs_ch = Channel.empty()
+            cached_ref_groups_ch = Channel.empty()
+            // With no cache, every Sylph candidate reference set must be clustered/refined.
+            candidate_refs_to_cluster_ch = candidate_references_ch
         }
 
         // Cluster references
         // only uncached candidate references go through PREP_REFS and clustering
-        PREP_REFS(candidate_references_ch)
+        PREP_REFS(candidate_refs_to_cluster_ch)
         POPPUNK(PREP_REFS.out.refs_csv)
 
         // Always refine autoselected candidate references before indexing.
-        candidate_references_ch
+        candidate_refs_to_cluster_ch
         | join(POPPUNK.out.clusters)
         | join(POPPUNK.out.dist_matrix)
         | set { refine_refs_input }
@@ -209,29 +212,37 @@ workflow {
         }
 
         // Build the current-run reference set from cached + generated.
-        representatives_ch = rep_refs_ch.mix(generated_rep_refs_ch)
-        ref_groups_ch = ref_groups_ch.mix(generated_ref_groups_ch)
+        // Cached refs/groups are joined first so each species keeps its matching pair.
+        cached_ref_group_pairs_ch = cached_rep_refs_ch.join(cached_ref_groups_ch)
+        // Generated refs/groups are also joined before mixing with cached pairs.
+        generated_ref_group_pairs_ch = generated_rep_refs_ch.join(generated_ref_groups_ch)
+        // Mix cached and generated species after pairing to preserve refs/groups alignment.
+        combined_ref_group_pairs_ch = cached_ref_group_pairs_ch.mix(generated_ref_group_pairs_ch)
 
-
-        representatives_ch
-        | join(ref_groups_ch)
-        | multiMap { meta, refs, groups ->
-            refs: refs
-            groups: groups
+        // Sort species for reproducible refs.txt/groups.txt manifest order across runs.
+        combined_ref_group_pairs_ch
+        | collect()
+        | flatMap { entries ->
+            entries.sort { a, b -> a[0].ID <=> b[0].ID }
         }
-        | set { ref_groups }
+        | multiMap { meta, refs_file, groups_file ->
+            refs: refs_file
+            groups: groups_file
+        }
+        | set { combined_ref_groups }
 
-        ref_groups.refs
+        combined_ref_groups.refs
         | map { refs_file -> refs_file.path }
         | collectFile(name: "refs.txt", newLine: true)
         | set { refs }
 
-        ref_groups.groups
+        combined_ref_groups.groups
         | map { groups_file -> groups_file.path }
         | collectFile(name: "groups.txt", newLine: true)
         | set { groups }
 
         COMBINE_REFS(refs, groups)
+        ref_groups_ch = COMBINE_REFS.out.groups
 
         // Build themisto index
         index_prefix_ch = channel.value("index") // needs to be identical to what index is set as in indexing process
@@ -248,7 +259,7 @@ workflow {
     pseudoaligned_ch = THEMISTO_PSEUDOALIGN(reads_ch, index_files_ch, index_prefix_ch)
     // Normalise ref_groups_ch so downstream processes always receive group.txt files instead of mixed tuple/file entries.
     ref_groups_ch = ref_groups_ch.map { meta, groups_file ->
-    return groups_file ? groups_file : meta
+        return groups_file ? groups_file : meta
     }
 
     msweep_ch = MSWEEP(pseudoaligned_ch, ref_groups_ch)
