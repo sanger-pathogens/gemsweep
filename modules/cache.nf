@@ -39,7 +39,7 @@ process CACHE_LOOKUP {
     path(cache_config)
 
     output:
-    path("cache_hit.tsv"), optional: true, emit: hits
+    tuple val(meta), path("cache_hits.tsv"), path(refs_file), optional: true, emit: hits
     tuple val(meta), path("cache_miss.tsv"), path(refs_file), optional: true, emit: misses
 
     script:
