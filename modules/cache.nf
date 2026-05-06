@@ -10,14 +10,11 @@ process CHECK_CACHE {
     path("cache_config.json"), emit: config
 
     script:
-    cluster_model = params.cluster_tool == "poppunk" ? params.poppunk_model : params.sketchlib_model
 
     """
     python3 ${projectDir}/bin/check_cache.py \\
         --cache-root '${params.cache_dir}' \\
         --cluster-tool '${params.cluster_tool}' \\
-        --cluster-method '${params.cluster_method}' \\
-        --cluster-model '${cluster_model ?: ""}' \\
         --representatives '${params.representatives}' \\
         --out cache_config.json
     """
