@@ -43,7 +43,8 @@ To run the pipeline from source (this repository):
     ```
     nextflow run <path/to/main.nf> \
         -profile docker \
-        --manifest <path/to/manifest.csv>
+        --manifest <path/to/manifest.csv> \
+        --ref_mode full \
         --references <path/to/references.txt>
     ```
 
@@ -68,7 +69,7 @@ To run the pipeline from source (this repository):
   | `index` | `themisto_index`, `ref_groups` | The supplied index and reference groupings will be validated and directly used in the core workflow (Themisto pseudoalignment, mSWEEP relative abundance estimation and mGEMS read binning) |
   | `full` | `references` | All references supplied will be indexed, clustered (with the tool indicated by `cluster_tool`) and the produced index and groups files will be used in the core workflow |
   | `refine` | `references` | The references supplied will be clustered (with the tool indicated by `cluster_tool`) and each cluster is dereplicated and capped to a maximum indicated by `representatives`. Index and groups file are produced for the representatives selected to use in the core workflow. |
-  | `autoselect` | N/A | The references are not supplied but rather derived from querying the reads against GTDB and using the hits as references for in indexing and clustering before the core workflow. A refine reference process is always enabled with autoselect mode to subselect representative genomes from clustered references. |
+  | `autoselect` | N/A | The references are not supplied but rather derived from querying the reads against GTDB and using the hits as references for indexing and clustering before the core workflow. A refine reference process is always enabled with autoselect mode to subselect representative genomes from clustered references. |
 
   NOTE: If supplying a prebuilt index a\) the kmer size must be identical to the argument `kmer_size` (default: 31) and b\) the reference grouping file must be in identical positional order to the references when indexed.
 
@@ -150,7 +151,7 @@ Cache Layout:
 
 ```
 <cache_root>/
-  poppunk_network_based_trim_bgmm_reps20/
+  poppunk_reps20/
     metadata.json
     species/
       escherichia_coli/
@@ -159,7 +160,7 @@ Cache Layout:
         metadata.json
 ```
 
-## The config-level `metadata.json` records the clustering settings used for that cache directory. Each species-level `metadata.json` records cache write/update details for that species, including update counts and added reference IDs.
+The config-level `metadata.json` records the clustering settings used for that cache directory. Each species-level `metadata.json` records cache write/update details for that species, including update counts and added reference IDs.
 
 **Clustering options**
 
