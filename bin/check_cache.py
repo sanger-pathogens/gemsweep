@@ -14,7 +14,7 @@ the effective cache directory for this run.
 Expected layout:
 
 <cache_root>/
-  poppunk_network_based_trim_bgmm_reps20/
+  sketchlib_reps20/
     metadata.json
     species/
       escherichia_coli/
@@ -26,10 +26,8 @@ cache_config.json contains:
 {
   "use_existing_cache": true,
   "cache_root": "/path/to/cache",
-  "effective_cache_dir": "/path/to/cache/poppunk_network_based_trim_bgmm_reps20",
-  "cluster_tool": "poppunk",
-  "cluster_method": "network_based_trim",
-  "cluster_model": "bgmm",
+  "effective_cache_dir": "/path/to/cache/specific_cache_dir",
+  "cluster_tool": "sketchlib",
   "representatives": 20
 }
 """
@@ -51,8 +49,6 @@ def parse_args():
         help="User-provided cache root or configuration-specific cache directory.",
     )
     parser.add_argument("--cluster-tool", required=True, help="Clustering tool for this run.")
-    parser.add_argument("--cluster-method", required=True, help="Clustering method for this run.")
-    parser.add_argument("--cluster-model", default="", help="Clustering model for this run.")
     parser.add_argument("--representatives", type=int, required=True, help="Representative cap for this run.")
     parser.add_argument("--out", type=Path, default=Path("cache_config.json"), help="Output cache config JSON.")
     return parser.parse_args()
@@ -67,8 +63,6 @@ def safe_path_part(value) -> str:
 def build_metadata(args) -> dict:
     return {
         "cluster_tool": args.cluster_tool,
-        "cluster_method": args.cluster_method,
-        "cluster_model": args.cluster_model or "",
         "representatives": args.representatives,
     }
 
@@ -85,8 +79,6 @@ def build_effective_cache_dir(cache_root: Path, metadata: dict) -> Path:
     cache_name = "_".join(
         [
             safe_path_part(metadata["cluster_tool"]),
-            safe_path_part(metadata["cluster_method"]),
-            safe_path_part(metadata["cluster_model"]),
             f"reps{safe_path_part(metadata['representatives'])}",
         ]
     )
@@ -97,8 +89,6 @@ def resolve_cache_paths(cache_root: Path, metadata: dict) -> tuple[Path, Path]:
     expected_cache_name = "_".join(
         [
             safe_path_part(metadata["cluster_tool"]),
-            safe_path_part(metadata["cluster_method"]),
-            safe_path_part(metadata["cluster_model"]),
             f"reps{safe_path_part(metadata['representatives'])}",
         ]
     )
@@ -146,8 +136,6 @@ def config_payload(
         "cache_root": str(cache_root),
         "effective_cache_dir": str(effective_cache_dir),
         "cluster_tool": metadata["cluster_tool"],
-        "cluster_method": metadata["cluster_method"],
-        "cluster_model": metadata["cluster_model"],
         "representatives": metadata["representatives"],
         "status": status,
     }
