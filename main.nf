@@ -246,9 +246,11 @@ workflow {
 
     // Core Workflow
     pseudoaligned_ch = THEMISTO_PSEUDOALIGN(reads_ch, index_files_ch, index_prefix_ch)
-    ref_groups_ch = ref_groups_ch.map { left, right ->
-        return right ? right : left
+    // Normalise ref_groups_ch so downstream processes always receive group.txt files instead of mixed tuple/file entries.
+    ref_groups_ch = ref_groups_ch.map { meta, groups_file ->
+    return groups_file ? groups_file : meta
     }
+
     msweep_ch = MSWEEP(pseudoaligned_ch, ref_groups_ch)
     
     MGEMS(
