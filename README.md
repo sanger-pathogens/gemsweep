@@ -137,7 +137,6 @@ mkdir mGEMs_bins_manifest
 | `references` | `path` | `null` | Path to text file containing paths to references, one per line. |
 | `representatives` | `integer` | `20` | Number of representatives at which to cap each reference cluster. |
 
-
 ---
 
 ---
