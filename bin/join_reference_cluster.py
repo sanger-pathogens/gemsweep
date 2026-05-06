@@ -92,14 +92,16 @@ def join_tables(
     df = labels_df.merge(refs_df, on="label", how="left")
     df = df.merge(clusters_df, on="label", how="left")
 
-    missing_refs = df["reference_path"].isna().sum()
-    missing_clusters = df["cluster"].isna().sum()
+    missing_refs = df["label"][df["reference_path"].isna()]
+    missing_clusters = df["label"][df["cluster"].isna()]
 
     if missing_refs:
-        logging.warning("Missing reference_path for %d labels", missing_refs)
+        logging.warning(f"Missing reference_path for the following labels: {list(missing_refs})")
+        logging.warning(f"Missing reference_path for {len(missing_refs)} labels")
 
     if missing_clusters:
-        logging.warning("Missing cluster for %d labels", missing_clusters)
+        logging.warning(f"Missing clusters for the following labels: {list(missing_clusters})")
+        logging.warning(f"Missing cluster for {len(missing_clusters)} labels")
 
     df = df.sort_values("order").drop(columns=["order"])
 
