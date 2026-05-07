@@ -86,6 +86,37 @@ Example reference grouping file would be useful to add.
 
 ### Outputs
 
+### Outputs
+
+Main pipeline outputs are written under `--outdir` (`./results` by default).
+
+- Binned reads per reference group:
+  - `results/<sample_id>/mGEMS/*`
+- mSWEEP abundance/probability outputs:
+  - `results/<sample_id>/<sample_id>_mSWEEP_abundances.txt`
+  - `results/<sample_id>/<sample_id>_mSWEEP_probs.tsv`
+- Final reference files used downstream:
+  - `results/ref_groups/references.txt`
+  - `results/ref_groups/groups.txt`
+- Themisto index:
+  - `results/themisto/index.*`
+  - `results/themisto/index_report.txt`
+
+When using `--ref_mode autoselect`, Sylph outputs are written to:
+
+- `results/sylph/combined_sylph_report.tsv`
+- `results/<sample_id>/sylph/<sample_id>_sylph_profile.tsv`
+- `results/<sample_id>/sylph/<sample_id>_sylphtax_profile.sylphmpa`
+
+Sylph sketch files are only published if `--save_sylph_sketches true`.
+
+PopPUNK full outputs are only published if `--publish_poppunk true`:
+
+- `results/poppunk/<species_id>/pp_database/*`
+
+Otherwise PopPUNK, reference refinement, and reference preparation intermediates remain in the Nextflow `work/` directory.
+
+
 - Binned reads per reference group (strain-level deconvolution)
 - Read assignment table (optionally, with `--get_assignments`)
 
@@ -158,6 +189,10 @@ Cache Layout:
         groups.txt
         metadata.json
 ```
+
+Cache setup and lookup intermediates such as `cache_config.json`, `cache_hits.tsv`, and `cache_miss.tsv` are kept in the Nextflow `work/` directory and are not published to `results`.
+
+When `--cache_dir` is supplied, generated reference entries are written directly to the external cache directory, not to `results`:
 
 The config-level `metadata.json` records the clustering settings used for that cache directory. Each species-level `metadata.json` records cache write/update details for that species, including update counts and added reference IDs.
 
