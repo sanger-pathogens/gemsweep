@@ -33,6 +33,11 @@
       "representatives": {
         "default": "20",
         "help_text": "Number of representatives at which to cap each reference cluster."
+      },
+      "save_sylph_sketches": {
+        "type": "boolean",
+        "default": false,
+        "description": "Publish Sylph sketch files (.sylsp) to the sample-specific sylph output directory."
       }
     },
     "Cache options": {
