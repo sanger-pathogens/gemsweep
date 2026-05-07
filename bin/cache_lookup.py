@@ -4,8 +4,9 @@
 Read cache_config.json, check use_existing_cache, and look under
 effective_cache_dir/species/<species_id>/ for cached species files.
 
-Emit cache_hit.tsv if both references.txt and groups.txt exist; otherwise emit
-cache_miss.tsv so the species continues through normal autoselect clustering.
+Emit cache_hits.tsv if references.txt, groups.txt, and
+<species>_reference_clusters.csv exist; otherwise emit cache_miss.tsv so the
+species continues through normal autoselect clustering.
 """
 
 import argparse
@@ -28,10 +29,17 @@ def read_cache_config(cache_config: Path) -> dict:
         return json.load(in_f)
 
 
-def write_hit(species: str, cached_refs: Path, cached_groups: Path):
-    with open("cache_hit.tsv", "w") as out_f:
-        out_f.write("species_id\tcached_refs\tcached_groups\n")
-        out_f.write(f"{species}\t{cached_refs}\t{cached_groups}\n")
+def write_hit(
+    species: str,
+    cached_refs: Path,
+    cached_groups: Path,
+    cached_ref_groups: Path,
+):
+    with open("cache_hits.tsv", "w") as out_f:
+        out_f.write("species_id\tcached_refs\tcached_groups\tcached_ref_groups\n")
+        out_f.write(
+            f"{species}\t{cached_refs}\t{cached_groups}\t{cached_ref_groups}\n"
+        )
 
 
 def write_miss(species: str, refs: Path):
@@ -40,11 +48,21 @@ def write_miss(species: str, refs: Path):
         out_f.write(f"{species}\t{refs.resolve()}\n")
 
 
-def cache_entry_exists(effective_cache_dir: Path, species: str) -> tuple[bool, Path, Path]:
+def cache_entry_exists(
+    effective_cache_dir: Path, species: str
+) -> tuple[bool, Path, Path, Path]:
     species_cache_dir = effective_cache_dir / "species" / species
     cached_refs = species_cache_dir / "references.txt"
     cached_groups = species_cache_dir / "groups.txt"
-    return cached_refs.is_file() and cached_groups.is_file(), cached_refs, cached_groups
+    cached_ref_groups = species_cache_dir / f"{species}_reference_clusters.csv"
+    return (
+        cached_refs.is_file()
+        and cached_groups.is_file()
+        and cached_ref_groups.is_file(),
+        cached_refs,
+        cached_groups,
+        cached_ref_groups,
+    )
 
 
 def main():
@@ -56,10 +74,12 @@ def main():
         return
 
     effective_cache_dir = Path(config["effective_cache_dir"])
-    has_cache_entry, cached_refs, cached_groups = cache_entry_exists(effective_cache_dir, args.species)
+    has_cache_entry, cached_refs, cached_groups, cached_ref_groups = cache_entry_exists(
+        effective_cache_dir, args.species
+    )
 
     if has_cache_entry:
-        write_hit(args.species, cached_refs, cached_groups)
+        write_hit(args.species, cached_refs, cached_groups, cached_ref_groups)
     else:
         write_miss(args.species, args.refs)
 

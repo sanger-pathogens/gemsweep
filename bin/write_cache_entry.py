@@ -4,7 +4,7 @@
 Write one generated species reference entry into the configured cache.
 
 The script reads cache_config.json from CHECK_CACHE, checks write_cache, and
-writes generated references/groups to:
+writes generated references/groups and combined reference cluster CSVs to:
 
   effective_cache_dir/species/<species_id>/
 
@@ -12,6 +12,8 @@ If references.txt and groups.txt do not already exist, they are created. If they
 do exist, new reference/group pairs are appended while already-present
 references are ignored as a defensive guard. references.txt and groups.txt are
 kept line-aligned, so each incoming reference must have a matching group line.
+<species>_reference_clusters.csv is kept in sync with the appended
+reference/group pairs.
 
 The script writes species-level metadata.json recording how many references were
 added, the added reference IDs, and how many references were already present.
@@ -20,6 +22,7 @@ multiple species tasks.
 """
 
 import argparse
+import csv
 import json
 import shutil
 from datetime import datetime, timezone
@@ -31,6 +34,12 @@ def parse_args():
     parser.add_argument("--species", required=True, help="Species or taxon identifier.")
     parser.add_argument("--refs", type=Path, required=True, help="Generated references.txt for this species.")
     parser.add_argument("--groups", type=Path, required=True, help="Generated groups.txt for this species.")
+    parser.add_argument(
+        "--reference-clusters",
+        type=Path,
+        required=True,
+        help="Generated label/ref/group CSV for this species.",
+    )
     parser.add_argument("--cache-config", type=Path, required=True, help="cache_config.json from CHECK_CACHE.")
     return parser.parse_args()
 
@@ -57,6 +66,39 @@ def append_lines(path: Path, lines: list[str]):
             out_f.write(f"{line}\n")
 
 
+def append_reference_cluster_rows(
+    cached_ref_groups_file: Path,
+    incoming_ref_groups_file: Path,
+    refs_to_add: list[str],
+):
+    refs_to_add = set(refs_to_add)
+    if not refs_to_add:
+        return
+
+    with open(incoming_ref_groups_file, newline="") as in_f:
+        reader = csv.DictReader(in_f)
+        fieldnames = reader.fieldnames
+        if fieldnames is None or "ref" not in fieldnames:
+            raise SystemExit(
+                f"Cannot write cache entry: {incoming_ref_groups_file} must have "
+                "a header including a 'ref' column."
+            )
+        rows_to_add = [row for row in reader if row["ref"] in refs_to_add]
+
+    if len(rows_to_add) != len(refs_to_add):
+        raise SystemExit(
+            f"Cannot write cache entry: {incoming_ref_groups_file} has "
+            f"{len(rows_to_add)} rows matching {len(refs_to_add)} new references."
+        )
+
+    write_header = not cached_ref_groups_file.exists()
+    with open(cached_ref_groups_file, "a", newline="") as out_f:
+        writer = csv.DictWriter(out_f, fieldnames=fieldnames)
+        if write_header:
+            writer.writeheader()
+        writer.writerows(rows_to_add)
+
+
 def validate_line_counts(refs: list[str], groups: list[str], refs_file: Path, groups_file: Path):
     if len(refs) != len(groups):
         raise SystemExit(
@@ -65,12 +107,15 @@ def validate_line_counts(refs: list[str], groups: list[str], refs_file: Path, gr
         )
 
 
-def cache_entry_paths(cache_config: dict, species: str) -> tuple[Path, Path, Path, Path]:
+def cache_entry_paths(
+    cache_config: dict, species: str
+) -> tuple[Path, Path, Path, Path, Path]:
     species_dir = Path(cache_config["effective_cache_dir"]) / "species" / species
     return (
         species_dir,
         species_dir / "references.txt",
         species_dir / "groups.txt",
+        species_dir / f"{species}_reference_clusters.csv",
         species_dir / "metadata.json",
     )
 
@@ -145,12 +190,25 @@ def main():
     incoming_groups = read_lines(args.groups)
     validate_line_counts(incoming_refs, incoming_groups, args.refs, args.groups)
 
-    species_dir, cached_refs_file, cached_groups_file, metadata_file = cache_entry_paths(cache_config, args.species)
+    (
+        species_dir,
+        cached_refs_file,
+        cached_groups_file,
+        cached_ref_groups_file,
+        metadata_file,
+    ) = cache_entry_paths(cache_config, args.species)
     species_dir.mkdir(parents=True, exist_ok=True)
 
-    if not cached_refs_file.exists() and not cached_groups_file.exists():
+    cached_files_exist = [
+        cached_refs_file.exists(),
+        cached_groups_file.exists(),
+        cached_ref_groups_file.exists(),
+    ]
+
+    if not any(cached_files_exist):
         shutil.copyfile(args.refs, cached_refs_file)
         shutil.copyfile(args.groups, cached_groups_file)
+        shutil.copyfile(args.reference_clusters, cached_ref_groups_file)
         update_metadata(
             metadata_file,
             cache_config,
@@ -162,11 +220,12 @@ def main():
         )
         return
 
-    if cached_refs_file.exists() != cached_groups_file.exists():
+    if len(set(cached_files_exist)) != 1:
         raise SystemExit(
             f"Cannot update partial cache entry for {args.species}: "
             f"{cached_refs_file} exists={cached_refs_file.exists()}, "
-            f"{cached_groups_file} exists={cached_groups_file.exists()}."
+            f"{cached_groups_file} exists={cached_groups_file.exists()}, "
+            f"{cached_ref_groups_file} exists={cached_ref_groups_file.exists()}."
         )
 
     seen_refs = existing_refs(cached_refs_file)
@@ -184,6 +243,9 @@ def main():
 
     append_lines(cached_refs_file, refs_to_add)
     append_lines(cached_groups_file, groups_to_add)
+    append_reference_cluster_rows(
+        cached_ref_groups_file, args.reference_clusters, refs_to_add
+    )
     update_metadata(
         metadata_file,
         cache_config,

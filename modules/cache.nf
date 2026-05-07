@@ -57,7 +57,7 @@ process WRITE_CACHE_ENTRY {
     container 'quay.io/sangerpathogens/pandas:2.2.1'
 
     input:
-    tuple val(meta), path(refs_file), path(groups_file)
+    tuple val(meta), path(refs_file), path(groups_file), path(reference_clusters)
     path(cache_config)
 
     script:
@@ -66,6 +66,7 @@ process WRITE_CACHE_ENTRY {
         --species '${meta.ID}' \\
         --refs '${refs_file}' \\
         --groups '${groups_file}' \\
+        --reference-clusters '${reference_clusters}' \\
         --cache-config '${cache_config}'
     """
 }
