@@ -13,20 +13,20 @@ def parse_args():
         description="Combine references and groups to preserve group identity."
     )
     parser.add_argument(
-        "--refs",
-        help="Path to file containing list of reference files to combine.",
-        type=Path,
-        required=True,
-    )
-    parser.add_argument(
-        "--groups",
-        help="Path to file containing list of groups files to combine (same order as --refs file).",
+        "--ref_group_files",
+        help="Path to files containing list of reference files to combine.",
+        nargs="+",
         type=Path,
         required=True,
     )
     parser.add_argument(
         "--prefix_groups",
         help="Prefix groups with names derived from the group files.",
+        action="store_true",
+    )
+    parser.add_argument(
+        "--header",
+        help="Header present on input files.",
         action="store_true",
     )
     parser.add_argument("--outdir", type=Path, default=".")
@@ -41,35 +41,12 @@ def setup_logging():
     )
 
 
-def load_data(filepath: Path) -> pd.DataFrame:
-    df = pd.read_csv(filepath, header=None)
+def load_data(filepath: Path, header: bool = True) -> pd.DataFrame:
+    if header:
+        df = pd.read_csv(filepath, header=0, names=["label", "ref", "group"])
+    else:
+        df = pd.read_csv(filepath, header=None, names=["label", "ref", "group"])
     return df
-
-
-def get_filepath_list(manifest: Path) -> list[Path]:
-    errors = 0
-    manifest_filepaths = []
-    with open(manifest) as f:
-        for line in f:
-            filepath = line.strip()
-            if not filepath:
-                continue
-            filepath = Path(filepath)
-            if not filepath.is_file():
-                logging.error(f"Filepath in {manifest} is not a file: {filepath}")
-                errors += 1
-                continue
-            manifest_filepaths.append(filepath)
-    if errors:
-        logging.error(
-            f"Detected {errors} errors during parsing of {manifest}. Exiting now"
-        )
-        sys.exit(1)
-    return manifest_filepaths
-
-
-def get_df_list(filepaths: list[Path]) -> list[pd.DataFrame]:
-    return [load_data(filepath) for filepath in filepaths]
 
 
 def get_group_prefix_from_files(filepaths: list[Path]) -> list[str]:
@@ -86,7 +63,7 @@ def combine_groups(groups_dfs: list[pd.DataFrame], group_prefixes: list[str] = N
         dfs_to_combine = [prefix + group.astype(str) for prefix, group in zip(group_prefixes, groups_dfs)]
         combined_groups = pd.concat(dfs_to_combine, ignore_index=True)
     else:
-        for groups_df in enumerate(groups_dfs):
+        for groups_df in groups_dfs:
             if combined_groups.empty:
                 combined_groups = groups_df
             else:
@@ -96,19 +73,22 @@ def combine_groups(groups_dfs: list[pd.DataFrame], group_prefixes: list[str] = N
     return combined_groups
 
 
-def main():
+def main() -> None:
     args = parse_args()
     setup_logging()
 
-    refs_paths = get_filepath_list(args.refs)
-    groups_paths = get_filepath_list(args.groups)
-    refs = get_df_list(refs_paths)
-    groups = get_df_list(groups_paths)
+    ref_group_dfs = [load_data(filepath, header=args.header) for filepath in args.ref_group_files]
+
+    refs = []
+    groups = []
+    for ref_group_df in ref_group_dfs:
+        refs.append(ref_group_df["ref"])
+        groups.append(ref_group_df["group"])
 
     combined_refs = combine_dfs(refs)
 
     if args.prefix_groups:
-        groups_prefixes = get_group_prefix_from_files(refs_paths)
+        groups_prefixes = get_group_prefix_from_files(args.ref_group_files)
         combined_groups = combine_groups(groups, groups_prefixes)
     else:
         combined_groups = combine_groups(groups)

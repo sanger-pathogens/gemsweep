@@ -30,8 +30,6 @@ include { SYLPH_REF_SELECTION   } from './assorted-sub-workflows/sylph_refset/sy
 include { PREP_REFS;             
           POPPUNK;                
           ORDER_GROUPS          } from './modules/poppunk.nf'
-include { PUBLISH_GROUPS;
-          PUBLISH_REPS          } from './modules/publish_intermediates.nf'
 include { THEMISTO_BUILD_INDEX; 
           THEMISTO_PSEUDOALIGN;
           THEMISTO_STATS        } from './modules/themisto.nf'
@@ -127,8 +125,14 @@ workflow {
 
         REFINE_REFS(refine_refs_input)
 
-        representatives_ch = REFINE_REFS.out.representatives_ch
-        ref_groups_ch = REFINE_REFS.out.ref_groups_ch
+        // Split into references and groups, then publish
+        REFINE_REFS.out.rep_refs_and_groups
+        | map { meta, ref_groups_file -> ref_groups_file}
+        | collect
+        | COMBINE_REFS
+
+        representatives_ch = COMBINE_REFS.out.references.first()
+        ref_groups_ch = COMBINE_REFS.out.groups.first()
 
         index_prefix_ch = channel.value("index") // needs to be identical to what index is set as in indexing process
         index_files_ch = THEMISTO_BUILD_INDEX(index_prefix_ch, representatives_ch).collect()
@@ -142,55 +146,29 @@ workflow {
         SYLPH_REF_SELECTION(reads_ch)
         references_ch = SYLPH_REF_SELECTION.out.references
 
-        //TODO Need to group refs per species (or other taxon here) here for use with poppunk
-
         // Cluster references
         PREP_REFS(references_ch)
         POPPUNK(PREP_REFS.out.refs_csv)
         poppunk_clusters_csv = POPPUNK.out.clusters
 
-        // TODO: dereplication instead of optional/param-based automate based on num genomes per species?
-        if (params.refine_refs) {
-            references_ch
-            | join(POPPUNK.out.clusters)
-            | join(POPPUNK.out.dist_matrix)
-            | set { refine_refs_input }
+        // Dereplicate/Refine references per cluster
+        references_ch
+        | join(POPPUNK.out.clusters)
+        | join(POPPUNK.out.dist_matrix)
+        | set { refine_refs_input }
 
-            REFINE_REFS(refine_refs_input)
+        REFINE_REFS(refine_refs_input)
 
-            representatives_ch = REFINE_REFS.out.representatives_ch
-            ref_groups_ch = REFINE_REFS.out.ref_groups_ch
+        // Split into references and groups, then combine across all taxa
+        REFINE_REFS.out.rep_refs_and_groups
+        | map { meta, ref_groups_file -> ref_groups_file}
+        | collect
+        | COMBINE_REFS
 
-        } else {
-            representatives_ch = references_ch
+        representatives_ch = COMBINE_REFS.out.references.first()
+        ref_groups_ch = COMBINE_REFS.out.groups.first()
 
-            PREP_REFS.out.refs_csv
-            | join(POPPUNK.out.clusters)
-            | ORDER_GROUPS
-
-            ref_groups_ch = ORDER_GROUPS.out.groups
-        }
-
-        representatives_ch
-        | join(ref_groups_ch)
-        | multiMap { meta, refs, groups ->
-            refs: refs
-            groups: groups
-        }
-        | set { ref_groups }
-
-        ref_groups.refs
-        | map { refs_file -> refs_file.path }
-        | collectFile(name: "refs.txt", newLine: true)
-        | set { refs }
-
-        ref_groups.groups
-        | map { groups_file -> groups_file.path }
-        | collectFile(name: "groups.txt", newLine: true)
-        | set { groups }
-
-        COMBINE_REFS(refs, groups)
-
+        // Build themisto index
         index_prefix_ch = channel.value("index") // needs to be identical to what index is set as in indexing process
         index_files_ch = THEMISTO_BUILD_INDEX(index_prefix_ch, representatives_ch).collect()
     }
