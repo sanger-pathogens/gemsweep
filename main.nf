@@ -151,26 +151,19 @@ workflow {
         candidate_references_ch = SYLPH_REF_SELECTION.out.references
 
         // call cache search process if cache_dir is provided, otherwise skip to clustering with Sylph outputs as input.
-        // if cache s enabled, split sylph candidate into cached and uncached.
+        // if cache is enabled, split sylph candidate into cached and uncached.
         if (params.cache_dir) {
-            // Cache-enabled path: seed ref/group channels with cache hits and cluster cache misses.
+            // Cache-enabled path: create cached ref/group pairs and cluster cache misses.
             CHECK_CACHE()
             cache_config_ch = CHECK_CACHE.out.config.first()
             CACHE_LOOKUP(candidate_references_ch, cache_config_ch)
 
-            // Cached reference files for species found in the cache.
-            CACHE_LOOKUP.out.hits
-            | splitCsv(header: true, sep: '\t')
-            | map { row ->
-                tuple([ID: row.species_id], file(row.cached_refs))
-            }
-            | set { cached_rep_refs_ch }
-
-            // Cached group files matching cached_rep_refs_ch by species ID.
-            cached_ref_groups_ch = CACHE_LOOKUP.out.hits
-                | splitCsv(header: true, sep: '\t')
-                | map { row ->
-                    tuple([ID: row.species_id], file(row.cached_groups))
+            // Cached reference and group files for each species found in the cache.
+            // create cached ref/group pairs and cluster cache misses.
+            cached_ref_group_pairs_ch = CACHE_LOOKUP.out.hits
+                .splitCsv(header: true, sep: '\t')
+                .map { row ->
+                    tuple([ID: row.species_id], file(row.cached_refs), file(row.cached_groups))
                 }
 
             // Candidate references not found in the cache; these still need clustering/refinement.
@@ -180,8 +173,7 @@ workflow {
                 }
         } else {
             // Cache-disabled path: all Sylph refs continue to clustering.
-            cached_rep_refs_ch = Channel.empty()
-            cached_ref_groups_ch = Channel.empty()
+            cached_ref_group_pairs_ch = Channel.empty()
             // With no cache, every Sylph candidate reference set must be clustered/refined.
             candidate_refs_to_cluster_ch = candidate_references_ch
         }
@@ -190,6 +182,7 @@ workflow {
         // only uncached candidate references go through PREP_REFS and clustering
         PREP_REFS(candidate_refs_to_cluster_ch)
         POPPUNK(PREP_REFS.out.refs_csv)
+        poppunk_clusters_csv = POPPUNK.out.clusters
 
         // Always refine autoselected candidate references before indexing.
         candidate_refs_to_cluster_ch
@@ -212,34 +205,39 @@ workflow {
         }
 
         // Build the current-run reference set from cached + generated.
-        // Cached refs/groups are joined first so each species keeps its matching pair.
-        cached_ref_group_pairs_ch = cached_rep_refs_ch.join(cached_ref_groups_ch)
-        // Generated refs/groups are also joined before mixing with cached pairs.
+        // Generated refs/groups are joined before mixing with cached pairs.
         generated_ref_group_pairs_ch = generated_rep_refs_ch.join(generated_ref_groups_ch)
         // Mix cached and generated species after pairing to preserve refs/groups alignment.
         combined_ref_group_pairs_ch = cached_ref_group_pairs_ch.mix(generated_ref_group_pairs_ch)
 
-        // Sort species for reproducible refs.txt/groups.txt manifest order across runs.
-        combined_ref_group_pairs_ch
-        | collect()
-        | flatMap { entries ->
-            entries.sort { a, b -> a[0].ID <=> b[0].ID }
-        }
-        | multiMap { meta, refs_file, groups_file ->
-            refs: refs_file
-            groups: groups_file
-        }
-        | set { combined_ref_groups }
+        // Mix emits asynchronously, so sort all species ref/group tuples by ID
+        // before writing refs.txt/groups.txt in a consistent order across runs.
+        sorted_ref_group_pairs_ch = combined_ref_group_pairs_ch
+            .collect()
+            .flatMap { ref_group_entries ->
+                ref_group_entries.sort { first_species, second_species ->
+                    first_species[0].ID <=> second_species[0].ID}
+            }
+ 
+        // This splits refs and groups into separate channels.
+        sorted_ref_group_pairs_ch
+            .multiMap { meta, refs_file, groups_file ->
+                refs: refs_file
+                groups: groups_file
+            }
+            .set { combined_ref_groups }
 
+        // Write one refs.txt file containing all reference file paths for THEMISTO_BUILD_INDEX
         combined_ref_groups.refs
-        | map { refs_file -> refs_file.path }
-        | collectFile(name: "refs.txt", newLine: true)
-        | set { refs }
+            .map { refs_file -> refs_file.path }
+            .collectFile(name: "refs.txt", newLine: true)
+            .set { refs }
 
+        // Write one groups.txt file containing all reference file paths for MSWEEP
         combined_ref_groups.groups
-        | map { groups_file -> groups_file.path }
-        | collectFile(name: "groups.txt", newLine: true)
-        | set { groups }
+            .map { groups_file -> groups_file.path }
+            .collectFile(name: "groups.txt", newLine: true)
+            .set { groups }
 
         COMBINE_REFS(refs, groups)
         ref_groups_ch = COMBINE_REFS.out.groups
