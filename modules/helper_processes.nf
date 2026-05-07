@@ -8,13 +8,14 @@ process COMBINE_REFS {
     container 'quay.io/sangerpathogens/pandas:2.2.1'
 
     input:
-    path(refs_groups, stageAs: "input/*")
+    path(ref_group_files)
 
     output:
     path("references.txt"), emit: references
     path("groups.txt"), emit: groups
 
     script:
+    ref_group_files_arg = ref_group_files.join(' ')
     """
     ${projectDir}/bin/combine_refs.py \\
 <<<<<<< HEAD
@@ -22,9 +23,8 @@ process COMBINE_REFS {
         --prefix_groups \\
         --header \\
 =======
-        --refs input/refs.txt \\
-        --groups input/groups.txt \\
-        --prefix-groups \\
+        --ref_group_files ${ref_group_files_arg} \\
+        --header \\
 >>>>>>> 76de388 (python script:)
         --outdir .
     """
