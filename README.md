@@ -116,7 +116,6 @@ PopPUNK full outputs are only published if `--publish_poppunk true`:
 
 Otherwise PopPUNK, reference refinement, and reference preparation intermediates remain in the Nextflow `work/` directory.
 
-
 - Binned reads per reference group (strain-level deconvolution)
 - Read assignment table (optionally, with `--get_assignments`)
 
