@@ -158,13 +158,13 @@ workflow {
             cache_config_ch = CHECK_CACHE.out.config.first()
             CACHE_LOOKUP(candidate_references_ch, cache_config_ch)
 
-            // Cached reference and group files for each species found in the cache.
-            // create cached ref/group pairs and cluster cache misses.
-            cached_ref_group_pairs_ch = CACHE_LOOKUP.out.hits
+            // Cached combined label/ref/group files for the current run combine step.
+            cached_ref_group_files_ch = CACHE_LOOKUP.out.hits
                 .splitCsv(header: true, sep: '\t')
                 .map { row ->
-                    tuple([ID: row.species_id], file(row.cached_refs), file(row.cached_groups))
+                    tuple([ID: row.species_id], file(row.cached_ref_groups))
                 }
+
 
             // Candidate references not found in the cache; these still need clustering/refinement.
             candidate_refs_to_cluster_ch = CACHE_LOOKUP.out.misses
@@ -173,7 +173,7 @@ workflow {
                 }
         } else {
             // Cache-disabled path: all Sylph refs continue to clustering.
-            cached_ref_group_pairs_ch = Channel.empty()
+            cached_ref_group_files_ch = Channel.empty()
             // With no cache, every Sylph candidate reference set must be clustered/refined.
             candidate_refs_to_cluster_ch = candidate_references_ch
         }
@@ -192,54 +192,40 @@ workflow {
 
         REFINE_REFS(refine_refs_input)
 
+        // For current run combine_refs.py input: tuple(meta, label_ref_group_csv)
+        generated_ref_group_files_ch = REFINE_REFS.out.rep_refs_and_groups
+
+        // all refine_refs emit outputs carry same meta so i can just join these two
         generated_rep_refs_ch = REFINE_REFS.out.representatives_ch
         generated_ref_groups_ch = REFINE_REFS.out.ref_groups_ch
 
+        // tuple(meta, references_txt, clusters_txt)
+        generated_ref_group_pairs_ch = generated_rep_refs_ch
+            .join(generated_ref_groups_ch)
+
         // store newly generated species cache entries for future runs.
         if (params.cache_dir) {
-            generated_rep_refs_ch
-            | join(generated_ref_groups_ch)
-            | set { generated_cache_entries_ch}
+            generated_ref_group_pairs_ch
+                .join(generated_ref_group_files_ch)
+                .set { generated_cache_entries_ch}
             
             WRITE_CACHE_ENTRY(generated_cache_entries_ch, cache_config_ch)
         }
 
-        // Build the current-run reference set from cached + generated.
-        // Generated refs/groups are joined before mixing with cached pairs.
-        generated_ref_group_pairs_ch = generated_rep_refs_ch.join(generated_ref_groups_ch)
-        // Mix cached and generated species after pairing to preserve refs/groups alignment.
-        combined_ref_group_pairs_ch = cached_ref_group_pairs_ch.mix(generated_ref_group_pairs_ch)
+        // Mix cached and generated combined ref/group CSVs for the current run.
+        combined_ref_group_files_ch = cached_ref_group_files_ch.mix(generated_ref_group_files_ch)
 
-        // Mix emits asynchronously, so sort all species ref/group tuples by ID
-        // before writing refs.txt/groups.txt in a consistent order across runs.
-        sorted_ref_group_pairs_ch = combined_ref_group_pairs_ch
+        // Sort species for reproducible ref/group file order across runs.
+        combined_ref_group_files_ch
             .collect()
-            .flatMap { ref_group_entries ->
-                ref_group_entries.sort { first_species, second_species ->
-                    first_species[0].ID <=> second_species[0].ID}
+            .flatMap { entries ->
+                entries.sort { a, b -> a[0].ID <=> b[0].ID }
             }
- 
-        // This splits refs and groups into separate channels.
-        sorted_ref_group_pairs_ch
-            .multiMap { meta, refs_file, groups_file ->
-                refs: refs_file
-                groups: groups_file
-            }
-            .set { combined_ref_groups }
+            .map { meta, ref_group_file -> ref_group_file }
+            .collect()
+            .set { ref_group_files }
 
-        // Write one refs.txt file containing all reference file paths for THEMISTO_BUILD_INDEX
-        combined_ref_groups.refs
-            .map { refs_file -> refs_file.path }
-            .collectFile(name: "refs.txt", newLine: true)
-            .set { refs }
-
-        // Write one groups.txt file containing all reference file paths for MSWEEP
-        combined_ref_groups.groups
-            .map { groups_file -> groups_file.path }
-            .collectFile(name: "groups.txt", newLine: true)
-            .set { groups }
-
-        COMBINE_REFS(refs, groups)
+        COMBINE_REFS(ref_group_files)
         ref_groups_ch = COMBINE_REFS.out.groups
 
         // Build themisto index
