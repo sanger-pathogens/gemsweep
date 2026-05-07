@@ -3,6 +3,7 @@ process COMBINE_REFS {
     label 'mem_4'
     label 'time_queue_from_small'
 
+    // suggestion to rename this e.g. "refined_ref_group"
     publishDir "${params.outdir}/ref_groups", mode: 'copy', overwrite: true
 
     container 'quay.io/sangerpathogens/pandas:2.2.1'
