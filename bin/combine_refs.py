@@ -63,7 +63,7 @@ def combine_groups(groups_dfs: list[pd.DataFrame], group_prefixes: list[str] = N
         dfs_to_combine = [prefix + group.astype(str) for prefix, group in zip(group_prefixes, groups_dfs)]
         combined_groups = pd.concat(dfs_to_combine, ignore_index=True)
     else:
-        for groups_df in enumerate(groups_dfs):
+        for groups_df in groups_dfs:
             if combined_groups.empty:
                 combined_groups = groups_df
             else:
