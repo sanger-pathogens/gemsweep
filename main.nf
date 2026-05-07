@@ -160,6 +160,7 @@ workflow {
 
             // Cached combined label/ref/group files for the current run combine step.
             cached_ref_group_files_ch = CACHE_LOOKUP.out.hits
+                .map { meta, cache_hits_tsv, refs_file -> cache_hits_tsv }
                 .splitCsv(header: true, sep: '\t')
                 .map { row ->
                     tuple([ID: row.species_id], file(row.cached_ref_groups))

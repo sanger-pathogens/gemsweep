@@ -18,14 +18,8 @@ process COMBINE_REFS {
     ref_group_files_arg = ref_group_files.join(' ')
     """
     ${projectDir}/bin/combine_refs.py \\
-<<<<<<< HEAD
-        --ref_group_files input/* \\
-        --prefix_groups \\
-        --header \\
-=======
         --ref_group_files ${ref_group_files_arg} \\
         --header \\
->>>>>>> 76de388 (python script:)
         --outdir .
     """
 }
