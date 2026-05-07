@@ -77,7 +77,7 @@ workflow REFINE_REFS {
 
     chosen_representatives 
     | join(EXTRACT_REF_LABEL.out.ref_label_paths)
-    | join(clusters_csv)
+    | join(clusters_info.clusters_csv)
     | BUILD_REFERENCE_CLUSTER_FILES
 
     emit:
