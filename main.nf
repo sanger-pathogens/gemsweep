@@ -265,20 +265,21 @@ workflow {
         THEMISTO_STATS(index_files_ch, index_prefix_ch)
     }
 
-
     // Core Workflow
-    pseudoaligned_ch = THEMISTO_PSEUDOALIGN(reads_ch, index_files_ch, index_prefix_ch)
-    msweep_ch = MSWEEP(pseudoaligned_ch, ref_groups_ch)
-    
-    MGEMS(
-        reads_ch
-            .join(pseudoaligned_ch, by: 0)
-            .join(msweep_ch, by: 0)
-            .map { meta, r1, r2, aln1, aln2, abund, probs ->
-                tuple(meta, r1, r2, aln1, aln2, abund, probs)
-            },
-            index_files_ch,
-            index_prefix_ch,
-            ref_groups_ch
-    )
+    if (!params.skip_main) {
+        pseudoaligned_ch = THEMISTO_PSEUDOALIGN(reads_ch, index_files_ch, index_prefix_ch)
+        msweep_ch = MSWEEP(pseudoaligned_ch, ref_groups_ch)
+        
+        MGEMS(
+            reads_ch
+                .join(pseudoaligned_ch, by: 0)
+                .join(msweep_ch, by: 0)
+                .map { meta, r1, r2, aln1, aln2, abund, probs ->
+                    tuple(meta, r1, r2, aln1, aln2, abund, probs)
+                },
+                index_files_ch,
+                index_prefix_ch,
+                ref_groups_ch
+        )
+    }
 }
