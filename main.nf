@@ -166,7 +166,6 @@ workflow {
                     tuple([ID: row.species_id], file(row.cached_ref_groups))
                 }
 
-
             // Candidate references not found in the cache; these still need clustering/refinement.
             candidate_refs_to_cluster_ch = CACHE_LOOKUP.out.misses
                 | map { meta, cache_miss_tsv, sylph_refs ->
@@ -218,7 +217,7 @@ workflow {
 
         // Sort species for reproducible ref/group file order across runs.
         combined_ref_group_files_ch
-            .collect()
+            .collect(flat: false)
             .flatMap { entries ->
                 entries.sort { a, b -> a[0].ID <=> b[0].ID }
             }
