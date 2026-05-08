@@ -58,6 +58,18 @@
       "publish_poppunk": {
         "default": "false",
         "help_text": "Optionally publish full poppunk output, group assignments are always published."
+      },
+      "ani_threshold": {
+        "default": "0.02",
+        "help_text": "Max ANI distance threshold for clustering (default 0.2 clusters genomes sharing >98% ANI similarity)"
+      },
+      "sketchlib_kstep": {
+        "default": "13,29,4",
+        "help_text": "Kmer sizes at which sketchlib will sketch the reference in the format start,stop,step"
+      },
+      "cluster_strict": {
+        "default": "false",
+        "help_text": "Fail early if all genomes form a single cluster, or each genome is a singleton."
       }
     },
     "Themisto options": {
