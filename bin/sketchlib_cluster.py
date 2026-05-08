@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
 
 """
-Cluster genomes in a pre-sketched sketchlib database by pairwise ANI distance
+Cluster genomes in a pre-sketched sketchlib database by pairwise ANI distance 
 using connected components. Outputs a CSV mapping each genome ID to a cluster 
-ID. Also performs cluster checks; warning or failing if each genome is in it's 
-own cluster or all genomes fall into a single cluster, and either logging a 
-warning or, in strict mode, failing.
+ID. Also performs cluster checks; if each genome is in its own cluster or all 
+genomes fall into a single cluster, log a warning or, in strict mode, exit with
+nonzero exit code.
 
 Example usage:
     sketchlib_cluster.py \
@@ -136,7 +136,7 @@ def parse_args() -> argparse.ArgumentParser:
         "--sketch", 
         type=str, 
         required=True, 
-        help="Sketchlib db path up including prefix but not extensions for .skm and .skd files"
+        help="Sketchlib db path including prefix but not extensions for .h5 file"
     )
     parser.add_argument(
         "--ani_threshold",
@@ -160,7 +160,7 @@ def parse_args() -> argparse.ArgumentParser:
         "--out",
         type=Path,
         required=True,
-        help="Name for the output CSV"
+        help="Path to save the output CSV"
     )
     parser.add_argument(
         "--threads",
@@ -176,7 +176,7 @@ def parse_args() -> argparse.ArgumentParser:
     parser.add_argument(
         "--random_correct",
         action='store_true',
-        help="Apply random match correction, only use if sketch includes random match calculations"
+        help="Apply random match correction. Only use if sketch includes random match calculations."
     )
     return parser.parse_args()
 
