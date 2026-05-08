@@ -2,6 +2,7 @@ process PREP_REFS {
     label 'cpu_1'
     label 'mem_1'
     label 'time_30m'
+    tag "${meta.ID}"
 
     input:
     tuple val(meta), path(refs_txt)
@@ -19,6 +20,7 @@ process POPPUNK {
     label 'cpu_4'
     label 'mem_8'
     label 'time_12'
+    tag "${meta.ID}"
 
     container 'quay.io/biocontainers/poppunk:2.7.8--py310h4d0eb5b_0'
 
@@ -45,6 +47,7 @@ process ORDER_GROUPS {
     label 'cpu_1'
     label 'mem_1'
     label 'time_30m'
+    tag "${meta.ID}"
 
     publishDir "${params.outdir}/poppunk/${meta.ID}", mode: 'copy', overwrite: true
 

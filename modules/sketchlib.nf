@@ -2,6 +2,7 @@ process SKETCHLIB_SKETCH {
     label 'cpu_4'
     label 'mem_1'
     label 'time_queue_from_small'
+    tag "${meta.ID}"
 
     container 'quay.io/sangerpathogens/pp-sketchlib-python:2.1.5'
 
@@ -33,6 +34,7 @@ process SKETCHLIB_CLUSTER {
     label 'cpu_4'
     label 'mem_8'
     label 'time_12'
+    tag "${meta.ID}"
 
     container 'quay.io/sangerpathogens/pp-sketchlib-python:2.1.5'
 
