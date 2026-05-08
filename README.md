@@ -86,19 +86,22 @@ Example reference grouping file would be useful to add.
 
 ### Outputs
 
-### Outputs
-
 Main pipeline outputs are written under `--outdir` (`./results` by default).
 
 - Binned reads per reference group:
+
   - `results/<sample_id>/mGEMS/*`
+
 - mSWEEP abundance/probability outputs:
+
   - `results/<sample_id>/<sample_id>_mSWEEP_abundances.txt`
   - `results/<sample_id>/<sample_id>_mSWEEP_probs.tsv`
-- Final reference files used downstream:
+
+- Read assignment table (optionally, with `--get_assignments`)
+
+- The final reference genome paths, their groups and Themisto index, if generated within the pipeline run:
   - `results/ref_groups/references.txt`
   - `results/ref_groups/groups.txt`
-- Themisto index:
   - `results/themisto/index.*`
   - `results/themisto/index_report.txt`
 
@@ -108,16 +111,7 @@ When using `--ref_mode autoselect`, Sylph outputs are written to:
 - `results/<sample_id>/sylph/<sample_id>_sylph_profile.tsv`
 - `results/<sample_id>/sylph/<sample_id>_sylphtax_profile.sylphmpa`
 
-Sylph sketch files are only published if `--save_sylph_sketches true`.
-
-PopPUNK full outputs are only published if `--publish_poppunk true`:
-
-- `results/poppunk/<species_id>/pp_database/*`
-
-Otherwise PopPUNK, reference refinement, and reference preparation intermediates remain in the Nextflow `work/` directory.
-
-- Binned reads per reference group (strain-level deconvolution)
-- Read assignment table (optionally, with `--get_assignments`)
+If `--save_sylph_sketches` or `--publish_poppunk` are true these will also be published in the `results/` directory.
 
 <!---
 Add example tree of results output
