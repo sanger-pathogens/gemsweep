@@ -132,14 +132,11 @@ def parse_args() -> argparse.ArgumentParser:
     parser.add_argument(
         "--debug", 
         action='store_true',
-        required=False, 
-        default=False,
         help="Set to true to log debug-level information"
     )
     parser.add_argument(
         "--log", 
-        type=str, 
-        required=False, 
+        type=str,
         default=f"{Path(sys.argv[0]).stem}",
         help="Basename of the log file, e.g. --log foo will ouput foo.log"
     )
@@ -153,7 +150,7 @@ def parse_args() -> argparse.ArgumentParser:
         "--ani_threshold",
         type=float,
         default=0.02,
-        help="maximum ANI distance threshold for clustering (default 0.02, meaning clusters of genomes sharing at least 98%% ANI similarity)"
+        help="Maximum ANI distance threshold for clustering (default 0.02, meaning clusters of genomes sharing at least 98%% ANI similarity)"
     )
     parser.add_argument(
         "--ref_ids",
