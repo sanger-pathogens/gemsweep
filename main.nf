@@ -116,6 +116,7 @@ workflow {
 
         // Cluster references
         PREP_REFS(references_ch)
+
         SKETCHLIB_SKETCH(PREP_REFS.out.refs_tsv)
         | SKETCHLIB_CLUSTER
 
@@ -123,7 +124,13 @@ workflow {
         | join(SKETCHLIB_CLUSTER.out.clusters)
         | ORDER_GROUPS
 
-        representatives_ch = references_ch // no dereplication
+        // no dereplication
+        references_ch
+        | map { meta, refs ->
+            refs
+        }
+        | set {representatives_ch}
+
         ref_groups_ch = ORDER_GROUPS.out.groups
 
         index_prefix_ch = channel.value("index") // needs to be identical to what index is set as in indexing process

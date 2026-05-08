@@ -7,10 +7,10 @@ process SKETCHLIB_SKETCH {
     container 'quay.io/sangerpathogens/pp-sketchlib-python:2.1.5'
 
     input:
-    path(refs_tsv) // has shape 'name  file.fasta' per line
+    tuple val(meta), path(refs_tsv) // has shape 'name  file.fasta' per line
 
     output:
-    tuple path(refs_tsv), path("${sketch_db}.h5")
+    tuple val(meta), path(refs_tsv), path("${sketch_db}.h5")
 
     script:
     sketch_db = "references_sketch" // need to make this per taxon if this runs per taxon after sylph
@@ -39,11 +39,11 @@ process SKETCHLIB_CLUSTER {
     container 'quay.io/sangerpathogens/pp-sketchlib-python:2.1.5'
 
     input:
-    tuple path(refs_tsv), path(h5_db)
+    tuple val(meta), path(refs_tsv), path(h5_db)
 
     output:
-    path("${sketch_prefix}_clusters.csv"), emit: clusters
-    path("groups.txt"), emit: groups
+    tuple val(meta), path("${sketch_prefix}_clusters.csv"), emit: clusters
+    tuple val(meta), path("groups.txt"), emit: groups
 
     script:
     def sketchlib_cluster = "${projectDir}/bin/sketchlib_cluster.py" 
