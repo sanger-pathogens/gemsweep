@@ -22,10 +22,21 @@ from pathlib import Path
 import sys
 import logging
 import pp_sketchlib
-import scipy.sparse.csgraph as csgraph
-import scipy.sparse as sp
+import igraph as ig
 import pandas as pd
 import argparse
+
+ALGORITHMS = {
+    "connected_components": None,  # handled separately — not a community method
+    "leiden":               lambda g: g.community_leiden(objective_function="modularity", weights="weight"),
+    "louvain":              lambda g: g.community_multilevel(weights="weight"),
+    "walktrap":             lambda g: g.community_walktrap(weights="weight").as_clustering(),
+    "fastgreedy":           lambda g: g.community_fastgreedy(weights="weight").as_clustering(),
+    "label_propagation":    lambda g: g.community_label_propagation(weights="weight"),
+    "infomap":              lambda g: g.community_infomap(edge_weights="weight"),
+    "spinglass":            lambda g: g.community_spinglass(weights="weight"),
+    "eigenvector":          lambda g: g.community_leading_eigenvector(weights="weight"),
+}
 
 def main():
     args = parse_args()
@@ -178,6 +189,13 @@ def parse_args() -> argparse.ArgumentParser:
         action='store_true',
         help="Apply random match correction. Only use if sketch includes random match calculations."
     )
+    parser.add_argument(
+        "--algorithm",
+        type=str,
+        default="connected_components",
+        choices=list(ALGORITHMS),
+        help="Community detection algorithm to use"
+    )
     return parser.parse_args()
 
 def parse_kmer_sizes(kstep: str) -> list[int]:
@@ -189,7 +207,7 @@ def parse_kmer_sizes(kstep: str) -> list[int]:
     kmer_sizes = list(range(k_start, k_stop + 1, step))
 
     return kmer_sizes
-        
+
 
 
 def validate_clusters(clusters_df: pd.DataFrame, num_refs: int, ani_threshold: float) -> bool:
