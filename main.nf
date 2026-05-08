@@ -27,6 +27,9 @@ def printHelp() {
 */
 include { MIXED_INPUT           } from './assorted-sub-workflows/mixed_input/mixed_input.nf'
 include { SYLPH_REF_SELECTION   } from './assorted-sub-workflows/sylph_refset/sylph_refset.nf'
+include { CHECK_CACHE;
+          CACHE_LOOKUP;
+          WRITE_CACHE_ENTRY     } from './modules/cache.nf'
 include { PREP_REFS;             
           POPPUNK;                
           ORDER_GROUPS          } from './modules/poppunk.nf'
@@ -97,7 +100,7 @@ workflow {
         | ORDER_GROUPS
 
         representatives_ch = references_ch // no dereplication
-        ref_groups_ch = ORDER_GROUPS.out.groups
+        ref_groups_ch = ORDER_GROUPS.out.groups.map { meta, groups_file -> groups_file }
 
         index_prefix_ch = channel.value("index") // needs to be identical to what index is set as in indexing process
         index_files_ch = THEMISTO_BUILD_INDEX(index_prefix_ch, representatives_ch).collect()
@@ -142,58 +145,113 @@ workflow {
         error("Sketchlib reference refinement not implemented yet! Watch this space :)")
 
     } else if (params.ref_mode == "autoselect") {
+
         // Generate candidate references from reads via Sylph.
         SYLPH_REF_SELECTION(reads_ch)
-        references_ch = SYLPH_REF_SELECTION.out.references
+        candidate_references_ch = SYLPH_REF_SELECTION.out.references
+
+        // call cache search process if cache_dir is provided, otherwise skip to clustering with Sylph outputs as input.
+        // if cache is enabled, split sylph candidate into cached and uncached.
+        if (params.cache_dir) {
+            // Cache-enabled path: create cached ref/group pairs and cluster cache misses.
+            CHECK_CACHE()
+            cache_config_ch = CHECK_CACHE.out.config.first()
+            CACHE_LOOKUP(candidate_references_ch, cache_config_ch)
+
+            // Cached combined label/ref/group files for the current run combine step.
+            cached_ref_group_files_ch = CACHE_LOOKUP.out.hits
+                .map { meta, cache_hits_tsv, refs_file -> cache_hits_tsv }
+                .splitCsv(header: true, sep: '\t')
+                .map { row ->
+                    tuple([ID: row.species_id], file(row.cached_ref_groups))
+                }
+
+            // Candidate references not found in the cache; these still need clustering/refinement.
+            candidate_refs_to_cluster_ch = CACHE_LOOKUP.out.misses
+                | map { meta, cache_miss_tsv, sylph_refs ->
+                    tuple(meta, sylph_refs)
+                }
+        } else {
+            // Cache-disabled path: all Sylph refs continue to clustering.
+            cached_ref_group_files_ch = Channel.empty()
+            // With no cache, every Sylph candidate reference set must be clustered/refined.
+            candidate_refs_to_cluster_ch = candidate_references_ch
+        }
 
         // Cluster references
-        PREP_REFS(references_ch)
+        // only uncached candidate references go through PREP_REFS and clustering
+        PREP_REFS(candidate_refs_to_cluster_ch)
         POPPUNK(PREP_REFS.out.refs_csv)
         poppunk_clusters_csv = POPPUNK.out.clusters
 
-        // Dereplicate/Refine references per cluster
-        references_ch
+        // Always refine autoselected candidate references before indexing.
+        candidate_refs_to_cluster_ch
         | join(POPPUNK.out.clusters)
         | join(POPPUNK.out.dist_matrix)
         | set { refine_refs_input }
 
         REFINE_REFS(refine_refs_input)
 
-        // Split into references and groups, then combine across all taxa
-        REFINE_REFS.out.rep_refs_and_groups
-        | map { meta, ref_groups_file -> ref_groups_file}
-        | collect
-        | COMBINE_REFS
+        // For current run combine_refs.py input: tuple(meta, label_ref_group_csv)
+        generated_ref_group_files_ch = REFINE_REFS.out.rep_refs_and_groups
 
-        representatives_ch = COMBINE_REFS.out.references.first()
-        ref_groups_ch = COMBINE_REFS.out.groups.first()
+        // all refine_refs emit outputs carry same meta so i can just join these two
+        generated_rep_refs_ch = REFINE_REFS.out.representatives_ch
+        generated_ref_groups_ch = REFINE_REFS.out.ref_groups_ch
+
+        // tuple(meta, references_txt, clusters_txt)
+        generated_ref_group_pairs_ch = generated_rep_refs_ch
+            .join(generated_ref_groups_ch)
+
+        // store newly generated species cache entries for future runs.
+        if (params.cache_dir) {
+            generated_ref_group_pairs_ch
+                .join(generated_ref_group_files_ch)
+                .set { generated_cache_entries_ch}
+            
+            WRITE_CACHE_ENTRY(generated_cache_entries_ch, cache_config_ch)
+        }
+
+        // Mix cached and generated combined ref/group CSVs for the current run.
+        combined_ref_group_files_ch = cached_ref_group_files_ch.mix(generated_ref_group_files_ch)
+
+        // Sort species for reproducible ref/group file order across runs.
+        combined_ref_group_files_ch
+            .collect(flat: false)
+            .flatMap { entries ->
+                entries.sort { a, b -> a[0].ID <=> b[0].ID }
+            }
+            .map { meta, ref_group_file -> ref_group_file }
+            .collect()
+            .set { ref_group_files }
+
+        COMBINE_REFS(ref_group_files)
+        ref_groups_ch = COMBINE_REFS.out.groups
 
         // Build themisto index
         index_prefix_ch = channel.value("index") // needs to be identical to what index is set as in indexing process
-        index_files_ch = THEMISTO_BUILD_INDEX(index_prefix_ch, representatives_ch).collect()
+        index_files_ch = THEMISTO_BUILD_INDEX(index_prefix_ch, COMBINE_REFS.out.references).collect()
     }
 
-    if (!params.ref_mode == "index") {
+    if (params.ref_mode != "index") {
         // Output stats on the index (not required for anything just an additional output)
         THEMISTO_STATS(index_files_ch, index_prefix_ch)
     }
 
+
     // Core Workflow
-    if (!params.skip_main) {
-        pseudoaligned_ch = THEMISTO_PSEUDOALIGN(reads_ch, index_files_ch, index_prefix_ch)
-        
-        msweep_ch = MSWEEP(pseudoaligned_ch, ref_groups_ch)
-        
-        MGEMS(
-            reads_ch
-                .join(pseudoaligned_ch, by: 0)
-                .join(msweep_ch, by: 0)
-                .map { meta, r1, r2, aln1, aln2, abund, probs ->
-                    tuple(meta, r1, r2, aln1, aln2, abund, probs)
-                },
-                index_files_ch,
-                index_prefix_ch,
-                ref_groups_ch
-        )
-    }
+    pseudoaligned_ch = THEMISTO_PSEUDOALIGN(reads_ch, index_files_ch, index_prefix_ch)
+    msweep_ch = MSWEEP(pseudoaligned_ch, ref_groups_ch)
+    
+    MGEMS(
+        reads_ch
+            .join(pseudoaligned_ch, by: 0)
+            .join(msweep_ch, by: 0)
+            .map { meta, r1, r2, aln1, aln2, abund, probs ->
+                tuple(meta, r1, r2, aln1, aln2, abund, probs)
+            },
+            index_files_ch,
+            index_prefix_ch,
+            ref_groups_ch
+    )
 }

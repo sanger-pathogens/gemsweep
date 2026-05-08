@@ -28,11 +28,22 @@
       },
       "references": {
         "default": "null",
-        "help_text": "Path to text file containing paths to references, one per line. Optional if --sylph_refset is true, or if --themisto_index and --ref_groups are provided."
+        "help_text": "Path to text file containing paths to references, one per line. Required when --ref_mode is full or refine. Not used when --ref_mode is autoselect, or when --themisto_index and --ref_groups are provided for index mode."
       },
       "representatives": {
         "default": "20",
         "help_text": "Number of representatives at which to cap each reference cluster."
+      },
+      "save_sylph_sketches": {
+        "type": "boolean",
+        "default": false,
+        "description": "Publish Sylph sketch files (.sylsp) to the sample-specific sylph output directory."
+      }
+    },
+    "Cache options": {
+      "cache_dir": {
+        "default": "null",
+        "help_text": "Path to a cache root or an existing config-specific cache directory for autoselect mode. The pipeline reuses a matching cache directory containing metadata.json and per-species references.txt/groups.txt entries."
       }
     },
     "Clustering options": {
