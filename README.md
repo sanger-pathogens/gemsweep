@@ -43,7 +43,8 @@ To run the pipeline from source (this repository):
     ```
     nextflow run <path/to/main.nf> \
         -profile docker \
-        --manifest <path/to/manifest.csv>
+        --manifest <path/to/manifest.csv> \
+        --ref_mode full \
         --references <path/to/references.txt>
     ```
 
@@ -68,7 +69,7 @@ To run the pipeline from source (this repository):
   | `index` | `themisto_index`, `ref_groups` | The supplied index and reference groupings will be validated and directly used in the core workflow (Themisto pseudoalignment, mSWEEP relative abundance estimation and mGEMS read binning) |
   | `full` | `references` | All references supplied will be indexed, clustered (with the tool indicated by `cluster_tool`) and the produced index and groups files will be used in the core workflow |
   | `refine` | `references` | The references supplied will be clustered (with the tool indicated by `cluster_tool`) and each cluster is dereplicated and capped to a maximum indicated by `representatives`. Index and groups file are produced for the representatives selected to use in the core workflow. |
-  | `autoselect` | N/A | The references are not supplied but rather derived from querying the reads against GTDB and using the hits as references for in indexing and clustering before the core workflow.|
+  | `autoselect` | N/A | The references are not supplied but rather derived from querying the reads against GTDB and using the hits as references for indexing and clustering before the core workflow. A refine reference process is always enabled with autoselect mode to subselect representative genomes from clustered references. |
 
   NOTE: If supplying a prebuilt index a\) the kmer size must be identical to the argument `kmer_size` (default: 31) and b\) the reference grouping file must be in identical positional order to the references when indexed.
 
@@ -84,6 +85,36 @@ Example reference grouping file would be useful to add.
 --->
 
 ### Outputs
+
+### Outputs
+
+Main pipeline outputs are written under `--outdir` (`./results` by default).
+
+- Binned reads per reference group:
+  - `results/<sample_id>/mGEMS/*`
+- mSWEEP abundance/probability outputs:
+  - `results/<sample_id>/<sample_id>_mSWEEP_abundances.txt`
+  - `results/<sample_id>/<sample_id>_mSWEEP_probs.tsv`
+- Final reference files used downstream:
+  - `results/ref_groups/references.txt`
+  - `results/ref_groups/groups.txt`
+- Themisto index:
+  - `results/themisto/index.*`
+  - `results/themisto/index_report.txt`
+
+When using `--ref_mode autoselect`, Sylph outputs are written to:
+
+- `results/sylph/combined_sylph_report.tsv`
+- `results/<sample_id>/sylph/<sample_id>_sylph_profile.tsv`
+- `results/<sample_id>/sylph/<sample_id>_sylphtax_profile.sylphmpa`
+
+Sylph sketch files are only published if `--save_sylph_sketches true`.
+
+PopPUNK full outputs are only published if `--publish_poppunk true`:
+
+- `results/poppunk/<species_id>/pp_database/*`
+
+Otherwise PopPUNK, reference refinement, and reference preparation intermediates remain in the Nextflow `work/` directory.
 
 - Binned reads per reference group (strain-level deconvolution)
 - Read assignment table (optionally, with `--get_assignments`)
@@ -121,10 +152,11 @@ mkdir mGEMs_bins_manifest
 
 **General options**
 
-| Flag       | Type   | Default       | Description                                                                                           |
-| ---------- | ------ | ------------- | ----------------------------------------------------------------------------------------------------- |
-| `manifest` | `path` | `null`        | Input manifest CSV with required header `ID,R1,R2`, containing per-sample paths to `.fastq.gz` files. |
-| `outdir`   | `path` | `"./results"` | Path to top directory containing all results, by default `results` within the launch directory.       |
+| Flag        | Type   | Default       | Description                                                                                           |
+| ----------- | ------ | ------------- | ----------------------------------------------------------------------------------------------------- |
+| `manifest`  | `path` | `null`        | Input manifest CSV with required header `ID,R1,R2`, containing per-sample paths to `.fastq.gz` files. |
+| `outdir`    | `path` | `"./results"` | Path to top directory containing all results, by default `results` within the launch directory.       |
+| `skip_main` | `bool` | `false`       | Run only reference preparatory steps, skipping read pseudoalignment through to binning.               |
 
 ---
 
@@ -136,6 +168,32 @@ mkdir mGEMs_bins_manifest
 | `representatives` | `integer` | `20` | Number of representatives at which to cap each reference cluster. |
 
 ---
+
+---
+
+**Cache options**
+| Flag | Type | Default | Description |
+| ----------------- | -------- | -------- | ------------------------------------------------------------------------------- |
+| `cache_dir` | `path` | `null` | Path to a cache root or an existing config-specific cache directory for autoselect mode. The pipeline reuses a matching cache directory containing cache metadata and per-species reference/group entries. |
+
+Cache Layout:
+
+```
+<cache_root>/
+  poppunk_reps20/
+    metadata.json
+    species/
+      escherichia_coli/
+        references.txt
+        groups.txt
+        metadata.json
+```
+
+Cache setup and lookup intermediates such as `cache_config.json`, `cache_hits.tsv`, and `cache_miss.tsv` are kept in the Nextflow `work/` directory and are not published to `results`.
+
+When `--cache_dir` is supplied, generated reference entries are written directly to the external cache directory, not to `results`:
+
+The config-level `metadata.json` records the clustering settings used for that cache directory. Each species-level `metadata.json` records cache write/update details for that species, including update counts and added reference IDs.
 
 **Clustering options**
 | Flag | Type | Default | Description |

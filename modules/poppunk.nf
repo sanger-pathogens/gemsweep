@@ -18,8 +18,8 @@ process PREP_REFS {
 
 process POPPUNK {
     label 'cpu_4'
-    label 'mem_8'
-    label 'time_12'
+    label 'mem_16'
+    label 'time_queue_from_normal'
     tag "${meta.ID}"
 
     container 'quay.io/biocontainers/poppunk:2.7.8--py310h4d0eb5b_0'
