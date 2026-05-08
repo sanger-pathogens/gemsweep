@@ -100,7 +100,7 @@ workflow {
         | ORDER_GROUPS
 
         representatives_ch = references_ch // no dereplication
-        ref_groups_ch = ORDER_GROUPS.out.groups
+        ref_groups_ch = ORDER_GROUPS.out.groups.map { meta, groups_file -> groups_file }
 
         index_prefix_ch = channel.value("index") // needs to be identical to what index is set as in indexing process
         index_files_ch = THEMISTO_BUILD_INDEX(index_prefix_ch, representatives_ch).collect()
@@ -241,11 +241,6 @@ workflow {
 
     // Core Workflow
     pseudoaligned_ch = THEMISTO_PSEUDOALIGN(reads_ch, index_files_ch, index_prefix_ch)
-    // Normalise ref_groups_ch so downstream processes always receive group.txt files instead of mixed tuple/file entries.
-    ref_groups_ch = ref_groups_ch.map { meta, groups_file ->
-        return groups_file ? groups_file : meta
-    }
-
     msweep_ch = MSWEEP(pseudoaligned_ch, ref_groups_ch)
     
     MGEMS(
