@@ -49,7 +49,7 @@ process ORDER_GROUPS {
     label 'time_30m'
     tag "${meta.ID}"
 
-    publishDir "${params.outdir}/poppunk/${meta.ID}", mode: 'copy', overwrite: true
+    publishDir "${params.outdir}/${params.cluster_tool}/${meta.ID}", mode: 'copy', overwrite: true
 
     input:
     tuple val(meta), path(refs_tsv), path(clusters_csv)
