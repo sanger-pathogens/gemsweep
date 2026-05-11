@@ -97,6 +97,7 @@ def main():
     # Write output
     df.to_csv(args.out, sep=',', index=False)
     logging.info(f"Assigned {len(ref_ids)} genomes to {n_components} clusters")
+    # TODO: write output that mimics the longform npy dist matrix (maybe with NaNs for missing pairs?) for REFINE_REFS compatibility
 
 def validate_log_filename(log_filename:str):
     if not log_filename:
