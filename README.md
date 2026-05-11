@@ -53,7 +53,7 @@ To run the pipeline from source (this repository):
 
     This pipeline's default settings are optimised for running on the Sanger HPC, including making use of GPU and temp storage. To run on other systems please configure the parameters appropriately.
 
-    See [Usage](#usage) for all available pipeline options.
+    See [Parameters](#parameters) for all available pipeline options.
 
 ### Inputs
 
@@ -193,7 +193,7 @@ The config-level `metadata.json` records the clustering settings used for that c
 | Flag | Type | Default | Description |
 | ----------------- | -------- | ---------------------- | ----------------------------------------------------------------------------------------------------- |
 | `cluster_tool` | `str` | `poppunk` | Tool to use for clustering references when ref_mode is `refine` or `full`. Options: `poppunk` or `sketchlib` |
-| `poppunk_model` | `string` | `dbscan` | Clustering model for poppunk to use (either dbscan or bgmm) |
+| `poppunk_model` | `str` | `dbscan` | Clustering model for poppunk to use (either dbscan or bgmm) |
 | `publish_poppunk` | `bool` | `false` | Optionally publish full poppunk output, group assignments are always published. |
 | `ani_threshold` | `float` | `0.02` | Max ANI distance threshold for clustering (default 0.2 clusters genomes sharing >98% ANI similarity). |
 | `sketchlib_kstep` | `str` | `"13,29,4"` | Kmer sizes at which sketchlib will sketch the reference in the format start,stop,step |
