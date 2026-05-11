@@ -96,7 +96,11 @@ def main():
     
     # Write output
     df.to_csv(args.out, sep=',', index=False)
-    logging.info(f"Assigned {len(ref_ids)} genomes to {n_components} clusters")
+    n_components = len(g.clusters(mode="weak"))
+    n_communities = len(set(labels))
+    logging.info(f"Graph has {len(ref_ids)} genomes in {n_components} connected components, "
+                 f"further split into {n_communities} communities by {args.algorithm}")
+
     # TODO: write output that mimics the longform npy dist matrix (maybe with NaNs for missing pairs?) for REFINE_REFS compatibility
 
 def validate_log_filename(log_filename:str):
