@@ -198,6 +198,11 @@ The config-level `metadata.json` records the clustering settings used for that c
 | `ani_threshold` | `float` | `0.02` | Max ANI distance threshold for clustering (default 0.2 clusters genomes sharing >98% ANI similarity). |
 | `sketchlib_kstep` | `str` | `"13,29,4"` | Kmer sizes at which sketchlib will sketch the reference in the format start,stop,step |
 | `cluster_strict` | `bool` | `false` | Fail early if all genomes form a single cluster, or each genome is a singleton. |
+| `cluster_algorithm` | `str` | `connected_components` | Name of clustering/ community-finding algorithm to be used in sketchlib clustering (connected_components|leiden|louvain|walktrap|fastgreedy|label_propagation|infomap|eigenvector). |
+
+The pipeline's idea of strain-level is defined by the clustering stage. One route is to use poppunk clustering, and choose from dbscan or bgmm model to fit. Be aware this is a non-deterministic mode of clustering, developed to cluster single-species to the strain level. If you want to re-use the same groups from a previous run you would need to use the 'index' ref_mode.
+
+Alternatively the ANI-based community finding algorithms provide a deterministic method; using sketchlib to derive ANI and allowing a choice of community-finding algorithms available from igraph, or connected components/ single linkage clustering.
 
 ---
 
