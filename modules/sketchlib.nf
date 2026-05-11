@@ -73,7 +73,7 @@ process SKETCHLIB_CLUSTER {
         --out ${sketch_prefix}_clusters.csv \
         --threads ${task.cpus} \
         --log ${sketch_prefix}_sketchlib_cluster \
-        --algorithm ${cluster_algorithm} \
+        --algorithm ${params.cluster_algorithm} \
         \$random_flag
 
     cut -f2 ${sketch_prefix}_clusters.csv | tail -n +2 > groups.txt
