@@ -128,13 +128,13 @@ def setup_logging(log_filename: str, debug:bool):
 
 def parse_args() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
-        description="Pairwise ANI distance-based connected components clustering.",
+        description="Perform clustering/ community-finding using pairwise ANI distances.",
         formatter_class=argparse.ArgumentDefaultsHelpFormatter
     )
     parser.add_argument(
         "--debug", 
         action='store_true',
-        help="Set to true to log debug-level information"
+        help="Enable logging of debug-level information"
     )
     parser.add_argument(
         "--log", 
