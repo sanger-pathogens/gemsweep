@@ -27,14 +27,14 @@ import pandas as pd
 import argparse
 
 ALGORITHMS = {
-    "connected_components": None,  # handled separately — not a community method
+    "connected_components": None,  # handled separately — not a community method, needed here for argparse
     "leiden":               lambda g: g.community_leiden(objective_function="modularity", weights="weight"),
     "louvain":              lambda g: g.community_multilevel(weights="weight"),
     "walktrap":             lambda g: g.community_walktrap(weights="weight").as_clustering(),
     "fastgreedy":           lambda g: g.community_fastgreedy(weights="weight").as_clustering(),
     "label_propagation":    lambda g: g.community_label_propagation(weights="weight"),
     "infomap":              lambda g: g.community_infomap(edge_weights="weight"),
-    "spinglass":            lambda g: g.community_spinglass(weights="weight"),
+#    "spinglass":            lambda g: g.community_spinglass(weights="weight"), # graph connectivity after sparse query might be an issue
     "eigenvector":          lambda g: g.community_leading_eigenvector(weights="weight"),
 }
 
