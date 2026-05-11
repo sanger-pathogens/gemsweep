@@ -69,20 +69,21 @@ def main():
     )
     logging.debug(f"Distance stats: min={min(dists):.6f}, max={max(dists):.6f}, mean={sum(dists)/len(dists):.6f}")
 
-    # Convert returned tuple of lists to a COO matrix
-    l = len(ref_ids)
-    coo = sp.coo_matrix((dists, (rows, cols)), shape=(l, l))
-
-    # Convert to compressed sparse row (CSR) format for connected_components
-    csr = coo.tocsr()
-
-    # Connected components = clusters
-    # Any two genomes connected by distance < threshold end up in the same cluster
-    logging.info("Forming clusters of references connected by the returned distances...")
-    n_components, labels = csgraph.connected_components(
-        csgraph  = csr,
+    # Build a graph of the sparse sketchlib output (returned ANIs as edges)
+    logging.info("Building graph from pairwise distances...")
+    edges = list(zip(rows,cols))
+    weights = [1.0 - d for d in dists] # Community algos expect similarity not distance
+    g = ig.Graph(
+        n = len(ref_ids),
+        edges = edges,
         directed = False
     )
+    g.vs["name"] = ref_ids
+    g.es["weight"] = weights
+
+    # Find communities/ clusters
+    logging.info(f"Running community detection with algorithm: '{args.algorithm}'...")
+    labels = run_clustering(g, args.algorithm)
 
     df = pd.DataFrame({'genome_id': ref_ids, 'cluster_id': labels})
 
@@ -205,7 +206,14 @@ def parse_kmer_sizes(kstep: str) -> list[int]:
 
     return kmer_sizes
 
-
+def run_clustering(graph: ig.Graph, algorithm: str) -> list[int]:
+    # In the case of connected components there is no partition
+    if algorithm == "connected_components":
+        membership = graph.clusters(mode="weak").membership
+        return membership
+    community_fn = ALGORITHMS[algorithm]
+    partition = community_fn(graph)
+    return partition.membership
 
 def validate_clusters(clusters_df: pd.DataFrame, num_refs: int, ani_threshold: float) -> bool:
     checks_passed = True
