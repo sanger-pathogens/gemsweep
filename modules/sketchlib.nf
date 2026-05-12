@@ -13,7 +13,7 @@ process SKETCHLIB_SKETCH {
     tuple val(meta), path(refs_tsv), path("${sketch_db}.h5")
 
     script:
-    sketch_db = "references_sketch" // need to make this per taxon if this runs per taxon after sylph
+    sketch_db = "${meta.ID}_sketch"
 
     """
 	sketchlib sketch \
