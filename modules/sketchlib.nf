@@ -43,7 +43,7 @@ process SKETCHLIB_CLUSTER {
 
     output:
     tuple val(meta), path("${sketch_prefix}_clusters.csv"), emit: clusters
-    tuple val(meta), path("groups.txt"), emit: groups
+    tuple val(meta), path("${out}/${out}.dists.npy")        emit: dist_matrix // to mimic poppunk output for interoperability with refine_refs
 
     script:
     def sketchlib_cluster = "${projectDir}/bin/sketchlib_cluster.py" 
@@ -76,6 +76,5 @@ process SKETCHLIB_CLUSTER {
         --algorithm ${params.cluster_algorithm} \
         \$random_flag
 
-    cut -f2 ${sketch_prefix}_clusters.csv | tail -n +2 > groups.txt
     """
 }
