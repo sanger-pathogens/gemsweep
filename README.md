@@ -3,7 +3,6 @@
 [![Nextflow](https://img.shields.io/badge/nextflow%20DSL2-%E2%89%A521.04.0-23aa62.svg?labelColor=000000)](https://www.nextflow.io/)
 [![run with docker](https://img.shields.io/badge/run%20with-docker-0db7ed?labelColor=000000&logo=docker)](https://www.docker.com/)
 [![run with singularity](https://img.shields.io/badge/run%20with-singularity-1d355c.svg?labelColor=000000)](https://sylabs.io/docs/)
-
 [[_TOC_]]
 
 ## Pipeline summary
@@ -202,7 +201,7 @@ The config-level `metadata.json` records the clustering settings used for that c
 
 The pipeline's idea of strain-level is defined by the clustering stage. One route is to use poppunk clustering, and choose from dbscan or bgmm model to fit. Be aware this is a non-deterministic mode of clustering, developed to cluster single-species to the strain level. If you want to re-use the same groups from a previous run you would need to use the 'index' ref_mode.
 
-Alternatively the ANI-based community finding algorithms provide a deterministic method; using sketchlib to derive ANI and allowing a choice of community-finding algorithms available from igraph, or connected components/ single linkage clustering.
+Alternatively ANI-based community finding algorithms are available; using sketchlib to derive ANI followed by a choice of community-finding algorithms from the package `python-igraph`. Deterministic methods include `connected_components` (also known as single linkage clustering), `walktrap`, `fastgreedy` and `eigenvector`. Also available are the `louvain`, `leiden`, `infomap` and `label_propagation` methods.
 
 ---
 
