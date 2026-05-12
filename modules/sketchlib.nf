@@ -4,7 +4,7 @@ process SKETCHLIB_SKETCH {
     label 'time_queue_from_small'
     tag "${meta.ID}"
 
-    container 'quay.io/sangerpathogens/pp-sketchlib-python:2.1.5'
+    container 'quay.io/sangerpathogens/pp-sketchlib-python:2.1.5-c1'
 
     input:
     tuple val(meta), path(refs_tsv) // has shape 'name  file.fasta' per line
@@ -36,7 +36,7 @@ process SKETCHLIB_CLUSTER {
     label 'time_12'
     tag "${meta.ID}"
 
-    container 'quay.io/sangerpathogens/pp-sketchlib-python:2.1.5'
+    container 'quay.io/sangerpathogens/pp-sketchlib-python:2.1.5-c1'
 
     input:
     tuple val(meta), path(refs_tsv), path(h5_db)
