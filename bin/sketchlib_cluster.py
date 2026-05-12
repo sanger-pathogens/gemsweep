@@ -4,7 +4,7 @@
 Cluster genomes in a pre-sketched sketchlib database by pairwise ANI distance
 using clustering/ community-finding algorithm of choice. Outputs a CSV mapping
 each genome ID to a cluster ID. Also sanity checks clusters; if each genome
-is in it's own cluster or all genomes fall into a single cluster, it either logs
+is in its own cluster or all genomes fall into a single cluster, it either logs
 a warning or, in strict mode, fails with a non-zero exit code.
 
 Example usage:
