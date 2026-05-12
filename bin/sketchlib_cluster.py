@@ -25,6 +25,7 @@ import pp_sketchlib
 import igraph as ig
 import pandas as pd
 import argparse
+import numpy as np
 
 ALGORITHMS = {
     "connected_components": None,  # handled separately — not a community method, needed here for argparse
@@ -101,7 +102,13 @@ def main():
     logging.info(f"Graph has {len(ref_ids)} genomes in {n_components} connected components, "
                  f"further split into {n_communities} communities by {args.algorithm}")
 
-    # TODO: write output that mimics the longform npy dist matrix (maybe with NaNs for missing pairs?) for REFINE_REFS compatibility
+    save_dist_matrix(
+        num_refs=len(ref_ids),
+        rows = rows,
+        cols = cols,
+        dists = dists,
+        out_prefix= args.sketch
+    )
 
 def validate_log_filename(log_filename:str):
     if not log_filename:
@@ -237,6 +244,32 @@ def validate_clusters(clusters_df: pd.DataFrame, num_refs: int, ani_threshold: f
     logging.debug(f"Cluster sizes:\n{cluster_counts.to_string()}")
 
     return checks_passed
+
+def upper_triangle_index(i: int, j: int, n: int) -> int:
+    '''Return the row index in a long-form upper triangle array for pair (i, j).
+    
+    Assumes i < j. For an n x n matrix, the upper triangle has n*(n-1)//2 
+    entries stored row by row, left to right, excluding the diagonal.
+    '''
+    return i * n - i * (i + 1) // 2 + j - i - 1
+
+def save_dist_matrix(num_refs: int, rows: list[int], cols: list[int], dists: list[float], out_prefix: str):
+    '''Replicates the *.dists.npy poppunk output but with notable exceptions:
+      a) NaNs to fill distances missing due to the sparse query
+      b) Only a single set of dists (one column), no core and accessory'''
+    
+    n_pairs = num_refs * (num_refs - 1) // 2
+
+    dist_matrix = np.full((n_pairs, 1), np.nan) # Change to 2 columns if replicating poppunk format
+
+    for i, j, d in zip(rows, cols, dists):
+        if i < j:
+            idx = upper_triangle_index(i, j, num_refs)
+            dist_matrix[idx, 0] = d
+#            dist_matrix[idx, 1] = d second column identical if necessary to replicate 2 col format of poppunk
+
+    np.save(out_prefix + ".dists.npy", dist_matrix)
+    logging.info(f"Saved distance matrix to {out_prefix}.dists.npy")
 
 if __name__ == "__main__":
     main()
