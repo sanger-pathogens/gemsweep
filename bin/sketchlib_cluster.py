@@ -260,7 +260,7 @@ def save_dist_matrix(num_refs: int, rows: list[int], cols: list[int], dists: lis
     
     n_pairs = num_refs * (num_refs - 1) // 2
 
-    dist_matrix = np.full((n_pairs, 1), np.nan) # Change to 2 columns if replicating poppunk format
+    dist_matrix = np.full((n_pairs, 1), np.nan, dtype=np.float32) # Change to 2 columns if replicating poppunk format
 
     for i, j, d in zip(rows, cols, dists):
         if i < j:
