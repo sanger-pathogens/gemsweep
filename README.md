@@ -3,7 +3,6 @@
 [![Nextflow](https://img.shields.io/badge/nextflow%20DSL2-%E2%89%A521.04.0-23aa62.svg?labelColor=000000)](https://www.nextflow.io/)
 [![run with docker](https://img.shields.io/badge/run%20with-docker-0db7ed?labelColor=000000&logo=docker)](https://www.docker.com/)
 [![run with singularity](https://img.shields.io/badge/run%20with-singularity-1d355c.svg?labelColor=000000)](https://sylabs.io/docs/)
-
 [[_TOC_]]
 
 ## Pipeline summary
@@ -53,7 +52,7 @@ To run the pipeline from source (this repository):
 
     This pipeline's default settings are optimised for running on the Sanger HPC, including making use of GPU and temp storage. To run on other systems please configure the parameters appropriately.
 
-    See [Usage](#usage) for all available pipeline options.
+    See [Parameters](#parameters) for all available pipeline options.
 
 ### Inputs
 
@@ -193,11 +192,16 @@ The config-level `metadata.json` records the clustering settings used for that c
 | Flag | Type | Default | Description |
 | ----------------- | -------- | ---------------------- | ----------------------------------------------------------------------------------------------------- |
 | `cluster_tool` | `str` | `poppunk` | Tool to use for clustering references when ref_mode is `refine` or `full`. Options: `poppunk` or `sketchlib` |
-| `poppunk_model` | `string` | `dbscan` | Clustering model for poppunk to use (either dbscan or bgmm) |
+| `poppunk_model` | `str` | `dbscan` | Clustering model for poppunk to use (either dbscan or bgmm) |
 | `publish_poppunk` | `bool` | `false` | Optionally publish full poppunk output, group assignments are always published. |
 | `ani_threshold` | `float` | `0.02` | Max ANI distance threshold for clustering (default 0.2 clusters genomes sharing >98% ANI similarity). |
 | `sketchlib_kstep` | `str` | `"13,29,4"` | Kmer sizes at which sketchlib will sketch the reference in the format start,stop,step |
 | `cluster_strict` | `bool` | `false` | Fail early if all genomes form a single cluster, or each genome is a singleton. |
+| `cluster_algorithm` | `str` | `connected_components` | Name of clustering/ community-finding algorithm to be used in sketchlib clustering. Options: connected_components, leiden, louvain, walktrap, fastgreedy, label_propagation, infomap, eigenvector |
+
+The pipeline's idea of strain-level is defined by the clustering stage. One route is to use poppunk clustering, and choose from dbscan or bgmm model to fit. Be aware this is a non-deterministic mode of clustering, developed to cluster single-species to the strain level. If you want to re-use the same groups from a previous run you would need to use the 'index' ref_mode.
+
+Alternatively ANI-based community finding algorithms are available; using sketchlib to derive ANI followed by a choice of community-finding algorithms from the package `python-igraph`. Deterministic methods include `connected_components` (also known as single linkage clustering), `walktrap`, `fastgreedy` and `eigenvector`. Also available are the `louvain`, `leiden`, `infomap` and `label_propagation` methods.
 
 ---
 
@@ -240,14 +244,15 @@ The config-level `metadata.json` records the clustering settings used for that c
 
 The current version of the pipeline uses the following software dependencies:
 
-| Software     | Version | Image URL                                            |
-| ------------ | ------- | ---------------------------------------------------- |
-| themisto     | 3.2.2   | quay.io/sangerpathogens/themisto:3.2.2               |
-| mSWEEP       | 2.2.1   | quay.io/biocontainers/msweep:2.2.1--h503566f_1       |
-| mGEMS        | 1.3.3   | quay.io/biocontainers/mgems:1.3.3--h13024bc_2        |
-| PopPUNK      | 2.7.8   | quay.io/biocontainers/poppunk:2.7.8--py310h4d0eb5b_0 |
-| sylph        | 0.9.0   | quay.io/biocontainers/sylph:0.9.0                    |
-| pp-sketchlib | 2.1.5   | quay.io/sangerpathogens/pp-sketchlib-python:2.1.5    |
+| Software      | Version | Image URL                                            |
+| ------------- | ------- | ---------------------------------------------------- |
+| themisto      | 3.2.2   | quay.io/sangerpathogens/themisto:3.2.2               |
+| mSWEEP        | 2.2.1   | quay.io/biocontainers/msweep:2.2.1--h503566f_1       |
+| mGEMS         | 1.3.3   | quay.io/biocontainers/mgems:1.3.3--h13024bc_2        |
+| PopPUNK       | 2.7.8   | quay.io/biocontainers/poppunk:2.7.8--py310h4d0eb5b_0 |
+| sylph         | 0.9.0   | quay.io/biocontainers/sylph:0.9.0                    |
+| pp-sketchlib  | 2.1.5   | quay.io/sangerpathogens/pp-sketchlib-python:2.1.5-c1 |
+| python-igraph | 1.0.0   | quay.io/sangerpathogens/pp-sketchlib-python:2.1.5-c1 |
 
 <!---
 | XXX       | X.X.X   | quay.io/...                                         |

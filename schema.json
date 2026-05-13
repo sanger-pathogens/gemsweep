@@ -33,11 +33,6 @@
       "representatives": {
         "default": "20",
         "help_text": "Number of representatives at which to cap each reference cluster."
-      },
-      "save_sylph_sketches": {
-        "type": "boolean",
-        "default": false,
-        "description": "Publish Sylph sketch files (.sylsp) to the sample-specific sylph output directory."
       }
     },
     "Cache options": {
@@ -70,6 +65,10 @@
       "cluster_strict": {
         "default": "false",
         "help_text": "Fail early if all genomes form a single cluster, or each genome is a singleton."
+      },
+      "cluster_algorithm": {
+        "default": "connected_components",
+        "help_text": "Name of clustering/ community-finding algorithm to be used in sketchlib clustering (connected_components|leiden|louvain|walktrap|fastgreedy|label_propagation|infomap|eigenvector)."
       }
     },
     "Themisto options": {

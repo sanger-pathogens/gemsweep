@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
 
 """
-Cluster genomes in a pre-sketched sketchlib database by pairwise ANI distance 
-using connected components. Outputs a CSV mapping each genome ID to a cluster 
-ID. Also performs cluster checks; if each genome is in its own cluster or all 
-genomes fall into a single cluster, log a warning or, in strict mode, exit with
-nonzero exit code.
+Cluster genomes in a pre-sketched sketchlib database by pairwise ANI distance
+using clustering/ community-finding algorithm of choice. Outputs a CSV mapping
+each genome ID to a cluster ID. Also sanity checks clusters; if each genome
+is in its own cluster or all genomes fall into a single cluster, it either logs
+a warning or, in strict mode, fails with a non-zero exit code.
 
 Example usage:
     sketchlib_cluster.py \
@@ -22,10 +22,21 @@ from pathlib import Path
 import sys
 import logging
 import pp_sketchlib
-import scipy.sparse.csgraph as csgraph
-import scipy.sparse as sp
+import igraph as ig
 import pandas as pd
 import argparse
+
+ALGORITHMS = {
+    "connected_components": None,  # handled separately — not a community method, needed here for argparse
+    "leiden":               lambda g: g.community_leiden(objective_function="modularity", weights="weight"),
+    "louvain":              lambda g: g.community_multilevel(weights="weight"),
+    "walktrap":             lambda g: g.community_walktrap(weights="weight").as_clustering(),
+    "fastgreedy":           lambda g: g.community_fastgreedy(weights="weight").as_clustering(),
+    "label_propagation":    lambda g: g.community_label_propagation(weights="weight"),
+    "infomap":              lambda g: g.community_infomap(edge_weights="weight"),
+#    "spinglass":            lambda g: g.community_spinglass(weights="weight"), # graph connectivity after sparse query might be an issue
+    "eigenvector":          lambda g: g.community_leading_eigenvector(weights="weight"),
+}
 
 def main():
     args = parse_args()
@@ -58,20 +69,21 @@ def main():
     )
     logging.debug(f"Distance stats: min={min(dists):.6f}, max={max(dists):.6f}, mean={sum(dists)/len(dists):.6f}")
 
-    # Convert returned tuple of lists to a COO matrix
-    l = len(ref_ids)
-    coo = sp.coo_matrix((dists, (rows, cols)), shape=(l, l))
-
-    # Convert to compressed sparse row (CSR) format for connected_components
-    csr = coo.tocsr()
-
-    # Connected components = clusters
-    # Any two genomes connected by distance < threshold end up in the same cluster
-    logging.info("Forming clusters of references connected by the returned distances...")
-    n_components, labels = csgraph.connected_components(
-        csgraph  = csr,
+    # Build a graph of the sparse sketchlib output (returned ANIs as edges)
+    logging.info("Building graph from pairwise distances...")
+    edges = list(zip(rows,cols))
+    weights = [1.0 - d for d in dists] # Community algos expect similarity not distance
+    g = ig.Graph(
+        n = len(ref_ids),
+        edges = edges,
         directed = False
     )
+    g.vs["name"] = ref_ids
+    g.es["weight"] = weights
+
+    # Find communities/ clusters
+    logging.info(f"Running community detection with algorithm: '{args.algorithm}'...")
+    labels = run_clustering(g, args.algorithm)
 
     df = pd.DataFrame({'genome_id': ref_ids, 'cluster_id': labels})
 
@@ -84,7 +96,12 @@ def main():
     
     # Write output
     df.to_csv(args.out, sep=',', index=False)
-    logging.info(f"Assigned {len(ref_ids)} genomes to {n_components} clusters")
+    n_components = len(g.clusters(mode="weak"))
+    n_communities = len(set(labels))
+    logging.info(f"Graph has {len(ref_ids)} genomes in {n_components} connected components, "
+                 f"further split into {n_communities} communities by {args.algorithm}")
+
+    # TODO: write output that mimics the longform npy dist matrix (maybe with NaNs for missing pairs?) for REFINE_REFS compatibility
 
 def validate_log_filename(log_filename:str):
     if not log_filename:
@@ -115,20 +132,17 @@ def setup_logging(log_filename: str, debug:bool):
 
 def parse_args() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
-        description="Pairwise ANI distance-based connected components clustering.",
+        description="Perform clustering/ community-finding using pairwise ANI distances.",
         formatter_class=argparse.ArgumentDefaultsHelpFormatter
     )
     parser.add_argument(
         "--debug", 
         action='store_true',
-        required=False, 
-        default=False,
-        help="Set to true to log debug-level information"
+        help="Enable logging of debug-level information"
     )
     parser.add_argument(
         "--log", 
-        type=str, 
-        required=False, 
+        type=str,
         default=f"{Path(sys.argv[0]).stem}",
         help="Basename of the log file, e.g. --log foo will ouput foo.log"
     )
@@ -142,7 +156,7 @@ def parse_args() -> argparse.ArgumentParser:
         "--ani_threshold",
         type=float,
         default=0.02,
-        help="maximum ANI distance threshold for clustering (default 0.02, meaning clusters of genomes sharing at least 98%% ANI similarity)"
+        help="Maximum ANI distance threshold for clustering (default 0.02, meaning clusters of genomes sharing at least 98%% ANI similarity)"
     )
     parser.add_argument(
         "--ref_ids",
@@ -178,6 +192,13 @@ def parse_args() -> argparse.ArgumentParser:
         action='store_true',
         help="Apply random match correction. Only use if sketch includes random match calculations."
     )
+    parser.add_argument(
+        "--algorithm",
+        type=str,
+        default="connected_components",
+        choices=list(ALGORITHMS),
+        help="Community detection algorithm to use"
+    )
     return parser.parse_args()
 
 def parse_kmer_sizes(kstep: str) -> list[int]:
@@ -189,8 +210,15 @@ def parse_kmer_sizes(kstep: str) -> list[int]:
     kmer_sizes = list(range(k_start, k_stop + 1, step))
 
     return kmer_sizes
-        
 
+def run_clustering(graph: ig.Graph, algorithm: str) -> list[int]:
+    # In the case of connected components there is no partition
+    if algorithm == "connected_components":
+        membership = graph.clusters(mode="weak").membership
+        return membership
+    community_fn = ALGORITHMS[algorithm]
+    partition = community_fn(graph)
+    return partition.membership
 
 def validate_clusters(clusters_df: pd.DataFrame, num_refs: int, ani_threshold: float) -> bool:
     checks_passed = True
