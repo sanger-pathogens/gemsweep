@@ -43,7 +43,7 @@ process SKETCHLIB_CLUSTER {
 
     output:
     tuple val(meta), path("${sketch_prefix}_clusters.csv"), emit: clusters
-    tuple val(meta), path("${out}/${out}.dists.npy")        emit: dist_matrix // to mimic poppunk output for interoperability with refine_refs
+    tuple val(meta), path("${sketch_prefix}.dists.npy"),    emit: dist_matrix // for interoperability with refine_refs
 
     script:
     def sketchlib_cluster = "${projectDir}/bin/sketchlib_cluster.py" 
