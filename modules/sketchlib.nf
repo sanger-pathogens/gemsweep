@@ -70,7 +70,7 @@ process SKETCHLIB_CLUSTER {
         --ref_ids ref_ids.txt \
         --ani_threshold ${params.ani_threshold} \
         --kstep ${params.sketchlib_kstep} \
-        --out ${sketch_prefix}_clusters.csv \
+        --out_prefix ${sketch_prefix} \
         --threads ${task.cpus} \
         --log ${sketch_prefix}_sketchlib_cluster \
         --algorithm ${params.cluster_algorithm} \

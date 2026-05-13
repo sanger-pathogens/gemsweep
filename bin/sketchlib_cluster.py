@@ -95,8 +95,8 @@ def main():
     if not validated and args.strict_mode:
         sys.exit(1)
     
-    # Write output
-    df.to_csv(args.out, sep=',', index=False)
+    # Write outputs
+    df.to_csv(f"{args.out_prefix}_cluster.csv", sep=',', index=False)
     n_components = len(g.clusters(mode="weak"))
     n_communities = len(set(labels))
     logging.info(f"Graph has {len(ref_ids)} genomes in {n_components} connected components, "
@@ -107,7 +107,7 @@ def main():
         rows = rows,
         cols = cols,
         dists = dists,
-        out_prefix= args.sketch
+        out_prefix= args.out_prefix
     )
 
 def validate_log_filename(log_filename:str):
@@ -178,10 +178,10 @@ def parse_args() -> argparse.ArgumentParser:
         help="Kmer lengths to use for computing ANI in the format start,stop,step"
     )
     parser.add_argument(
-        "--out",
-        type=Path,
+        "--out_prefix",
+        type=str,
         required=True,
-        help="Path to save the output CSV"
+        help="Name for output files."
     )
     parser.add_argument(
         "--threads",
