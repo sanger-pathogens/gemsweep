@@ -96,7 +96,7 @@ def main():
         sys.exit(1)
     
     # Write outputs
-    df.to_csv(f"{args.out_prefix}_cluster.csv", sep=',', index=False)
+    df.to_csv(f"{args.out_prefix}_clusters.csv", sep=',', index=False)
     n_components = len(g.clusters(mode="weak"))
     n_communities = len(set(labels))
     logging.info(f"Graph has {len(ref_ids)} genomes in {n_components} connected components, "
