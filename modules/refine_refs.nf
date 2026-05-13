@@ -74,7 +74,7 @@ process SPLIT_DIST_MATRIX {
     container "quay.io/sangerpathogens/pandas:2.2.1"
 
     input:
-    tuple val(meta), path(pp_dist_matrix), path(cluster_assignments), path(references)
+    tuple val(meta), path(dist_matrix), path(cluster_assignments), path(references)
 
     output:
     tuple val(meta), path("cluster_dists/*.tsv"),  emit: cluster_dists
@@ -83,7 +83,7 @@ process SPLIT_DIST_MATRIX {
     get_submatrix_script = "${workflow.projectDir}/bin/get_submatrix.py"
     """
     ${get_submatrix_script} \
-        --matrix ${pp_dist_matrix} \
+        --matrix ${dist_matrix} \
         --clusters ${cluster_assignments} \
         --references ${references} \
         --outdir cluster_dists
