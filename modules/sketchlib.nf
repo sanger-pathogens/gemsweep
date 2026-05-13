@@ -51,7 +51,6 @@ process SKETCHLIB_CLUSTER {
         sketchlib_cluster += " --strict_mode"
         }
 
-    // reuse the sketch name for the clusters csv output
     sketch_prefix = h5_db.baseName
 
     """
@@ -70,9 +69,9 @@ process SKETCHLIB_CLUSTER {
         --ref_ids ref_ids.txt \
         --ani_threshold ${params.ani_threshold} \
         --kstep ${params.sketchlib_kstep} \
-        --out_prefix ${sketch_prefix} \
+        --out_prefix ${meta.ID} \
         --threads ${task.cpus} \
-        --log ${sketch_prefix}_sketchlib_cluster \
+        --log ${meta.ID}_sketchlib_cluster \
         --algorithm ${params.cluster_algorithm} \
         \$random_flag
 
