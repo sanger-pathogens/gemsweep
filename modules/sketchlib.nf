@@ -42,8 +42,8 @@ process SKETCHLIB_CLUSTER {
     tuple val(meta), path(refs_tsv), path(h5_db)
 
     output:
-    tuple val(meta), path("${sketch_prefix}_clusters.csv"), emit: clusters
-    tuple val(meta), path("${sketch_prefix}.dists.npy"),    emit: dist_matrix // for interoperability with refine_refs
+    tuple val(meta), path("${meta.ID}_clusters.csv"), emit: clusters
+    tuple val(meta), path("${meta.ID}.dists.npy"),    emit: dist_matrix // for interoperability with refine_refs
 
     script:
     def sketchlib_cluster = "${projectDir}/bin/sketchlib_cluster.py" 
