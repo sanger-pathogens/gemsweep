@@ -2,18 +2,24 @@
 
 """
 Cluster genomes in a pre-sketched sketchlib database by pairwise ANI distance
-using clustering/ community-finding algorithm of choice. Outputs a CSV mapping
-each genome ID to a cluster ID. Also sanity checks clusters; if each genome
-is in it's own cluster or all genomes fall into a single cluster, it either logs
-a warning or, in strict mode, fails with a non-zero exit code.
+using clustering/ community-finding algorithm of choice.
+
+Outputs both a CSV mapping each genome ID to a cluster ID, and a longform numpy
+matrix of all pairwise distances. Distances greater than the ANI threshold are
+filled with the maximum value (1.0) and the matrix contains two identical columns
+of ANI distance to replicate the format to that output by poppunk.
+
+Includes sanity checks; if each genome is in its own cluster or all genomes
+fall into a single cluster, it either logs a warning or, in strict mode, fails
+with a non-zero exit code.
 
 Example usage:
     sketchlib_cluster.py \
-        --sketch reference_sketch \
+        --sketch E_coli_reference_sketch \
         --ani_threshold 0.01 \
         --ref_ids path/to/refs_ids.txt \
         --kstep 17,20,1 \
-        --out . \
+        --out_prefix "E_coli" \
         --strict_mode
 
 """
