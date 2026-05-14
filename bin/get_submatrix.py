@@ -9,8 +9,8 @@ import numpy as np
 import pandas as pd
 
 def parse_arguments():
-    parser = argparse.ArgumentParser(description="Subset the poppunk matrix file into cluster-specific submatrices.")
-    parser.add_argument("--matrix", type=Path, help="Path to the matrix file (.npy)")
+    parser = argparse.ArgumentParser(description="Subset the distance matrix file into cluster-specific submatrices.")
+    parser.add_argument("--matrix", type=Path, help="Path to the matrix file (.dists.npy)")
     parser.add_argument("--outdir", type=Path, help="Directory to save the output submatrices", default=Path.cwd())
     parser.add_argument("--clusters", type=Path, help="List of samples and their clusters to subset (*.csv)")
     parser.add_argument("--header", help="Specifies whether the clusters file has a header row", action='store_true')
