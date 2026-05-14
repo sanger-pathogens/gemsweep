@@ -41,6 +41,11 @@ def load_data(filepath: Path, header: bool = True) -> pd.DataFrame:
         df = pd.read_csv(filepath, header=0, names=["label", "ref", "group"])
     else:
         df = pd.read_csv(filepath, header=None, names=["label", "ref", "group"])
+
+    # clean whitespaces inside ref column, find rows where ref is not missing & not empty
+    df["ref"] = df["ref"].astype("string").str.replace(r"\s+", "", regex=True)
+    df = df[df["ref"].notna() & (df["ref"] != "")].copy()
+
     return df.sort_values("label", kind="stable")
 
 
@@ -49,10 +54,9 @@ def get_group_prefix_from_files(filepaths: list[Path]) -> list[str]:
     return [f"{filepath.stem}_" for filepath in filepaths]
 
 
-def combine_dfs(dfs: list[pd.DataFrame]) -> pd.DataFrame:
+def combine_dfs(dfs: list[pd.Series]) -> pd.Series:
     # Stack all reference rows into one output table.
     return pd.concat(dfs, ignore_index=True)
-
 
 def combine_prefixed_groups(
     groups: list[pd.Series], group_prefixes: list[str]
