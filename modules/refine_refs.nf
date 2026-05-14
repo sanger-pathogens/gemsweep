@@ -81,6 +81,11 @@ process SPLIT_DIST_MATRIX {
 
     script:
     get_submatrix_script = "${workflow.projectDir}/bin/get_submatrix.py"
+    // If poppunk has sanitised the ref_labels this flag accounts for that
+    if (params.cluster_tool == "poppunk") {
+        get_submatrix_script += " --poppunk_labels"
+        }
+    
     """
     ${get_submatrix_script} \
         --matrix ${dist_matrix} \
