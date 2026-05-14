@@ -88,12 +88,12 @@ def read_reference_paths(references: Path) -> List[str]:
     return paths
 
 
-def build_dataframe(reference_paths: Iterable[str]) -> pd.DataFrame:
+def build_dataframe(reference_paths: Iterable[str],label_transform: bool) -> pd.DataFrame:
     """Build pandas DataFrame with ref_label and reference_path columns."""
     records = []
 
     for path in reference_paths:
-        ref_label = make_ref_label(path)
+        ref_label = make_ref_label(path,label_transform)
         records.append(
             {
                 "ref_label": ref_label,
@@ -119,7 +119,10 @@ def main() -> None:
     setup_logging(args.log_level)
 
     reference_paths = read_reference_paths(args.references)
-    df = build_dataframe(reference_paths)
+    df = build_dataframe(
+        reference_paths=reference_paths,
+        label_transform=args.poppunk_labels
+        )
     write_csv(df, args.output_csv)
 
 
