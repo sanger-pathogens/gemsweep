@@ -37,6 +37,11 @@ def parse_args() -> argparse.Namespace:
         help="Output CSV path.",
     )
     parser.add_argument(
+        "--poppunk_labels",
+        action='store_true', 
+        help="Corrects labels (dot-to-underscore) to match poppunk-sanitised reference labels"
+        )
+    parser.add_argument(
         "--log-level",
         default="INFO",
         choices=["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"],
@@ -53,13 +58,13 @@ def setup_logging(level: str) -> None:
     )
 
 
-def make_ref_label(reference_path: str) -> str:
+def make_ref_label(reference_path: str, label_transform: bool) -> str:
     """
     Convert a FASTA path into a reference label.
 
-    Current behaviour imitates ref_label extraction of poppunk:
       1. Extract filename
       2. Remove suffix, e.g. '.gz'
+      and if required to replicate poppunk labels:
       3. Replace dots with underscores
 
     Example:
@@ -67,8 +72,9 @@ def make_ref_label(reference_path: str) -> str:
         -> GCA_035419305_1_ASM3541930v1_genomic_fna
     """
     stem = Path(reference_path).stem
-    label = re.sub(r"[.]", "_", stem)
-    return label
+    if label_transform:
+        return re.sub(r"[.]", "_", stem)
+    return stem
 
 
 def read_reference_paths(references: Path) -> List[str]:
