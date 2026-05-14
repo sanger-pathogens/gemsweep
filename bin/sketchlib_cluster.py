@@ -261,18 +261,18 @@ def upper_triangle_index(i: int, j: int, n: int) -> int:
 
 def save_dist_matrix(num_refs: int, rows: list[int], cols: list[int], dists: list[float], out_prefix: str):
     '''Replicates the *.dists.npy poppunk output but with notable exceptions:
-      a) NaNs to fill distances missing due to the sparse query
-      b) Only a single set of dists (one column), no core and accessory'''
+      a) Max distance (1) to fill distances missing due to the sparse query
+      b) Only a single set of ANI dists that are identical accross the two columns, no core and accessory'''
     
     n_pairs = num_refs * (num_refs - 1) // 2
 
-    dist_matrix = np.full((n_pairs, 1), np.nan, dtype=np.float32) # Change to 2 columns if replicating poppunk format
+    dist_matrix = np.full((n_pairs, 2), 1.0, dtype=np.float32)
 
     for i, j, d in zip(rows, cols, dists):
         if i < j:
             idx = upper_triangle_index(i, j, num_refs)
             dist_matrix[idx, 0] = d
-#            dist_matrix[idx, 1] = d second column identical if necessary to replicate 2 col format of poppunk
+            dist_matrix[idx, 1] = d #second column identical, mimicking 2 col format of poppunk dists
 
     np.save(out_prefix + ".dists.npy", dist_matrix)
     logging.info(f"Saved distance matrix to {out_prefix}.dists.npy")
