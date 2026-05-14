@@ -162,8 +162,6 @@ mkdir mGEMs_bins_manifest
 
 ---
 
----
-
 **Cache options**
 | Flag | Type | Default | Description |
 | ----------------- | -------- | -------- | ------------------------------------------------------------------------------- |
@@ -187,6 +185,8 @@ Cache setup and lookup intermediates such as `cache_config.json`, `cache_hits.ts
 When `--cache_dir` is supplied, generated reference entries are written directly to the external cache directory, not to `results`:
 
 The config-level `metadata.json` records the clustering settings used for that cache directory. Each species-level `metadata.json` records cache write/update details for that species, including update counts and added reference IDs.
+
+---
 
 **Clustering options**
 | Flag | Type | Default | Description |

@@ -107,9 +107,6 @@ def main():
         cluster_dists = defaultdict(list)
         ref_query_generator = iterDistRows(references, references, self=True)
         for i, (ref, query) in enumerate(ref_query_generator):
-            # print(samples)
-            # print(ref, query)
-            # break
             if ref in samples and query in samples:
                 cluster_dists["sample"].append(query)
                 cluster_dists["reference"].append(ref)
