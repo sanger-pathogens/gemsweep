@@ -39,7 +39,7 @@ def parse_args():
     )
     parser.add_argument(
         "--cluster_tool",
-        type=Path,
+        type=str,
         required=False,
         help="Indicates which format the groups file will be in: poppunk|sketchlib"
     )
