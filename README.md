@@ -167,6 +167,21 @@ mkdir mGEMs_bins_manifest
 
 ---
 
+**Reference Autoselection options**
+| Flag | Type | Default | Description |
+| ----------------- | -------- | -------- | ------------------------------------------------------------------------------- |
+| `sylph_db` | `Path` | `"/data/pam/software/sylph/gtdb_full_r226.syldb"` | Path to a pre-built Sylph database (.syldb) |
+| `sylph_tax_metadata` | `Path` | `0."/data/pam/software/sylph-tax/v1/gtdb_r226_metadata.tsv"` | Path to the sylph-tax metadata TSV to use for taxprof |
+| `sylph_k` | `int` | `31` | K-mer size for sylph sketch. |
+| `sylph_mean_ani` | `float` | `95` | ANI threshold for Sylph filtering. |
+| `sylph_mean_cov` | `float` | `0.01` | Coverage threshold for Sylph filtering. |
+| `taxonomic_rank` | `str` | `species` | Taxonomic rank by which to group references. Choices: domain, kingdom, phylum, class, order, family, genus, species. |
+| `pool_latin_taxa` | `bool` | `false` | Adanced option. Collapses divisions of a taxon together, ignoring alphabet suffixes. Not recommended to change unless the effects on output are understood, see docs for more info. |
+| `save_sylph_sketches` | `bool` | `true` | Keep Sylph sketches. |
+| `genome_id_to_file` | `Path` | `"/data/pam/collections/GTDB/release226/genomic_files_all_retrievable_2026_03_05/metadata/id_to_genome_path.tsv"` | File from which to extract genome paths based on genome identifiers. |
+
+---
+
 **Cache Autoselection options**
 | Flag | Type | Default | Description |
 | ----------------- | -------- | -------- | ------------------------------------------------------------------------------- |
