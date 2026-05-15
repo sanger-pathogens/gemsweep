@@ -15,17 +15,19 @@
       "outdir": {
         "default": "./results",
         "help_text": "Path to top directory containing all results, by default 'results' within the launch directory."
-      },
+      }
+    },
+    "Workflow options": {
       "ref_prep_only": {
         "default": "false",
         "help_text": "Run only reference preparatory steps, skipping read pseudoalignment through to binning."
-      }
-    },
-    "References options": {
+      },
       "ref_mode": {
         "default": "null",
         "help_text": "Mode for processing of reference or index inputs. Choose from: 'index', 'full', 'refine', 'autoselect'."
-      },
+      }
+    },
+    "References options": {
       "references": {
         "default": "null",
         "help_text": "Path to text file containing paths to references, one per line. Required when --ref_mode is full or refine. Not used when --ref_mode is autoselect, or when --themisto_index and --ref_groups are provided for index mode."
@@ -56,21 +58,21 @@
       }
     },
     "Sketchlib workflow options": {
-      "ani_threshold": {
-        "default": "0.02",
-        "help_text": "Max ANI distance threshold for clustering (default 0.2 clusters genomes sharing >98% ANI similarity)"
-      },
       "sketchlib_kstep": {
         "default": "13,29,4",
         "help_text": "Kmer sizes at which sketchlib will sketch the reference in the format start,stop,step"
       },
+      "cluster_algorithm": {
+        "default": "connected_components",
+        "help_text": "Name of clustering/ community-finding algorithm to be used on distances (connected_components|leiden|louvain|walktrap|fastgreedy|label_propagation|infomap|eigenvector)."
+      },
+      "ani_threshold": {
+        "default": "0.02",
+        "help_text": "Max ANI distance threshold for clustering (default 0.2 clusters genomes sharing >98% ANI similarity)"
+      },
       "cluster_strict": {
         "default": "false",
         "help_text": "Fail early if all genomes form a single cluster, or each genome is a singleton."
-      },
-      "cluster_algorithm": {
-        "default": "connected_components",
-        "help_text": "Name of clustering/ community-finding algorithm to be used in sketchlib clustering (connected_components|leiden|louvain|walktrap|fastgreedy|label_propagation|infomap|eigenvector)."
       }
     },
     "Themisto options": {
