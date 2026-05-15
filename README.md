@@ -70,7 +70,7 @@ To run the pipeline from source (this repository):
   | `refine` | `references` | The references supplied will be clustered (NOTE: currently only compatible with `--cluster_tool poppunk`) and each cluster is dereplicated and capped to a maximum indicated by `representatives`. Index and groups file are produced for the representatives selected to use in the core workflow. |
   | `autoselect` | N/A | The references are not supplied but rather derived from querying the reads against GTDB and using the hits as references for indexing and clustering before the core workflow. A refine reference process is always enabled with autoselect mode to subselect representative genomes from clustered references. |
 
-  NOTE: If supplying a prebuilt index a\) the kmer size must be identical to the argument `kmer_size` (default: 31) and b\) the reference grouping file must be in identical positional order to the references when indexed.
+  NOTE: If supplying a prebuilt index a\) the kmer size must be identical to the argument `themisto_k` (default: 31) and b\) the reference grouping file must be in identical positional order to the references when indexed.
 
 - Paired-end reads per (mixed) sample
   To provide locally stored reads either use --manifest (or alias --manifest_of_reads) to supply a CSV file with the header line 'ID,R1,R2' (mandatory) and rows containing the read ID, path to read 1 and path to read 2, or use --manifest_from_dir to supply a directory containing the reads (can be used alongside --max_depth with an integer reflecting how many sub-directories deep to look for reads).
