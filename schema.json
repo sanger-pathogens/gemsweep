@@ -88,7 +88,7 @@
         "default": "null",
         "help_text": "Path to a pre-built Themisto index including the index prefix (without exts). Skips indexing if provided."
       },
-      "kmer_size": {
+      "themisto_k": {
         "default": "31",
         "help_text": "K-mer size to use for index and pseudoalignment (21|31|51). If providing an index ensure k-mer size is identical."
       }

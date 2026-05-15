@@ -212,7 +212,7 @@ Alternatively ANI-based community finding algorithms are available; using sketch
 | `temp_dir`       | `path`    | `null`  | Custom temporary storage directory to be used during runtime. Otherwise local `/tmp` will be used.                                                |
 | `temp_space`     | `integer` | `10000` | Amount of /tmp space (MB) that will be reserved for index creation and pseudoalignment, if /tmp is being used as the temporary storage directory. |
 | `themisto_index` | `path`    | `null`  | Path to a pre-built Themisto index including the index prefix (without exts). Skips indexing if provided.                                         |
-| `kmer_size`      | `integer` | `31`    | K-mer size for indexing and pseudoalignment. Allowed values: `21`, `31`, `51`. K-mer sizes must match if an index is provided.                    |
+| `themisto_k`     | `integer` | `31`    | K-mer size for indexing and pseudoalignment. Allowed values: `21`, `31`, `51`. K-mer sizes must match if an index is provided.                    |
 
 ---
 

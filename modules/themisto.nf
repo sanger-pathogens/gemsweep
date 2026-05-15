@@ -24,7 +24,7 @@ process THEMISTO_BUILD_INDEX {
     path "${index_prefix}.*"
 
     script:
-    index_build_params = "-k ${params.kmer_size} -i ${references_txt} -o ${index_prefix} --n-threads ${task.cpus}"
+    index_build_params = "-k ${params.themisto_k} -i ${references_txt} -o ${index_prefix} --n-threads ${task.cpus}"
     
     // User-provided temp storage if given otherwise use tmp workdir (since scratch is enabled)
     if (params.temp_dir) {
