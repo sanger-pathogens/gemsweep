@@ -33,19 +33,19 @@
       "representatives": {
         "default": "20",
         "help_text": "Number of representatives at which to cap each reference cluster."
+      },
+      "cluster_tool": {
+        "default": "poppunk",
+        "help_text": "Tool to use for clustering references when ref_mode is `refine` or `full` (poppunk|sketchlib)"
       }
     },
-    "Cache options": {
+    "Cache Autoselection options": {
       "cache_dir": {
         "default": "null",
         "help_text": "Path to a cache root or an existing config-specific cache directory for autoselect mode. The pipeline reuses a matching cache directory containing metadata.json and per-species references.txt/groups.txt entries."
       }
     },
-    "Clustering options": {
-      "cluster_tool": {
-        "default": "poppunk",
-        "help_text": "Tool to use for clustering references when ref_mode is `refine` or `full` (poppunk|sketchlib)"
-      },
+    "PopPUNK options": {
       "poppunk_model": {
         "default": "dbscan",
         "help_text": "Clustering model for poppunk to use (dbscan|bgmm)"
@@ -53,7 +53,9 @@
       "publish_poppunk": {
         "default": "false",
         "help_text": "Optionally publish full poppunk output, group assignments are always published."
-      },
+      }
+    },
+    "Sketchlib workflow options": {
       "ani_threshold": {
         "default": "0.02",
         "help_text": "Max ANI distance threshold for clustering (default 0.2 clusters genomes sharing >98% ANI similarity)"
