@@ -187,7 +187,7 @@ If you wanted to consider these as one group you can use the advanced option to 
 
 a) generated groups are no longer compliant with GTDB taxonomic definitions, consider if this affects downstream
 
-## b) the size of the produced group may be considerably larger, for example in GTDB release 232 at the genus level g**Clostridium has 1607 genomes but all 34 GTDB genuses in g**Clostridium\* total at 2931 genomes.
+b) the size of the produced group may be considerably larger, for example in GTDB release 232 at the genus level g\_\_Clostridium has 1607 genomes but all 34 GTDB genuses in g\_\_Clostridium\* total at 2931 genomes.
 
 **Cache Autoselection options**
 | Flag | Type | Default | Description |
