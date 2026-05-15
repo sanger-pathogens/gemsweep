@@ -39,7 +39,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--poppunk_labels",
         action='store_true', 
-        help="Corrects labels (dot-to-underscore) to match poppunk-sanitised reference labels"
+        help="Corrects reference genome names by replacing dots `.` with underscore `_` characters to match PopPUNK's way of editing reference labels"
         )
     parser.add_argument(
         "--log-level",
