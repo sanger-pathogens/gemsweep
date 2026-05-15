@@ -34,7 +34,7 @@
       },
       "representatives": {
         "default": "20",
-        "help_text": "Number of representatives at which to cap each reference cluster."
+        "help_text": "Number of representatives at which to cap each reference cluster. Used when ref_mode is refine or autoselect."
       },
       "cluster_tool": {
         "default": "poppunk",
