@@ -176,11 +176,18 @@ mkdir mGEMs_bins_manifest
 | `sylph_mean_ani` | `float` | `95` | ANI threshold for Sylph filtering. |
 | `sylph_mean_cov` | `float` | `0.01` | Coverage threshold for Sylph filtering. |
 | `taxonomic_rank` | `str` | `species` | Taxonomic rank by which to group references. Choices: domain, kingdom, phylum, class, order, family, genus, species. |
-| `pool_latin_taxa` | `bool` | `false` | Adanced option. Collapses divisions of a taxon together, ignoring alphabet suffixes. Not recommended to change unless the effects on output are understood, see docs for more info. |
+| `pool_latin_taxa` | `bool` | `false` | Adanced option. Collapses divisions of a taxon together, ignoring alphabet suffixes. Not recommended to change unless the effects on output are understood, see below for more info. |
 | `save_sylph_sketches` | `bool` | `true` | Keep Sylph sketches. |
 | `genome_id_to_file` | `Path` | `"/data/pam/collections/GTDB/release226/genomic_files_all_retrievable_2026_03_05/metadata/id_to_genome_path.tsv"` | File from which to extract genome paths based on genome identifiers. |
 
----
+Note on using `pool_latin_taxa`:
+Certain genus/species in GTDB are further divided by appended alphabet suffixes, for example Escherichia coli in GTDB has 3 species rank taxonomic groups; Escherichia_coli, Escherichia_coli_E and Escherichia_coli_F. Further explanation is available in the [GTDB documentation](https://gtdb.ecogenomic.org/faq#why-do-some-genus-and-species-names-end-with-an-alphabetic-suffix).
+
+If you wanted to consider these as one group you can use the advanced option to pool latin taxa. Note that:
+
+a) generated groups are no longer compliant with GTDB taxonomic definitions, consider if this affects downstream
+
+## b) the size of the produced group may be considerably larger, for example in GTDB release 232 at the genus level g**Clostridium has 1607 genomes but all 34 GTDB genuses in g**Clostridium\* total at 2931 genomes.
 
 **Cache Autoselection options**
 | Flag | Type | Default | Description |
