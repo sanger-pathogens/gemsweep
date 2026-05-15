@@ -145,26 +145,29 @@ mkdir mGEMs_bins_manifest
 
 **General options**
 
-| Flag            | Type   | Default       | Description                                                                                           |
-| --------------- | ------ | ------------- | ----------------------------------------------------------------------------------------------------- |
-| `manifest`      | `path` | `null`        | Input manifest CSV with required header `ID,R1,R2`, containing per-sample paths to `.fastq.gz` files. |
-| `outdir`        | `path` | `"./results"` | Path to top directory containing all results, by default `results` within the launch directory.       |
-| `ref_prep_only` | `bool` | `false`       | Run only reference preparatory steps, skipping read pseudoalignment through to binning.               |
+| Flag       | Type   | Default       | Description                                                                                           |
+| ---------- | ------ | ------------- | ----------------------------------------------------------------------------------------------------- |
+| `manifest` | `path` | `null`        | Input manifest CSV with required header `ID,R1,R2`, containing per-sample paths to `.fastq.gz` files. |
+| `outdir`   | `path` | `"./results"` | Path to top directory containing all results, by default `results` within the launch directory.       |
+
+---
+
+**Workflow options**
+| `ref_prep_only` | `bool` | `false` | Run only reference preparatory steps, skipping read pseudoalignment through to binning. |
+| `ref_mode` | `str` | `null` | Required. Choose a reference input mode. Options: `index`,`full`,`refine`,`autoselect` . |
 
 ---
 
 **References options**
 | Flag | Type | Default | Description |
 | ----------------- | -------- | -------- | ------------------------------------------------------------------------------- |
-| `ref_mode` | `str` | `null` | Required. Choose a reference input mode. Options: `index`,`full`,`refine`,`autoselect` . |
 | `references` | `path` | `null` | Path to text file containing paths to references, one per line. |
-| `representatives` | `integer` | `20` | Number of representatives at which to cap each reference cluster. |
+| `representatives` | `integer` | `20` | Number of representatives at which to cap each reference cluster.Used when ref_mode is refine or autoselect. |
+| `cluster_tool` | `str` | `poppunk` | Tool to use for clustering references when ref_mode is `refine` or `full`. Options: `poppunk` or `sketchlib` |
 
 ---
 
----
-
-**Cache options**
+**Cache Autoselection options**
 | Flag | Type | Default | Description |
 | ----------------- | -------- | -------- | ------------------------------------------------------------------------------- |
 | `cache_dir` | `path` | `null` | Path to a cache root or an existing config-specific cache directory for autoselect mode. The pipeline reuses a matching cache directory containing cache metadata and per-species reference/group entries. |
@@ -188,12 +191,19 @@ When `--cache_dir` is supplied, generated reference entries are written directly
 
 The config-level `metadata.json` records the clustering settings used for that cache directory. Each species-level `metadata.json` records cache write/update details for that species, including update counts and added reference IDs.
 
-**Clustering options**
+---
+
+**PopPUNK options**
 | Flag | Type | Default | Description |
 | ----------------- | -------- | ---------------------- | ----------------------------------------------------------------------------------------------------- |
-| `cluster_tool` | `str` | `poppunk` | Tool to use for clustering references when ref_mode is `refine` or `full`. Options: `poppunk` or `sketchlib` |
 | `poppunk_model` | `str` | `dbscan` | Clustering model for poppunk to use (either dbscan or bgmm) |
 | `publish_poppunk` | `bool` | `false` | Optionally publish full poppunk output, group assignments are always published. |
+
+---
+
+**Sketchlib workflow options**
+| Flag | Type | Default | Description |
+| ----------------- | -------- | ---------------------- | ----------------------------------------------------------------------------------------------------- |
 | `ani_threshold` | `float` | `0.02` | Max ANI distance threshold for clustering (default 0.2 clusters genomes sharing >98% ANI similarity). |
 | `sketchlib_kstep` | `str` | `"13,29,4"` | Kmer sizes at which sketchlib will sketch the reference in the format start,stop,step |
 | `cluster_strict` | `bool` | `false` | Fail early if all genomes form a single cluster, or each genome is a singleton. |
@@ -209,10 +219,10 @@ Alternatively ANI-based community finding algorithms are available; using sketch
 
 | Flag             | Type      | Default | Description                                                                                                                                       |
 | ---------------- | --------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `temp_dir`       | `path`    | `null`  | Custom temporary storage directory to be used during runtime. Otherwise local `/tmp` will be used.                                                |
-| `temp_space`     | `integer` | `10000` | Amount of /tmp space (MB) that will be reserved for index creation and pseudoalignment, if /tmp is being used as the temporary storage directory. |
 | `themisto_index` | `path`    | `null`  | Path to a pre-built Themisto index including the index prefix (without exts). Skips indexing if provided.                                         |
 | `themisto_k`     | `integer` | `31`    | K-mer size for indexing and pseudoalignment. Allowed values: `21`, `31`, `51`. K-mer sizes must match if an index is provided.                    |
+| `temp_dir`       | `path`    | `null`  | Custom temporary storage directory to be used during runtime. Otherwise local `/tmp` will be used.                                                |
+| `temp_space`     | `integer` | `10000` | Amount of /tmp space (MB) that will be reserved for index creation and pseudoalignment, if /tmp is being used as the temporary storage directory. |
 
 ---
 
