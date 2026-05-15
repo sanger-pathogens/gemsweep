@@ -16,7 +16,7 @@
         "default": "./results",
         "help_text": "Path to top directory containing all results, by default 'results' within the launch directory."
       },
-      "skip_main": {
+      "ref_prep_only": {
         "default": "false",
         "help_text": "Run only reference preparatory steps, skipping read pseudoalignment through to binning."
       }

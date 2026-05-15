@@ -266,7 +266,7 @@ workflow {
     }
 
     // Core Workflow
-    if (!params.skip_main) {
+    if (!params.ref_prep_only) {
         pseudoaligned_ch = THEMISTO_PSEUDOALIGN(reads_ch, index_files_ch, index_prefix_ch)
         msweep_ch = MSWEEP(pseudoaligned_ch, ref_groups_ch)
         
