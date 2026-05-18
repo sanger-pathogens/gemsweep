@@ -38,7 +38,11 @@ include { THEMISTO_BUILD_INDEX;
           THEMISTO_STATS        } from './modules/themisto.nf'
 include { MSWEEP                } from './modules/msweep.nf'
 include { MGEMS                 } from './modules/mgems.nf'
-include { COMBINE_REFS          } from './modules/helper_processes.nf'
+include { COMBINE_REFS;
+          CLEAN_REFS as CLEAN_FULL_POPPUNK_REFS;
+          CLEAN_REFS as CLEAN_FULL_SKETCHLIB_REFS;
+          CLEAN_REFS as CLEAN_REFINE_POPPUNK_REFS;
+          CLEAN_REFS as CLEAN_AUTOSELECT_REFS } from './modules/helper_processes.nf'
 include { SKETCHLIB_SKETCH;
           SKETCHLIB_CLUSTER     }  from './modules/sketchlib.nf'
 
@@ -101,7 +105,8 @@ workflow {
         | join(POPPUNK.out.clusters)
         | ORDER_GROUPS
 
-        representatives_ch = references_ch // no dereplication
+        CLEAN_FULL_POPPUNK_REFS(references_ch)
+        representatives_ch = CLEAN_FULL_POPPUNK_REFS.out.references // no dereplication
         ref_groups_ch = ORDER_GROUPS.out.groups.map { meta, groups_file -> groups_file }
 
         index_prefix_ch = channel.value("index") // needs to be identical to what index is set as in indexing process
@@ -125,11 +130,8 @@ workflow {
         | ORDER_GROUPS
 
         // no dereplication
-        references_ch
-        | map { meta, refs ->
-            refs
-        }
-        | set {representatives_ch}
+        CLEAN_FULL_SKETCHLIB_REFS(references_ch)
+        representatives_ch = CLEAN_FULL_SKETCHLIB_REFS.out.references
 
         ref_groups_ch = ORDER_GROUPS.out.groups
 
@@ -161,7 +163,9 @@ workflow {
         | collect
         | COMBINE_REFS
 
-        representatives_ch = COMBINE_REFS.out.references.first()
+        CLEAN_REFINE_POPPUNK_REFS(COMBINE_REFS.out.references)
+
+        representatives_ch = CLEAN_REFINE_POPPUNK_REFS.out.references.first()
         ref_groups_ch = COMBINE_REFS.out.groups.first()
 
         index_prefix_ch = channel.value("index") // needs to be identical to what index is set as in indexing process
@@ -169,6 +173,11 @@ workflow {
 
     } else if ((params.ref_mode == "refine") && (params.cluster_tool == "sketchlib")) {
         // To populate
+
+        // PAT-3311 
+        // TODO: Route representative references through CLEAN_REFS before THEMISTO_BUILD_INDEX
+        // when sketchlib reference refinement is implemented.
+
         error("Sketchlib reference refinement not implemented yet! Watch this space :)")
 
     } else if (params.ref_mode == "autoselect") {
@@ -253,11 +262,14 @@ workflow {
             .set { ref_group_files }
 
         COMBINE_REFS(ref_group_files)
-        ref_groups_ch = COMBINE_REFS.out.groups
+        CLEAN_AUTOSELECT_REFS(COMBINE_REFS.out.references)
+
+        representatives_ch = CLEAN_AUTOSELECT_REFS.out.references.first()
+        ref_groups_ch = COMBINE_REFS.out.groups.first()
 
         // Build themisto index
         index_prefix_ch = channel.value("index") // needs to be identical to what index is set as in indexing process
-        index_files_ch = THEMISTO_BUILD_INDEX(index_prefix_ch, COMBINE_REFS.out.references).collect()
+        index_files_ch = THEMISTO_BUILD_INDEX(index_prefix_ch, representatives_ch).collect()
     }
 
     if (params.ref_mode != "index") {
