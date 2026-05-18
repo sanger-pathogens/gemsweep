@@ -105,7 +105,11 @@ workflow {
         | join(POPPUNK.out.clusters)
         | ORDER_GROUPS
 
-        CLEAN_FULL_POPPUNK_REFS(references_ch)
+        // Make full mode pass the same path-only references file shape as refine/autoselect.
+        references_ch
+        | map { meta, refs -> refs}
+        | CLEAN_FULL_POPPUNK_REFS
+
         representatives_ch = CLEAN_FULL_POPPUNK_REFS.out.references // no dereplication
         ref_groups_ch = ORDER_GROUPS.out.groups.map { meta, groups_file -> groups_file }
 
@@ -129,10 +133,12 @@ workflow {
         | join(SKETCHLIB_CLUSTER.out.clusters)
         | ORDER_GROUPS
 
-        // no dereplication
-        CLEAN_FULL_SKETCHLIB_REFS(references_ch)
-        representatives_ch = CLEAN_FULL_SKETCHLIB_REFS.out.references
+        // Make full mode pass the same path-only references file shape as refine/autoselect.
+        references_ch
+        | map { meta, refs -> refs }
+        | CLEAN_FULL_SKETCHLIB_REFS
 
+        representatives_ch = CLEAN_FULL_SKETCHLIB_REFS.out.references
         ref_groups_ch = ORDER_GROUPS.out.groups
 
         index_prefix_ch = channel.value("index") // needs to be identical to what index is set as in indexing process
