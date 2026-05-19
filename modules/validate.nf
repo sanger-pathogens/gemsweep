@@ -37,7 +37,7 @@ def validate_references(ref_paths_txt, all_errors) {
     // which lets us report exactly which input lines need cleanup.
     def raw_lines = file(ref_paths_txt).readLines()
 
-    // Find lines that CLEAN_REFS will change before Themisto index build.
+    // Find lines that will be cleaned before Themisto index build.
     // This catches empty lines, whitespace-only lines, and whitespace anywhere in
     // a reference path. withIndex() lets us report human-readable line numbers.
     def lines_to_clean = raw_lines
@@ -45,13 +45,13 @@ def validate_references(ref_paths_txt, all_errors) {
         .findAll { line, index -> !line.trim() || line != line.replaceAll(/\s+/, '') }
         .collect { line, index -> index + 1 }
 
-    // Warn only. Do not add this to all_errors, because CLEAN_REFS will fix these
-    // lines later before Themisto sees the references file.
+    // Warn only. Do not add this to all_errors, because these lines are cleaned
+    // later before Themisto sees the references file.
     if (!lines_to_clean.isEmpty()) {
         log.warn "Empty lines or whitespace found in file supplied to --references at line(s): ${lines_to_clean.join(', ')}. These will be removed before Themisto index build."
     }
 
-    // Build the same cleaned representation that CLEAN_REFS will write later.
+    // Build the same cleaned representation that Themisto indexing will use later.
     // Use this for duplicate and missing-file checks so validation reflects the
     // actual paths that Themisto will receive.
     def lines = raw_lines

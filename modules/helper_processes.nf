@@ -23,26 +23,3 @@ process COMBINE_REFS {
         --outdir .
     """
 }
-
-process CLEAN_REFS {
-    label 'cpu_1'
-    label 'mem_4'
-    label 'time_queue_from_small'
-
-    publishDir "${params.outdir}/ref_groups", mode: 'copy', overwrite: true
-
-    container 'quay.io/sangerpathogens/pandas:2.2.1'
-
-    input:
-    path(refs_txt)
-
-    output:
-    path("references_cleaned.txt"), emit: references
-
-    script:
-    """
-    ${projectDir}/bin/clean_refs.py \\
-        --refs_txt ${refs_txt} \\
-        --outdir .
-    """
-}
