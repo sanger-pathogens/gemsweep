@@ -173,8 +173,8 @@ mkdir mGEMs_bins_manifest
 | `sylph_db` | `Path` | `"/data/pam/software/sylph/gtdb_full_r226.syldb"` | Path to a pre-built Sylph database (.syldb) |
 | `sylph_tax_metadata` | `Path` | `"/data/pam/software/sylph-tax/v1/gtdb_r226_metadata.tsv"` | Path to the sylph-tax metadata TSV to use for taxprof |
 | `sylph_k` | `int` | `31` | K-mer size for sylph sketch. |
-| `sylph_mean_ani` | `float` | `95` | ANI threshold for Sylph filtering. |
-| `sylph_mean_cov` | `float` | `0.01` | Coverage threshold for Sylph filtering. |
+| `sylph_min_ani` | `float` | `95` | ANI threshold for Sylph filtering. |
+| `sylph_min_cov` | `float` | `0.01` | Coverage threshold for Sylph filtering. |
 | `taxonomic_rank` | `str` | `species` | Taxonomic rank by which to group references. Choices: `domain`, `kingdom`, `phylum`, `class`, `order`, `family`, `genus`, `species`. |
 | `pool_latin_taxa` | `bool` | `false` | Advanced option. Ignores alphabet suffixes of GTDB divisions of latin-name taxa, thus pooling those subdivisions together. Not recommended to change unless the effects on output are understood; see below for more info. |
 | `save_sylph_sketches` | `bool` | `true` | Keep Sylph sketches. |
@@ -187,7 +187,9 @@ If you wanted to consider these as one group you can use the advanced option to 
 
 a) generated groups are no longer compliant with GTDB taxonomic definitions, consider if this affects downstream
 
-b) the size of the produced group may be considerably larger, for example in GTDB release 232 at the genus level g\_\_Clostridium has 1607 genomes but all 34 GTDB genuses in g\_\_Clostridium\* total at 2931 genomes.
+b) the size of the produced group may be considerably larger, for example in GTDB release 232 at the genus level `g__Clostridium` has 1607 genomes but all 34 GTDB genuses in `g__Clostridium*` total at 2931 genomes.
+
+Note that not all taxa belonging to a "traditional" species might be pooled this way due to certain GTDB species being named differently; for instance in GTDB r232, a new species called `ECMA0423 sp047199055` has been created out of genomes previously classified as `Escherichia_coli`.
 
 **Cache Autoselection options**
 | Flag | Type | Default | Description |
@@ -238,12 +240,12 @@ Alternatively ANI-based community finding algorithms are available; using sketch
 ---
 
 **Themisto options**
-| Flag             | Type      | Default | Description                                                                                                                                       |
+| Flag | Type | Default | Description |
 | ---------------- | --------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `themisto_index` | `path`    | `null`  | Path to a pre-built Themisto index including the index prefix (without exts). Skips indexing if provided.                                         |
-| `themisto_k`     | `integer` | `31`    | K-mer size for indexing and pseudoalignment. Allowed values: `21`, `31`, `51`. K-mer sizes must match if an index is provided.                    |
-| `temp_dir`       | `path`    | `null`  | Custom temporary storage directory to be used during runtime. Otherwise local `/tmp` will be used.                                                |
-| `temp_space`     | `integer` | `10000` | Amount of /tmp space (MB) that will be reserved for index creation and pseudoalignment, if /tmp is being used as the temporary storage directory. |
+| `themisto_index` | `path` | `null` | Path to a pre-built Themisto index including the index prefix (without exts). Skips indexing if provided. |
+| `themisto_k` | `integer` | `31` | K-mer size for indexing and pseudoalignment. Allowed values: `21`, `31`, `51`. K-mer sizes must match if an index is provided. |
+| `temp_dir` | `path` | `null` | Custom temporary storage directory to be used during runtime. Otherwise local `/tmp` will be used. |
+| `temp_space` | `integer` | `10000` | Amount of /tmp space (MB) that will be reserved for index creation and pseudoalignment, if /tmp is being used as the temporary storage directory. |
 
 ---
 
