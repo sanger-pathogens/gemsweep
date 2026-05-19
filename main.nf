@@ -208,7 +208,7 @@ workflow {
         // Cluster references
         // only uncached candidate references go through PREP_REFS and clustering
         PREP_REFS(candidate_refs_to_cluster_ch)
-        POPPUNK(PREP_REFS.out.refs_csv)
+        POPPUNK(PREP_REFS.out.refs_tsv)
         poppunk_clusters_csv = POPPUNK.out.clusters
 
         // Always refine autoselected candidate references before indexing.
