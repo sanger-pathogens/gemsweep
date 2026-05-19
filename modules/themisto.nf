@@ -39,6 +39,7 @@ process THEMISTO_BUILD_INDEX {
     index_build_params += " --mem-gigas ${mem_gigas_param}"
 
     """
+    sed -i '/^\s*\$/d' "${references_txt}"
     themisto build ${index_build_params}
     """
 }
