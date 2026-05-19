@@ -151,6 +151,8 @@ mkdir mGEMs_bins_manifest
 ---
 
 **Workflow options**
+| Flag | Type | Default | Description |
+| ---------- | ------ | ------------- | ----------------------------------------------------------------------------------------------------- |
 | `ref_prep_only` | `bool` | `false` | Run only reference preparatory steps, skipping read pseudoalignment through to binning. |
 | `ref_mode` | `str` | `null` | Required. Choose a reference input mode. Options: `index`,`full`,`refine`,`autoselect` . |
 
