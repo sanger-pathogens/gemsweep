@@ -134,7 +134,7 @@ def validate_refine_ref_mode(all_errors) {
 def validate_autoselect_ref_mode(all_errors) {
     // Check required params given and paths exist
     validate_path_exists("--sylph_db", params.sylph_db, all_errors)
-    validate_choice_param("--sketch_size", params.sketch_size, [21,31], all_errors)
+    validate_choice_param("--sylph_k", params.sylph_k, [21,31], all_errors)
     
     // Check no additional, incompatible ref params are given
     validate_incompatible("autoselect", ["references", "themisto_index", "ref_groups"], all_errors)
@@ -167,7 +167,7 @@ def validate_params() {
 
 
     // Themisto options
-    validate_choice_param("--kmer_size", params.kmer_size, [21,31,51], validation_errors)
+    validate_choice_param("--themisto_k", params.themisto_k, [21,31,51], validation_errors)
     if (params.temp_dir != null) {
         validate_path_exists("--temp_dir", params.temp_dir, validation_errors)
     }
@@ -182,7 +182,7 @@ def validate_params() {
 // Pre-built index validation:
 def validate_index(kmer_index, kmer_arg) {
     if (kmer_index != kmer_arg.toInteger()) {
-        error("Unexpected K-mer length for pre-built index. Please use the option '--kmer_size' in your command to supply the index's K-mer size: ${kmer_index}")
+        error("Unexpected K-mer length for pre-built index. Please use the option '--themisto_k' in your command to supply the index's K-mer size: ${kmer_index}")
     }
 }
 def validate_ref_groups(num_refs_index, len_ref_groups) {

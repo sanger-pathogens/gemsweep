@@ -34,7 +34,7 @@ workflow VALIDATE_PREBUILT_INPUT {
         tuple(kmer_index, refs_index)
     }
     .map { kmer_index, refs_index ->
-        validate_index(kmer_index, params.kmer_size)
+        validate_index(kmer_index, params.themisto_k)
         validate_ref_groups(refs_index, len_ref_groups)
         tuple(kmer_index, refs_index)
     }

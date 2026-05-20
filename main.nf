@@ -73,7 +73,7 @@ workflow {
 
     validate_params()
 
-    if (!params.skip_main) {
+    if (!params.ref_prep_only || ref_mode == 'autoselect') { // only autoselect requires reads for ref prep
         reads_ch = MIXED_INPUT()    // outputs channel of [meta, R1, R2] for reads_<1|2>.fastq.gz
     }
 
@@ -294,7 +294,7 @@ workflow {
     }
 
     // Core Workflow
-    if (!params.skip_main) {
+    if (!params.ref_prep_only) {
         pseudoaligned_ch = THEMISTO_PSEUDOALIGN(reads_ch, index_files_ch, index_prefix_ch)
         msweep_ch = MSWEEP(pseudoaligned_ch, ref_groups_ch)
         
