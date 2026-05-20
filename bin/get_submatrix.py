@@ -15,7 +15,7 @@ def parse_arguments():
     parser.add_argument("--clusters", type=Path, help="List of samples and their clusters to subset (*.csv)")
     parser.add_argument("--header", help="Specifies whether the clusters file has a header row", action='store_true')
     parser.add_argument("--references", type=Path, help="List of references that relate (*.txt)")
-    parser.add_argument("--poppunk_style_labels", action='store_true', help="Corrects labels (dot-to-underscore) to match poppunk-sanitised reference labels")
+    parser.add_argument("--poppunk_style_labels", action='store_true', help="Corrects reference genome names by replacing dots `.` with underscore `_` characters to match PopPUNK's way of editing reference labels")
     return parser.parse_args()
 
 def read_matrix(matrix_file: Path) -> np.ndarray:

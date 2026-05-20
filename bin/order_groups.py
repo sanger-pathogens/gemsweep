@@ -8,7 +8,7 @@ References TSV includes an ID and path to reference genome.
 Groups CSV includes the ID and it's group ID e.g. PopPUNK/sketchlib cluster.
 
 Usage:
-    order_groups.py <references.tsv> <poppunk_groups.csv> <output_directory>
+    order_groups.py --references_tsv <references.tsv> --groups_csv <poppunk_groups.csv> --outdir <output_directory>
 """
 
 from pathlib import Path
@@ -38,11 +38,11 @@ def parse_args():
         help="TSV containing genome ID followed by path to the fasta"
     )
     parser.add_argument(
-        "--cluster_tool",
-        type=str,
-        required=False,
-        help="Indicates which format the groups file will be in: poppunk|sketchlib"
-    )
+        "--poppunk_style_labels",
+        action='store_true',
+        help="Corrects reference genome names by replacing dots `.` with underscore `_` characters to match PopPUNK's way of editing reference labels"
+        )
+
     return parser.parse_args()
 
 def main():
@@ -61,7 +61,7 @@ def main():
     ref_tracker = set()
     for ref in references:
         file, path = ref.split('\t')
-        if args.cluster_tool == "poppunk":
+        if args.poppunk_style_labels:
             file = file.replace('.', '_')    # match poppunks ID editing
         ref_dict[file] = 'missing'
         ref_tracker.add(file)

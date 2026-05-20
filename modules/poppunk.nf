@@ -61,8 +61,12 @@ process ORDER_GROUPS {
 
     script:
     order_groups = "${projectDir}/bin/order_groups.py"
+    if (params.cluster_dist == "core") {
+        order_groups += " --poppunk_style_labels"
+        }
+
     
     """
-    ${order_groups} --references_tsv ${refs_tsv} --groups_csv ${clusters_csv} --cluster_tool ${params.cluster_tool} --outdir .
+    ${order_groups} --references_tsv ${refs_tsv} --groups_csv ${clusters_csv} --outdir .
     """
 }
