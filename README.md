@@ -302,4 +302,4 @@ The `--temp_dir` option is available to customise temporary storage location if 
 
 ## GPU Acceleration
 
-TBC
+This current version is not yet GPU enabled. Watch this space!
