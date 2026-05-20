@@ -29,15 +29,36 @@ def validate_incompatible(ref_mode, incompatible_params, all_errors) {
 // ---------------- Individual references validation -----------------
 
 def validate_references(ref_paths_txt, all_errors) {
-    // Avoid a hard error before errors can accumulate in validate_params()
+    // If the references file is missing, stop checking its contents.
+    // The missing-file error is handled elsewhere.
     if (!file(ref_paths_txt).exists()) return
 
-    // Check for duplicates and missing references within refs_txt
-    def lines = file(ref_paths_txt)
-        .readLines()
-        .collect { line -> line.trim() }
-        .findAll { line -> line }
+    // Read the references file once. raw_lines preserves the original formatting,
+    // which lets us report exactly which input lines need cleanup.
+    def raw_lines = file(ref_paths_txt).readLines()
 
+    // Find lines that will be cleaned before Themisto index build.
+    // This catches empty lines, whitespace-only lines, and whitespace anywhere in
+    // a reference path. withIndex() lets us report human-readable line numbers.
+    def lines_to_clean = raw_lines
+        .withIndex()
+        .findAll { line, index -> !line.trim() || line != line.replaceAll(/\s+/, '') }
+        .collect { line, index -> index + 1 }
+
+    // Warn only. Do not add this to all_errors, because these lines are cleaned
+    // later before Themisto sees the references file.
+    if (!lines_to_clean.isEmpty()) {
+        log.warn "Empty lines or whitespace found in file supplied to --references at line(s): ${lines_to_clean.join(', ')}. These will be removed before Themisto index build."
+    }
+
+    // Build the same cleaned representation that Themisto indexing will use later.
+    // Use this for duplicate and missing-file checks so validation reflects the
+    // actual paths that Themisto will receive.
+    def lines = raw_lines
+        .collect { line -> line.replaceAll(/\s+/, '') }
+        .findAll { line -> line }
+    
+    // Report duplicate reference paths after cleanup.
     def duplicates = lines
         .groupBy { line -> line }
         .findAll { key, values -> values.size() > 1 }
@@ -46,7 +67,7 @@ def validate_references(ref_paths_txt, all_errors) {
     if (!duplicates.isEmpty()) {
         all_errors << "Duplicated references in ${ref_paths_txt}:\n${duplicates.join('\n')}"
     }
-
+    // Report cleaned reference paths that do not exist on disk.
     def missing = lines.findAll { path -> !file(path).exists() }
 
     if (!missing.isEmpty()) {
