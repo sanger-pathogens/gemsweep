@@ -37,7 +37,7 @@ def parse_args() -> argparse.Namespace:
         help="Output CSV path.",
     )
     parser.add_argument(
-        "--poppunk_labels",
+        "--poppunk_style_labels",
         action='store_true', 
         help="Corrects reference genome names by replacing dots `.` with underscore `_` characters to match PopPUNK's way of editing reference labels"
         )
@@ -121,7 +121,7 @@ def main() -> None:
     reference_paths = read_reference_paths(args.references)
     df = build_dataframe(
         reference_paths=reference_paths,
-        label_transform=args.poppunk_labels
+        label_transform=args.poppunk_style_labels
         )
     write_csv(df, args.output_csv)
 
