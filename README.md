@@ -1,13 +1,12 @@
 # gemsweep
 
-[![Nextflow](https://img.shields.io/badge/nextflow%20DSL2-%E2%89%A521.04.0-23aa62.svg?labelColor=000000)](https://www.nextflow.io/)
 [![run with docker](https://img.shields.io/badge/run%20with-docker-0db7ed?labelColor=000000&logo=docker)](https://www.docker.com/)
 [![run with singularity](https://img.shields.io/badge/run%20with-singularity-1d355c.svg?labelColor=000000)](https://sylabs.io/docs/)
 [[_TOC_]]
 
 ## Pipeline summary
 
-This workflow deconvolutes mixed read sets (e.g. plate sweep sequencing data) and resolves these into strain-level resolution bins. At it's core it implements Themisto pseudoalignment of reads to a curated set of references, mSWEEP to estimate relative abundances and mGEMS to bin reads.
+This workflow deconvolutes mixed read sets (e.g. plate sweep sequencing data, shotgun metagenomic data) and resolves these into strain-level resolution bins. At it's core it implements Themisto pseudoalignment of reads to a curated set of references, mSWEEP to estimate relative abundances and mGEMS to bin reads.
 
 Indexing references with Themisto and clustering are optionally automated, however if you have inputs an index and biologically meaningful grouping, you may provide these and skip some computation.
 
@@ -39,13 +38,15 @@ To run the pipeline from source (this repository):
     Other profiles are also supported (`docker`, `singularity`).  
     :warning: If no profile is specified the pipeline will run with a Sanger HPC-specific configuration.
 
-    This pipeline's default settings are optimised for running on the Sanger HPC, including making use of GPU and temp storage. To run on other systems please configure the parameters appropriately.
+    This pipeline's default settings are optimised for running on the Sanger HPC, including making use of temp storage. To run on other systems please configure the parameters appropriately.
 
-    See [Parameters](#parameters) for all available pipeline options.
+    See [Parameters](#parameters) for available pipeline options.
 
 #### On the Sanger HPC
 
-To run the pipeline on the Sanger HPC as a module replace `nextflow run main.nf` with the name of the tool. For instance, to see a help message:
+First load modules for `gemsweep`, `nextflow` and `ISG/singularity`.
+
+Instead of `nextflow run main.nf` you can now run on the command line with `gemsweep <options>`. For instance, to see a help message:
 
 ```
 module load gemsweep
@@ -268,10 +269,9 @@ Alternatively ANI-based community finding algorithms are available; using sketch
 
 ### Dependencies
 
+- Nextflow $\ge$ 22.03.0, $\lt$ 26.04.0
 - sylph and sylph-tax databases for GTDB.
 - All other dependencies are containerised in publicly available docker images.
-
-<!--- Mention Nextflow version dependency --->
 
 ## Software versions
 
