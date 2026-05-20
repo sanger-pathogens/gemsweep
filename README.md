@@ -64,10 +64,10 @@ gemsweep --help
   Compatible parameters for each reference mode (`ref_mode`):
   | Reference Mode | Required Params | Mode Description |
   | ---------- | ------ | ------ |
-  | `index` | `themisto_index`, `ref_groups` | The supplied index and reference groupings will be validated and directly used in the core workflow (Themisto pseudoalignment, mSWEEP relative abundance estimation and mGEMS read binning) |
-  | `full` | `references` | All references supplied will be indexed, clustered (with the workflow indicated by `cluster_dist`) and the produced index and groups files will be used in the core workflow |
-  | `refine` | `references` | The references supplied will be clustered (NOTE: currently only compatible with `--cluster_dist core`) and each cluster is dereplicated and capped to a maximum indicated by `representatives`. Index and groups file are produced for the representatives selected to use in the core workflow. |
-  | `autoselect` | N/A | The references are not supplied but rather derived from querying the reads against GTDB and using the hits as references for indexing and clustering before the core workflow. In the autoselect mode, reference genome clustering is always done with PopPUNK - the `cluster_dist` parameter has no effect. Also, the reference refinement process is always applied to subselect representative genomes from clustered references. |
+  | `index` | `themisto_index`, `ref_groups` | The supplied index and reference groupings will be validated and directly used in the main workflow (Themisto pseudoalignment, mSWEEP relative abundance estimation and mGEMS read binning) |
+  | `full` | `references` | All references supplied will be indexed, clustered (with the workflow indicated by `cluster_dist`) and the produced index and groups files will be used in the main workflow |
+  | `refine` | `references` | The references supplied will be clustered (NOTE: currently only compatible with `--cluster_dist core_acc`) and each cluster is dereplicated and capped to a maximum indicated by `representatives`. Index and groups file are produced for the representatives selected to use in the main workflow. |
+  | `autoselect` | N/A | The references are not supplied but rather derived from querying the reads against GTDB and using the hits as references for indexing and clustering before the main workflow. In the autoselect mode, reference genome clustering is always done with PopPUNK - the `cluster_dist` parameter has no effect. Also, the reference refinement process is always applied to subselect representative genomes from clustered references. |
 
   NOTE: If supplying a prebuilt index a\) the kmer size must be identical to the argument `themisto_k` (default: 31) and b\) the reference grouping file must be in identical positional order to the references when indexed.
 
@@ -164,7 +164,7 @@ mkdir mGEMs_bins_manifest
 | ----------------- | -------- | -------- | ------------------------------------------------------------------------------- |
 | `references` | `path` | `null` | Path to text file containing paths to references, one per line. |
 | `representatives` | `integer` | `20` | Number of representatives at which to cap each reference cluster. Used when `--ref_mode` is `refine` or `autoselect`. |
-| `cluster_dist | `str`|`poppunk`| Genomic distance used in clustering references. Determines the clustering workflow, see below for more info. Only used when ref_mode is`refine`or`full`. |
+| `cluster_dist` | `str`|`poppunk`| Genomic distance used in clustering references, options: `core_acc` or `ani`. Determines the clustering workflow, see below for more info. Only used when ref_mode is`refine`or`full`. |
 
 The pipeline's idea of strain-level is defined by the clustering stage. When you supply groups in `--ref_mode index` the references are pre-clustered. In `--ref_mode refine` or `full` you have a choice of clustering workflows defined by the `--cluster_dist` param.
 

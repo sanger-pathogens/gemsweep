@@ -10,7 +10,7 @@ process CHECK_CACHE {
     path("cache_config.json"), emit: config
 
     script:
-    if (params.cluster_dist == "core") {
+    if (params.cluster_dist == "core_acc") {
         cluster_method = "${params.cluster_dist}-${params.poppunk_model}"
     } else if (params.cluster_dist == "ani") {
         cluster_method = "${params.cluster_dist}-${params.cluster_algorithm}"

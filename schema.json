@@ -37,8 +37,8 @@
         "help_text": "Number of representatives at which to cap each reference cluster. Used when ref_mode is refine or autoselect."
       },
       "cluster_dist": {
-        "default": "core",
-        "help_text": "Genomic distance used in clustering references. Determines the clustering workflow, see docs for more info. Only used when ref_mode is 'refine' or 'full'"
+        "default": "core_acc",
+        "help_text": "Genomic distance used in clustering references (core_acc|ani). Determines the clustering workflow, see docs for more info. Only used when ref_mode is 'refine' or 'full'"
       }
     },
     "Cache Autoselection options": {

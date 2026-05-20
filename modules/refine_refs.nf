@@ -82,7 +82,7 @@ process SPLIT_DIST_MATRIX {
     script:
     get_submatrix_script = "${workflow.projectDir}/bin/get_submatrix.py"
     // If poppunk has sanitised the ref_labels this flag accounts for that
-    if (params.cluster_dist == "core") {
+    if (params.cluster_dist == "core_acc") {
         get_submatrix_script += " --poppunk_style_labels"
         }
     
@@ -112,7 +112,7 @@ process EXTRACT_REF_LABEL {
     script:
     output_csv = "${meta.ID}_reference_paths.csv"
     extract_ref_label = "${projectDir}/bin/extract_ref_label.py"
-    if (params.cluster_dist == "core") {
+    if (params.cluster_dist == "core_acc") {
         extract_ref_label_script += " --poppunk_style_labels"
     }
 

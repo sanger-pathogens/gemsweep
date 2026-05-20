@@ -61,7 +61,7 @@ process ORDER_GROUPS {
 
     script:
     order_groups = "${projectDir}/bin/order_groups.py"
-    if (params.cluster_dist == "core") {
+    if (params.cluster_dist == "core_acc") {
         order_groups += " --poppunk_style_labels"
         }
 

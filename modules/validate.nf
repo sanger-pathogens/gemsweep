@@ -100,9 +100,9 @@ def validate_full_ref_mode(all_errors) {
     if (!params.cluster_dist) {
         all_errors << "You must supply --cluster_dist for chosen ref_mode ${params.ref_mode}"
     } else {
-        validate_choice_param("--cluster_dist", params.cluster_dist, ["ani", "core"], all_errors)
+        validate_choice_param("--cluster_dist", params.cluster_dist, ["ani", "core_acc"], all_errors)
     }
-    if (params.cluster_dist == "core") {
+    if (params.cluster_dist == "core_acc") {
         validate_choice_param("--poppunk_model", params.poppunk_model, ["dbscan","bgmm"], all_errors)
 
     }
@@ -115,9 +115,9 @@ def validate_refine_ref_mode(all_errors) {
     if (!params.cluster_dist) {
         all_errors << "You must supply --cluster_dist for chosen ref_mode ${params.ref_mode}"
     } else {
-        validate_choice_param("--cluster_dist", params.cluster_dist, ["ani", "core"], all_errors)
+        validate_choice_param("--cluster_dist", params.cluster_dist, ["ani", "core_acc"], all_errors)
     }
-    if (params.cluster_dist == "core") {
+    if (params.cluster_dist == "core_acc") {
         validate_choice_param("--poppunk_model", params.poppunk_model, ["dbscan","bgmm"], all_errors)
     }
     if (!params.references) {
