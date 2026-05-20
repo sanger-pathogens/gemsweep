@@ -12,6 +12,7 @@ process PREP_REFS {
 
     script:
     """
+    sed -i '/^\s*\$/d' "${refs_txt}"    # Remove blank lines
     python3 ${projectDir}/bin/poppunk_helper.py --input ${refs_txt} --outdir .
     """
 }

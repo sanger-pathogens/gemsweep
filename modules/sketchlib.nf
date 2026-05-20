@@ -13,7 +13,7 @@ process SKETCHLIB_SKETCH {
     tuple val(meta), path(refs_tsv), path("${sketch_db}.h5")
 
     script:
-    sketch_db = "references_sketch" // need to make this per taxon if this runs per taxon after sylph
+    sketch_db = "${meta.ID}_sketch"
 
     """
 	sketchlib sketch \
@@ -42,8 +42,8 @@ process SKETCHLIB_CLUSTER {
     tuple val(meta), path(refs_tsv), path(h5_db)
 
     output:
-    tuple val(meta), path("${sketch_prefix}_clusters.csv"), emit: clusters
-    tuple val(meta), path("groups.txt"), emit: groups
+    tuple val(meta), path("${meta.ID}_clusters.csv"), emit: clusters
+    tuple val(meta), path("${meta.ID}.dists.npy"),    emit: dist_matrix // for interoperability with refine_refs
 
     script:
     def sketchlib_cluster = "${projectDir}/bin/sketchlib_cluster.py" 
@@ -51,7 +51,6 @@ process SKETCHLIB_CLUSTER {
         sketchlib_cluster += " --strict_mode"
         }
 
-    // reuse the sketch name for the clusters csv output
     sketch_prefix = h5_db.baseName
 
     """
@@ -70,12 +69,11 @@ process SKETCHLIB_CLUSTER {
         --ref_ids ref_ids.txt \
         --ani_threshold ${params.ani_threshold} \
         --kstep ${params.sketchlib_kstep} \
-        --out ${sketch_prefix}_clusters.csv \
+        --out_prefix ${meta.ID} \
         --threads ${task.cpus} \
-        --log ${sketch_prefix}_sketchlib_cluster \
+        --log ${meta.ID}_sketchlib_cluster \
         --algorithm ${params.cluster_algorithm} \
         \$random_flag
 
-    cut -f2 ${sketch_prefix}_clusters.csv | tail -n +2 > groups.txt
     """
 }

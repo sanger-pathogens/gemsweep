@@ -2,18 +2,24 @@
 
 """
 Cluster genomes in a pre-sketched sketchlib database by pairwise ANI distance
-using clustering/ community-finding algorithm of choice. Outputs a CSV mapping
-each genome ID to a cluster ID. Also sanity checks clusters; if each genome
-is in its own cluster or all genomes fall into a single cluster, it either logs
-a warning or, in strict mode, fails with a non-zero exit code.
+using clustering/ community-finding algorithm of choice.
+
+Outputs both a CSV mapping each genome ID to a cluster ID, and a longform numpy
+matrix of all pairwise distances. Distances greater than the ANI threshold are
+filled with the maximum value (1.0) and the matrix contains two identical columns
+of ANI distance to replicate the format to that output by poppunk.
+
+Includes sanity checks; if each genome is in its own cluster or all genomes
+fall into a single cluster, it either logs a warning or, in strict mode, fails
+with a non-zero exit code.
 
 Example usage:
     sketchlib_cluster.py \
-        --sketch reference_sketch \
+        --sketch E_coli_reference_sketch \
         --ani_threshold 0.01 \
         --ref_ids path/to/refs_ids.txt \
         --kstep 17,20,1 \
-        --out . \
+        --out_prefix "E_coli" \
         --strict_mode
 
 """
@@ -25,6 +31,7 @@ import pp_sketchlib
 import igraph as ig
 import pandas as pd
 import argparse
+import numpy as np
 
 ALGORITHMS = {
     "connected_components": None,  # handled separately — not a community method, needed here for argparse
@@ -94,14 +101,20 @@ def main():
     if not validated and args.strict_mode:
         sys.exit(1)
     
-    # Write output
-    df.to_csv(args.out, sep=',', index=False)
+    # Write outputs
+    df.to_csv(f"{args.out_prefix}_clusters.csv", sep=',', index=False)
     n_components = len(g.clusters(mode="weak"))
     n_communities = len(set(labels))
     logging.info(f"Graph has {len(ref_ids)} genomes in {n_components} connected components, "
                  f"further split into {n_communities} communities by {args.algorithm}")
 
-    # TODO: write output that mimics the longform npy dist matrix (maybe with NaNs for missing pairs?) for REFINE_REFS compatibility
+    save_dist_matrix(
+        num_refs=len(ref_ids),
+        rows = rows,
+        cols = cols,
+        dists = dists,
+        out_prefix= args.out_prefix
+    )
 
 def validate_log_filename(log_filename:str):
     if not log_filename:
@@ -171,10 +184,10 @@ def parse_args() -> argparse.ArgumentParser:
         help="Kmer lengths to use for computing ANI in the format start,stop,step"
     )
     parser.add_argument(
-        "--out",
-        type=Path,
+        "--out_prefix",
+        type=str,
         required=True,
-        help="Path to save the output CSV"
+        help="Name for output files."
     )
     parser.add_argument(
         "--threads",
@@ -237,6 +250,32 @@ def validate_clusters(clusters_df: pd.DataFrame, num_refs: int, ani_threshold: f
     logging.debug(f"Cluster sizes:\n{cluster_counts.to_string()}")
 
     return checks_passed
+
+def upper_triangle_index(i: int, j: int, n: int) -> int:
+    '''Return the row index in a long-form upper triangle array for pair (i, j).
+    
+    Assumes i < j. For an n x n matrix, the upper triangle has n*(n-1)//2 
+    entries stored row by row, left to right, excluding the diagonal.
+    '''
+    return i * n - i * (i + 1) // 2 + j - i - 1
+
+def save_dist_matrix(num_refs: int, rows: list[int], cols: list[int], dists: list[float], out_prefix: str):
+    '''Replicates the *.dists.npy poppunk output but with notable exceptions:
+      a) Max distance (1) to fill distances missing due to the sparse query
+      b) Only a single set of ANI dists that are identical accross the two columns, no core and accessory'''
+    
+    n_pairs = num_refs * (num_refs - 1) // 2
+
+    dist_matrix = np.full((n_pairs, 2), 1.0, dtype=np.float32)
+
+    for i, j, d in zip(rows, cols, dists):
+        if i < j:
+            idx = upper_triangle_index(i, j, num_refs)
+            dist_matrix[idx, 0] = d
+            dist_matrix[idx, 1] = d #second column identical, mimicking 2 col format of poppunk dists
+
+    np.save(out_prefix + ".dists.npy", dist_matrix)
+    logging.info(f"Saved distance matrix to {out_prefix}.dists.npy")
 
 if __name__ == "__main__":
     main()

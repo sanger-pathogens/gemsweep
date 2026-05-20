@@ -74,16 +74,21 @@ process SPLIT_DIST_MATRIX {
     container "quay.io/sangerpathogens/pandas:2.2.1"
 
     input:
-    tuple val(meta), path(pp_dist_matrix), path(cluster_assignments), path(references)
+    tuple val(meta), path(dist_matrix), path(cluster_assignments), path(references)
 
     output:
     tuple val(meta), path("cluster_dists/*.tsv"),  emit: cluster_dists
 
     script:
     get_submatrix_script = "${workflow.projectDir}/bin/get_submatrix.py"
+    // If poppunk has sanitised the ref_labels this flag accounts for that
+    if (params.cluster_tool == "poppunk") {
+        get_submatrix_script += " --poppunk_style_labels"
+        }
+    
     """
     ${get_submatrix_script} \
-        --matrix ${pp_dist_matrix} \
+        --matrix ${dist_matrix} \
         --clusters ${cluster_assignments} \
         --references ${references} \
         --outdir cluster_dists
@@ -106,8 +111,13 @@ process EXTRACT_REF_LABEL {
 
     script:
     output_csv = "${meta.ID}_reference_paths.csv"
+    extract_ref_label = "${projectDir}/bin/extract_ref_label.py"
+    if (params.cluster_tool == "poppunk") {
+        extract_ref_label_script += " --poppunk_style_labels"
+    }
+
     """
-    "${projectDir}/bin/extract_ref_label.py" \\
+    ${extract_ref_label} \\
         --references ${references} \\
         --output ${output_csv}
     """
