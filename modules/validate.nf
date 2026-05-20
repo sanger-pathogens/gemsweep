@@ -97,12 +97,12 @@ def validate_full_ref_mode(all_errors) {
         validate_path_exists("--references", params.references, all_errors)
         validate_references(params.references, all_errors) // Checks missing/duplicates in refs
     }
-    if (!params.cluster_tool) {
-        all_errors << "You must supply --cluster_tool for chosen ref_mode ${params.ref_mode}"
+    if (!params.cluster_dist) {
+        all_errors << "You must supply --cluster_dist for chosen ref_mode ${params.ref_mode}"
     } else {
-        validate_choice_param("--cluster_tool", params.cluster_tool, ["sketchlib", "poppunk"], all_errors)
+        validate_choice_param("--cluster_dist", params.cluster_dist, ["ani", "core"], all_errors)
     }
-    if (params.cluster_tool == "poppunk") {
+    if (params.cluster_dist == "core") {
         validate_choice_param("--poppunk_model", params.poppunk_model, ["dbscan","bgmm"], all_errors)
 
     }
@@ -112,14 +112,13 @@ def validate_full_ref_mode(all_errors) {
 
 def validate_refine_ref_mode(all_errors) {
     // Check required params given and paths exist
-    if (!params.cluster_tool) {
-        all_errors << "You must supply --cluster_tool for chosen ref_mode ${params.ref_mode}"
+    if (!params.cluster_dist) {
+        all_errors << "You must supply --cluster_dist for chosen ref_mode ${params.ref_mode}"
     } else {
-        validate_choice_param("--cluster_tool", params.cluster_tool, ["sketchlib", "poppunk"], all_errors)
+        validate_choice_param("--cluster_dist", params.cluster_dist, ["ani", "core"], all_errors)
     }
-    if (params.cluster_tool == "poppunk") {
+    if (params.cluster_dist == "core") {
         validate_choice_param("--poppunk_model", params.poppunk_model, ["dbscan","bgmm"], all_errors)
-
     }
     if (!params.references) {
         all_errors << "You must supply --references for chosen ref_mode ${params.ref_mode}"
