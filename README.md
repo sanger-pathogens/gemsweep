@@ -68,7 +68,7 @@ To run the pipeline from source (this repository):
   | `index` | `themisto_index`, `ref_groups` | The supplied index and reference groupings will be validated and directly used in the core workflow (Themisto pseudoalignment, mSWEEP relative abundance estimation and mGEMS read binning) |
   | `full` | `references` | All references supplied will be indexed, clustered (with the tool indicated by `cluster_tool`) and the produced index and groups files will be used in the core workflow |
   | `refine` | `references` | The references supplied will be clustered (NOTE: currently only compatible with `--cluster_tool poppunk`) and each cluster is dereplicated and capped to a maximum indicated by `representatives`. Index and groups file are produced for the representatives selected to use in the core workflow. |
-  | `autoselect` | N/A | The references are not supplied but rather derived from querying the reads against GTDB and using the hits as references for indexing and clustering before the core workflow. A refine reference process is always enabled with autoselect mode to subselect representative genomes from clustered references. |
+  | `autoselect` | N/A | The references are not supplied but rather derived from querying the reads against GTDB and using the hits as references for indexing and clustering before the core workflow. In the autoselect mode, reference genome clustering is always done with PopPUNK - the `cluster_tool` parameter has no effect. Also, the reference refinement process is always applied to subselect representative genomes from clustered references. |
 
   NOTE: If supplying a prebuilt index a\) the kmer size must be identical to the argument `kmer_size` (default: 31) and b\) the reference grouping file must be in identical positional order to the references when indexed.
 
@@ -162,8 +162,6 @@ mkdir mGEMs_bins_manifest
 
 ---
 
----
-
 **Cache options**
 | Flag | Type | Default | Description |
 | ----------------- | -------- | -------- | ------------------------------------------------------------------------------- |
@@ -187,6 +185,8 @@ Cache setup and lookup intermediates such as `cache_config.json`, `cache_hits.ts
 When `--cache_dir` is supplied, generated reference entries are written directly to the external cache directory, not to `results`:
 
 The config-level `metadata.json` records the clustering settings used for that cache directory. Each species-level `metadata.json` records cache write/update details for that species, including update counts and added reference IDs.
+
+---
 
 **Clustering options**
 | Flag | Type | Default | Description |

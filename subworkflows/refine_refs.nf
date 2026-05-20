@@ -15,10 +15,10 @@ workflow REFINE_REFS {
     // Then split the distance matrix per cluster - this would allow SPLIT_DIST_MATRIX to output just one CSV instead of multiple and should simplify whole workflow...
 
     clustered_refs
-    | multiMap { meta, references, clusters_csv, pp_dist_matrix ->
+    | multiMap { meta, references, clusters_csv, dist_matrix ->
         references: [meta, references]
         clusters_csv: [meta, clusters_csv]
-        pp_dist_matrix: [meta, pp_dist_matrix]
+        dist_matrix: [meta, dist_matrix]
     }
     | set { clusters_info }
 
@@ -32,7 +32,7 @@ workflow REFINE_REFS {
     }
     | set { clusters }
 
-    clusters_info.pp_dist_matrix
+    clusters_info.dist_matrix
     | join(clusters.derep)
     | join(clusters_info.references)
     | SPLIT_DIST_MATRIX

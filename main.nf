@@ -161,15 +161,43 @@ workflow {
         | collect
         | COMBINE_REFS
 
-        representatives_ch = COMBINE_REFS.out.references.first()
-        ref_groups_ch = COMBINE_REFS.out.groups.first()
+        representatives_ch = COMBINE_REFS.out.references
+        ref_groups_ch = COMBINE_REFS.out.groups
 
         index_prefix_ch = channel.value("index") // needs to be identical to what index is set as in indexing process
         index_files_ch = THEMISTO_BUILD_INDEX(index_prefix_ch, representatives_ch).collect()
 
     } else if ((params.ref_mode == "refine") && (params.cluster_tool == "sketchlib")) {
-        // To populate
-        error("Sketchlib reference refinement not implemented yet! Watch this space :)")
+        // Set up input channels starting from references.txt
+        channel.fromPath(params.references)
+        | first() // using .first() to get a value channel
+        | map { ref -> [ ["ID": "all_refs"], ref ] }
+        | set { references_ch }
+
+        // Cluster references
+        PREP_REFS(references_ch)
+        SKETCHLIB_SKETCH(PREP_REFS.out.refs_tsv)
+        | SKETCHLIB_CLUSTER
+
+        // Select representatives from clusters
+        references_ch
+        | join(SKETCHLIB_CLUSTER.out.clusters)
+        | join(SKETCHLIB_CLUSTER.out.dist_matrix)
+        | set { refine_refs_input }
+
+        REFINE_REFS(refine_refs_input)
+
+        // Split into references and groups, then publish
+        REFINE_REFS.out.rep_refs_and_groups
+        | map { meta, ref_groups_file -> ref_groups_file}
+        | collect
+        | COMBINE_REFS
+
+        representatives_ch = COMBINE_REFS.out.references
+        ref_groups_ch = COMBINE_REFS.out.groups
+
+        index_prefix_ch = channel.value("index") // needs to be identical to what index is set as in indexing process
+        index_files_ch = THEMISTO_BUILD_INDEX(index_prefix_ch, representatives_ch).collect()
 
     } else if (params.ref_mode == "autoselect") {
 
