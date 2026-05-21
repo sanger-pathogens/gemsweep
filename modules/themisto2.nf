@@ -68,8 +68,8 @@ process THEMISTO_PSEUDOALIGN {
     pseudoalignment_params = "-i ${index_prefix}.thm2 --n-threads ${task.cpus}"
 
     """
-    themisto2 intersection-pseudoalign -q ${reads_1} -o pseudoalignments_1.aln ${pseudoalignment_params}
-    themisto2 intersection-pseudoalign -q ${reads_2} -o pseudoalignments_2.aln ${pseudoalignment_params}
+    themisto2 intersection-pseudoalign -q ${reads_1} ${pseudoalignment_params} | gzip > pseudoalignments_1.aln.gz
+    themisto2 intersection-pseudoalign -q ${reads_2} ${pseudoalignment_params} | gzip > pseudoalignments_2.aln.gz
     """
 }
 
