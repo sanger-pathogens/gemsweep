@@ -207,7 +207,7 @@ Cache Layout:
 
 ```
 <cache_root>/
-  poppunk_reps20/
+  core_acc-bgmm-20_reps/
     metadata.json
     species/
       escherichia_coli/
