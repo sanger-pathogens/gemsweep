@@ -31,9 +31,12 @@ include { PREP_REFS;
           ORDER_GROUPS          } from './modules/poppunk.nf'
 include { PUBLISH_GROUPS;
           PUBLISH_REPS          } from './modules/publish_intermediates.nf'
-include { THEMISTO_BUILD_INDEX; 
-          THEMISTO_PSEUDOALIGN;
-          THEMISTO_STATS        } from './modules/themisto.nf'
+include { THEMISTO_BUILD_INDEX as THEMISTO1_BUILD_INDEX;
+          THEMISTO_PSEUDOALIGN as THEMISTO1_PSEUDOALIGN;
+          THEMISTO_STATS        as THEMISTO1_STATS       } from './modules/themisto.nf'
+include { THEMISTO_BUILD_INDEX as THEMISTO2_BUILD_INDEX;
+          THEMISTO_PSEUDOALIGN as THEMISTO2_PSEUDOALIGN;
+          THEMISTO_STATS        as THEMISTO2_STATS       } from './modules/themisto2.nf'
 include { MSWEEP                } from './modules/msweep.nf'
 include { MGEMS                 } from './modules/mgems.nf'
 
@@ -126,10 +129,15 @@ workflow {
         }
 
         index_prefix_ch = channel.value("index") // needs to be identical to what index is set as in indexing process
-        index_files_ch = THEMISTO_BUILD_INDEX(index_prefix_ch, representatives_ch).collect()
-        
-        // Output stats on the index (not required for anything just an additional output)
-        THEMISTO_STATS(index_files_ch, index_prefix_ch)
+        if (params.themisto2) {
+            index_files_ch = THEMISTO2_BUILD_INDEX(index_prefix_ch, representatives_ch).collect()
+            // Output stats on the index (not required for anything just an additional output)
+            THEMISTO2_STATS(index_files_ch, index_prefix_ch)
+        } else {
+            index_files_ch = THEMISTO1_BUILD_INDEX(index_prefix_ch, representatives_ch).collect()
+            // Output stats on the index (not required for anything just an additional output)
+            THEMISTO1_STATS(index_files_ch, index_prefix_ch)
+        }
 
     } else {
         // Set up input channels starting from pre-built index AND provided ref_groups
@@ -142,7 +150,11 @@ workflow {
     }
 
     // Core Workflow
-    pseudoaligned_ch = THEMISTO_PSEUDOALIGN(reads_ch, index_files_ch, index_prefix_ch)
+    if (params.themisto2) {
+        pseudoaligned_ch = THEMISTO2_PSEUDOALIGN(reads_ch, index_files_ch, index_prefix_ch)
+    } else {
+        pseudoaligned_ch = THEMISTO1_PSEUDOALIGN(reads_ch, index_files_ch, index_prefix_ch)
+    }
     
     msweep_ch = MSWEEP(pseudoaligned_ch, ref_groups_ch)
     
