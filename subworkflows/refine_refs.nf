@@ -70,10 +70,10 @@ workflow REFINE_REFS {
     EXTRACT_REF_LABEL(clusters_info.references)
 
     chosen_representatives
-    | map { chosen_representatives -> 
-        def taxon = chosen_representatives.baseName.replace("_representatives", "")
+    | map { chosen_reps -> 
+        def taxon = chosen_reps.baseName.replace("_representatives", "")
         def meta = ["ID":taxon]
-        [meta, chosen_representatives]
+        [meta, chosen_reps]
     }
     | set { chosen_representatives }
 
