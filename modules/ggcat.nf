@@ -32,6 +32,6 @@ process GGCAT {
     // supply less memory allocation in the command as it requires additional overhead (will likely fail if exact)
     mem_gigas_param = (task.memory.toGiga() / 1.2).toInteger()
     """
-    ggcat build --input-lists ${references_txt} -o ${index_prefix}.ggcat.fa -k ${params.kmer_size} --temp-dir ${temp_storage_location} --threads-count ${task.cpus} --memory ${mem_gigas_param} --prefer-memory
+    ggcat build --input-lists ${references_txt} -o ${index_prefix}.ggcat.fa -k ${params.kmer_size} --temp-dir ${temp_storage_location} --threads-count ${task.cpus} --memory ${mem_gigas_param} --prefer-memory -s 1
     """
 }
