@@ -123,26 +123,6 @@ process EXTRACT_REF_LABEL {
     """
 }
 
-process NORMALISE_REFERENCE_LIST {
-    tag "${meta.ID}"
-    label "cpu_1"
-    label "mem_1"
-    label "time_queue_from_small"
-
-    container "quay.io/sangerpathogens/pandas:2.2.1"  // TODO Only needs to rely on ubuntu...
-
-    input:
-    tuple val(meta), path(reference_list)
-
-    output:
-    tuple val(meta), path("references.txt")
-
-    script:
-    """
-    cut -d',' -f1 $reference_list > references.txt
-    """
-}
-
 process BUILD_REFERENCE_CLUSTER_FILES {
     tag "${meta.ID}"
     label "cpu_1"
