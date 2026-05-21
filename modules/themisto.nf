@@ -18,7 +18,7 @@ process THEMISTO_BUILD_INDEX {
 
     input:
     val index_prefix
-    tuple val(meta), path(references_txt)
+    path references_txt
 
     output:
     path "${index_prefix}.*"
