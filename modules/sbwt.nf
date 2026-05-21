@@ -17,7 +17,7 @@ process SBWT_BUILD {
 
     input:
     val index_prefix
-    path references_txt
+    path ggcat_unitigs
 
     output:
     path "${index_prefix}.sbwt", emit: sbwt
@@ -33,6 +33,6 @@ process SBWT_BUILD {
     // TODO: determine correct sbwt CLI flags. The only requirement for now is that it writes the SBWT to ${index_prefix}.sbwt.
     // TODO: I'm hardcoding 4 GiB memory to make it run on my laptop. Should use mem_gb_param instead.
     """
-    sbwt build -k ${params.kmer_size} --input-list ${references_txt} -o ${index_prefix} -v --temp-dir ${temp_storage_location} --build-lcs --mem-gb 4 --dedup-batches --add-revcomp --threads ${task.cpus}
+    sbwt build -k ${params.kmer_size} -i ${ggcat_unitigs} -o ${index_prefix} -v --temp-dir ${temp_storage_location} --build-lcs --mem-gb 4 --dedup-batches --add-revcomp --threads ${task.cpus}
     """
 }
