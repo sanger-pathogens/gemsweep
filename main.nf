@@ -101,7 +101,13 @@ workflow {
         | join(POPPUNK.out.clusters)
         | ORDER_GROUPS
 
-        representatives_ch = references_ch // no dereplication
+        // no dereplication
+        references_ch
+        | map { meta, refs ->
+            refs
+        }
+        | set {representatives_ch}
+        
         ref_groups_ch = ORDER_GROUPS.out.groups.map { meta, groups_file -> groups_file }
 
         index_prefix_ch = channel.value("index") // needs to be identical to what index is set as in indexing process
