@@ -113,7 +113,7 @@ process EXTRACT_REF_LABEL {
     output_csv = "${meta.ID}_reference_paths.csv"
     extract_ref_label = "${projectDir}/bin/extract_ref_label.py"
     if (params.cluster_dist == "core_acc") {
-        extract_ref_label_script += " --poppunk_style_labels"
+        extract_ref_label += " --poppunk_style_labels"
     }
 
     """
