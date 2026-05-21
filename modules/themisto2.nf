@@ -54,14 +54,6 @@ process THEMISTO_PSEUDOALIGN {
     label 'mem_32'
     label 'time_queue_from_long'
 
-    // Only request /tmp space if /tmp is being used (assumes TMPDIR is not set)
-    if (!params.temp_dir || params.temp_dir.startsWith("/tmp")) {
-        label 'request_temp'
-    }
-
-    // scratch used for fast node-local temp storage
-    scratch true
-
     // TODO: add a container for themisto2. For now assumes themisto2 is installed and available in PATH.
 
     input:
@@ -73,15 +65,7 @@ process THEMISTO_PSEUDOALIGN {
     tuple val(meta), path("pseudoalignments_1.aln.gz"), path("pseudoalignments_2.aln.gz")
 
     script:
-    pseudoalignment_params = "-i ${index_prefix}.thm2 --threads ${task.cpus}"
-
-    // User-provided temp storage if given otherwise use tmp workdir (since scratch is enabled)
-    if (params.temp_dir) {
-        temp_storage_location = (params.temp_dir)
-        pseudoalignment_params += " --temp-dir ${temp_storage_location}"
-    } else {
-        pseudoalignment_params += " --temp-dir \$PWD"
-    }
+    pseudoalignment_params = "-i ${index_prefix}.thm2 --n-threads ${task.cpus}"
 
     """
     themisto2 intersection-pseudoalign -q ${reads_1} -o pseudoalignments_1.aln ${pseudoalignment_params}
