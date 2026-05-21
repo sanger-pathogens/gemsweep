@@ -37,7 +37,7 @@ include { THEMISTO_BUILD_INDEX as THEMISTO1_BUILD_INDEX;
 include { THEMISTO_BUILD_INDEX as THEMISTO2_BUILD_INDEX;
           THEMISTO_PSEUDOALIGN as THEMISTO2_PSEUDOALIGN;
           THEMISTO_STATS        as THEMISTO2_STATS       } from './modules/themisto2.nf'
-include { SBWT_BUILD           as THEMISTO2_SBWT_BUILD   } from './modules/sbwt.nf'
+include { SBWT_BUILD           as SBWT   } from './modules/sbwt.nf'
 include { MSWEEP                } from './modules/msweep.nf'
 include { MGEMS                 } from './modules/mgems.nf'
 
@@ -131,8 +131,8 @@ workflow {
 
         index_prefix_ch = channel.value("index") // needs to be identical to what index is set as in indexing process
         if (params.themisto2) {
-            THEMISTO2_SBWT_BUILD(index_prefix_ch, representatives_ch)
-            index_files_ch = THEMISTO2_BUILD_INDEX(index_prefix_ch, representatives_ch, THEMISTO2_SBWT_BUILD.out.sbwt, THEMISTO2_SBWT_BUILD.out.lcs).collect()
+            SBWT(index_prefix_ch, representatives_ch)
+            index_files_ch = THEMISTO2_BUILD_INDEX(index_prefix_ch, representatives_ch, SBWT.out.sbwt, SBWT.out.lcs).collect()
             // Output stats on the index (not required for anything just an additional output)
             THEMISTO2_STATS(index_files_ch, index_prefix_ch)
         } else {
