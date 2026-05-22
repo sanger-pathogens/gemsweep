@@ -240,7 +240,9 @@ The config-level `metadata.json` records the clustering settings used for that c
 | `cluster_strict` | `bool` | `false` | Fail early if all genomes form a single cluster, or each genome is a singleton. |
 | `cluster_algorithm` | `str` | `connected_components` | Name of clustering/ community-finding algorithm to be used in sketchlib clustering. Options: connected_components, leiden, louvain, walktrap, fastgreedy, label_propagation, infomap, eigenvector |
 
-## Deterministic methods include `connected_components` (default, also known as single linkage clustering), `walktrap`, `fastgreedy` and `eigenvector`. Also available are the `louvain`, `leiden`, `infomap` and `label_propagation` methods.
+Deterministic methods include `connected_components` (default, also known as single linkage clustering), `walktrap`, `fastgreedy` and `eigenvector`. Also available are the `louvain`, `leiden`, `infomap` and `label_propagation` methods.
+
+---
 
 **Themisto options**
 | Flag | Type | Default | Description |
