@@ -230,6 +230,8 @@ The config-level `metadata.json` records the clustering settings used for that c
 | `poppunk_model` | `str` | `dbscan` | Clustering model for poppunk to use (either dbscan or bgmm) |
 | `publish_poppunk` | `bool` | `false` | Optionally publish full poppunk output, group assignments are always published. |
 
+:warning: It is strongly recommended to leave `--publish_poppunk` as false when using `--ref_mode autoselect` or `--ref_mode refine`. The PopPUNK outputs are generated on the full set of genomes supplied, in the case of `--ref_mode autoselect` all genomes for the detected species, rather than the representatives used downstream. Additionally, as outputs are generated per species, `--ref_mode autoselect` can produce a large number of files with significant storage overhead.
+
 ---
 
 **Sketchlib workflow options**
