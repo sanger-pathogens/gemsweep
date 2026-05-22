@@ -25,22 +25,30 @@ process POPPUNK {
 
     container 'quay.io/biocontainers/poppunk:2.7.8--py310h4d0eb5b_0'
 
-    publishDir "${params.outdir}/clustering/${meta.ID}", mode: 'copy', pattern: 'pp_database/*', enabled: params.publish_poppunk
+    publishDir "${params.outdir}/clustering", mode: 'copy', pattern: "${meta.ID}/*", enabled: params.publish_poppunk
+
+    afterScript """
+    if [ "${params.publish_poppunk}" = "false" ]; then
+        find ${meta.ID} -type f \
+            ! -name "${meta.ID}_clusters.csv" \
+            ! -name "${meta.ID}.dists.npy" \
+            -delete
+        find ${meta.ID} -type d -empty -delete
+    fi
+    """
 
     input:
     tuple val(meta), path(refs_tsv)
 
     output:
-    tuple val(meta), path("${out}/${out}_clusters.csv"), emit: clusters     // for downstream
-    tuple val(meta), path("${out}/${out}.dists.npy"),    emit: dist_matrix
-    tuple val(meta), path("${out}/*")                                       // for publishing
+    tuple val(meta), path("${meta.ID}/${meta.ID}_clusters.csv"), emit: clusters     // for downstream
+    tuple val(meta), path("${meta.ID}/${meta.ID}.dists.npy"),    emit: dist_matrix
+    tuple val(meta), path("${meta.ID}/*"),                       optional: true    // for publishing
 
     script:
-    out = "pp_database"
-
     """
-    poppunk --create-db --output ${out} --r-files ${refs_tsv} --threads ${task.cpus}
-    poppunk --fit-model ${params.poppunk_model} --ref-db ${out} --threads ${task.cpus}
+    poppunk --create-db --output ${meta.ID} --r-files ${refs_tsv} --threads ${task.cpus}
+    poppunk --fit-model ${params.poppunk_model} --ref-db ${meta.ID} --threads ${task.cpus}
     """
 }
 
