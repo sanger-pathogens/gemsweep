@@ -185,7 +185,7 @@ Alternatively ANI-based community-finding algorithms are available; using `--clu
 | `taxonomic_rank` | `str` | `species` | Taxonomic rank by which to group references. Choices: `domain`, `kingdom`, `phylum`, `class`, `order`, `family`, `genus`, `species`. |
 | `pool_latin_taxa` | `bool` | `false` | Advanced option. Ignores alphabet suffixes of GTDB divisions of latin-name taxa, thus pooling those subdivisions together. Not recommended to change unless the effects on output are understood; see below for more info. |
 | `save_sylph_sketches` | `bool` | `true` | Keep Sylph sketches. |
-| `genome_id_to_file` | `Path` | `"/data/pam/collections/GTDB/release226/genomic_files_all_retrievable_2026_03_05/metadata/id_to_genome_path.tsv"` | File from which to extract genome paths based on genome identifiers. |
+| `genome_id_to_file` | `Path` | `"/data/pam/collections/GTDB/release226/`<br>`genomic_files_all_retrievable_2026_03_05/`<br>`metadata/id_to_genome_path.tsv"` | File from which to extract genome paths based on genome identifiers. |
 
 Note on using `pool_latin_taxa`:
 Certain genus/species in GTDB are further divided by appended alphabet suffixes; for example, in GTDB r226, _Escherichia coli_ has 3 species-rank taxonomic groups: `Escherichia_coli`, `Escherichia_coli_E` and `Escherichia_coli_F`. Further explanation is available in the [GTDB documentation](https://gtdb.ecogenomic.org/faq#why-do-some-genus-and-species-names-end-with-an-alphabetic-suffix). If you wanted to consider these as one group you can use this advanced option. Note that:
