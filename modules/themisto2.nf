@@ -26,7 +26,7 @@ process THEMISTO_BUILD_INDEX {
     path "${index_prefix}.*"
 
     script:
-    index_build_params = "-k ${params.kmer_size} --file-colors ${references_txt} -o ${index_prefix}.thm2 --n-threads ${task.cpus} --index-type sparse-dense"
+    index_build_params = "-k ${params.kmer_size} --file-colors ${references_txt} -o ${index_prefix}.thm2 --n-threads ${task.cpus}"
 
     index_build_params += " --sbwt ${sbwt_index}"
     index_build_params += " --lcs ${lcs_index}"
@@ -68,12 +68,9 @@ process THEMISTO_PSEUDOALIGN {
 
     pseudoalignment_params = "-i ${index_prefix}.thm2 --n-threads ${task.cpus}"
 
-    // Convert Themisto 2 output to Themisto 1 (thanks Claude)
-    themisto2_to_themisto1 = 'awk \'match($0,/\\[[^]]*\\]/){c=substr($0,RSTART+1,RLENGTH-2);gsub(/,/," ",c);print (NR-1)" "c}\''
-
     """
-    themisto2 intersection-pseudoalign -q ${reads_1} ${pseudoalignment_params} --sort-output | ${themisto2_to_themisto1} | gzip > pseudoalignments_1.aln.gz
-    themisto2 intersection-pseudoalign -q ${reads_2} ${pseudoalignment_params} --sort-output | ${themisto2_to_themisto1} | gzip > pseudoalignments_2.aln.gz
+    themisto2 intersection-pseudoalign -q ${reads_1} ${pseudoalignment_params} --sort-output --themisto1-output-format | gzip > pseudoalignments_1.aln.gz
+    themisto2 intersection-pseudoalign -q ${reads_2} ${pseudoalignment_params} --sort-output --themisto1-output-format | gzip > pseudoalignments_2.aln.gz
     """
 }
 
