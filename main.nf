@@ -73,7 +73,7 @@ workflow {
 
     validate_params()
 
-    if (!params.ref_prep_only || ref_mode == 'autoselect') { // only autoselect requires reads for ref prep
+    if (!params.ref_prep_only || params.ref_mode == 'autoselect') { // only autoselect requires reads for ref prep
         reads_ch = MIXED_INPUT()    // outputs channel of [meta, R1, R2] for reads_<1|2>.fastq.gz
     }
 
@@ -86,7 +86,7 @@ workflow {
         // Validate
         VALIDATE_PREBUILT_INPUT(index_files_ch, index_prefix_ch)
 
-    } else if ((params.ref_mode == "full") && (params.cluster_tool == "poppunk")) {
+    } else if ((params.ref_mode == "full") && (params.cluster_dist == "core_acc")) {
         // Set up input channels starting from references.txt
         channel.fromPath(params.references)
         | first() // using .first() to get a value channel
@@ -113,7 +113,7 @@ workflow {
         index_prefix_ch = channel.value("index") // needs to be identical to what index is set as in indexing process
         index_files_ch = THEMISTO_BUILD_INDEX(index_prefix_ch, representatives_ch).collect()
 
-    } else if ((params.ref_mode == "full") && (params.cluster_tool == "sketchlib")) {
+    } else if ((params.ref_mode == "full") && (params.cluster_dist == "ani")) {
         // Set up input channels starting from references.txt
         channel.fromPath(params.references)
         | first() // using .first() to get a value channel
@@ -142,7 +142,7 @@ workflow {
         index_prefix_ch = channel.value("index") // needs to be identical to what index is set as in indexing process
         index_files_ch = THEMISTO_BUILD_INDEX(index_prefix_ch, representatives_ch).collect()
 
-    } else if ((params.ref_mode == "refine") && (params.cluster_tool == "poppunk")) {
+    } else if ((params.ref_mode == "refine") && (params.cluster_dist == "core_acc")) {
         // Set up input channels starting from references.txt
         channel.fromPath(params.references)
         | first() // using .first() to get a value channel
@@ -173,7 +173,7 @@ workflow {
         index_prefix_ch = channel.value("index") // needs to be identical to what index is set as in indexing process
         index_files_ch = THEMISTO_BUILD_INDEX(index_prefix_ch, representatives_ch).collect()
 
-    } else if ((params.ref_mode == "refine") && (params.cluster_tool == "sketchlib")) {
+    } else if ((params.ref_mode == "refine") && (params.cluster_dist == "ani")) {
         // Set up input channels starting from references.txt
         channel.fromPath(params.references)
         | first() // using .first() to get a value channel

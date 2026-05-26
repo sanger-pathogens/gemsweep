@@ -10,11 +10,17 @@ process CHECK_CACHE {
     path("cache_config.json"), emit: config
 
     script:
+    if (params.cluster_dist == "core_acc") {
+        cluster_method = "${params.cluster_dist}-${params.poppunk_model}"
+    } else if (params.cluster_dist == "ani") {
+        cluster_method = "${params.cluster_dist}-${params.cluster_algorithm}"
+    }
+
 
     """
     python3 ${projectDir}/bin/check_cache.py \\
         --cache-root '${params.cache_dir}' \\
-        --cluster-tool '${params.cluster_tool}' \\
+        --cluster-method '${cluster_method}' \\
         --representatives '${params.representatives}' \\
         --out cache_config.json
     """

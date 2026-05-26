@@ -64,10 +64,10 @@ gemsweep --help
   Compatible parameters for each reference mode (`ref_mode`):
   | Reference Mode | Required Params | Mode Description |
   | ---------- | ------ | ------ |
-  | `index` | `themisto_index`, `ref_groups` | The supplied index and reference groupings will be validated and directly used in the core workflow (Themisto pseudoalignment, mSWEEP relative abundance estimation and mGEMS read binning) |
-  | `full` | `references` | All references supplied will be indexed, clustered (with the tool indicated by `cluster_tool`) and the produced index and groups files will be used in the core workflow |
-  | `refine` | `references` | The references supplied will be clustered (NOTE: currently only compatible with `--cluster_tool poppunk`) and each cluster is dereplicated and capped to a maximum indicated by `representatives`. Index and groups file are produced for the representatives selected to use in the core workflow. |
-  | `autoselect` | N/A | The references are not supplied but rather derived from querying the reads against GTDB and using the hits as references for indexing and clustering before the core workflow. In the autoselect mode, reference genome clustering is always done with PopPUNK - the `cluster_tool` parameter has no effect. Also, the reference refinement process is always applied to subselect representative genomes from clustered references. |
+  | `index` | `themisto_index`, `ref_groups` | The supplied index and reference groupings will be validated and directly used in the main workflow (Themisto pseudoalignment, mSWEEP relative abundance estimation and mGEMS read binning) |
+  | `full` | `references` | All references supplied will be indexed, clustered (with the workflow indicated by `cluster_dist`) and the produced index and groups files will be used in the main workflow |
+  | `refine` | `references` | The references supplied will be clustered (NOTE: currently only compatible with `--cluster_dist core_acc`) and each cluster is dereplicated and capped to a maximum indicated by `representatives`. Index and groups file are produced for the representatives selected to use in the main workflow. |
+  | `autoselect` | N/A | The references are not supplied but rather derived from querying the reads against GTDB and using the hits as references for indexing and clustering before the main workflow. In the autoselect mode, reference genome clustering is always done with PopPUNK - the `cluster_dist` parameter has no effect. Also, the reference refinement process is always applied to subselect representative genomes from clustered references. |
 
   NOTE: If supplying a prebuilt index a\) the kmer size must be identical to the argument `themisto_k` (default: 31) and b\) the reference grouping file must be in identical positional order to the references when indexed.
 
@@ -164,7 +164,13 @@ mkdir mGEMs_bins_manifest
 | ----------------- | -------- | -------- | ------------------------------------------------------------------------------- |
 | `references` | `path` | `null` | Path to text file containing paths to references, one per line. |
 | `representatives` | `integer` | `20` | Number of representatives at which to cap each reference cluster. Used when `--ref_mode` is `refine` or `autoselect`. |
-| `cluster_tool` | `str` | `poppunk` | Tool to use for clustering references when `--ref_mode` is `refine` or `full`. Options: `poppunk` or `sketchlib` |
+| `cluster_dist` | `str`|`poppunk`| Genomic distance used in clustering references, options: `core_acc` or `ani`. Determines the clustering workflow, see below for more info. Only used when ref_mode is`refine`or`full`. |
+
+The pipeline's idea of strain-level is defined by the clustering stage. When you supply groups in `--ref_mode index` the references are pre-clustered. In `--ref_mode refine` or `full` you have a choice of clustering workflows defined by the `--cluster_dist` param.
+
+The default value `--cluster_dist core_acc` means that a `poppunk` workflow is applied; see PopPUNK Options below to configure. Be aware this is a non-deterministic mode of clustering, developed to cluster single-species genome datasets to the strain level. If you want to re-use the same clusters generated in a previous run you would need to use `--ref_mode index`. Note that `--ref_mode autoselect` currently _only_ uses this poppunk-based clustering workflow.
+
+Alternatively ANI-based community-finding algorithms are available; using `--cluster_dist ani` instead invokes `sketchlib` to estimate ANI similarities followed by a choice of community-finding algorithms from the package `python-igraph`, including some deterministic algorithms. See Sketchlib workflow options below to configure.
 
 ---
 
@@ -179,7 +185,7 @@ mkdir mGEMs_bins_manifest
 | `taxonomic_rank` | `str` | `species` | Taxonomic rank by which to group references. Choices: `domain`, `kingdom`, `phylum`, `class`, `order`, `family`, `genus`, `species`. |
 | `pool_latin_taxa` | `bool` | `false` | Advanced option. Ignores alphabet suffixes of GTDB divisions of latin-name taxa, thus pooling those subdivisions together. Not recommended to change unless the effects on output are understood; see below for more info. |
 | `save_sylph_sketches` | `bool` | `true` | Keep Sylph sketches. |
-| `genome_id_to_file` | `Path` | `"/data/pam/collections/GTDB/release226/genomic_files_all_retrievable_2026_03_05/metadata/id_to_genome_path.tsv"` | File from which to extract genome paths based on genome identifiers. |
+| `genome_id_to_file` | `Path` | `"/data/pam/collections/GTDB/release226/`<br>`genomic_files_all_retrievable_2026_03_05/`<br>`metadata/id_to_genome_path.tsv"` | File from which to extract genome paths based on genome identifiers. |
 
 Note on using `pool_latin_taxa`:
 Certain genus/species in GTDB are further divided by appended alphabet suffixes; for example, in GTDB r226, _Escherichia coli_ has 3 species-rank taxonomic groups: `Escherichia_coli`, `Escherichia_coli_E` and `Escherichia_coli_F`. Further explanation is available in the [GTDB documentation](https://gtdb.ecogenomic.org/faq#why-do-some-genus-and-species-names-end-with-an-alphabetic-suffix). If you wanted to consider these as one group you can use this advanced option. Note that:
@@ -201,7 +207,7 @@ Cache Layout:
 
 ```
 <cache_root>/
-  poppunk_reps20/
+  core_acc-bgmm-20_reps/
     metadata.json
     species/
       escherichia_coli/
@@ -224,6 +230,8 @@ The config-level `metadata.json` records the clustering settings used for that c
 | `poppunk_model` | `str` | `dbscan` | Clustering model for poppunk to use (either dbscan or bgmm) |
 | `publish_poppunk` | `bool` | `false` | Optionally publish full poppunk output, group assignments are always published. |
 
+:warning: It is strongly recommended to leave `--publish_poppunk` as false when using `--ref_mode autoselect` or `--ref_mode refine`. The PopPUNK outputs are generated on the full set of genomes supplied, in the case of `--ref_mode autoselect` all genomes for the detected species, rather than the representatives used downstream. Additionally, as outputs are generated per species, `--ref_mode autoselect` can produce a large number of files with significant storage overhead.
+
 ---
 
 **Sketchlib workflow options**
@@ -234,9 +242,7 @@ The config-level `metadata.json` records the clustering settings used for that c
 | `cluster_strict` | `bool` | `false` | Fail early if all genomes form a single cluster, or each genome is a singleton. |
 | `cluster_algorithm` | `str` | `connected_components` | Name of clustering/ community-finding algorithm to be used in sketchlib clustering. Options: connected_components, leiden, louvain, walktrap, fastgreedy, label_propagation, infomap, eigenvector |
 
-The pipeline's idea of strain-level is defined by the clustering stage. One route is to use poppunk clustering, and choose from dbscan or bgmm model to fit. Be aware this is a non-deterministic mode of clustering, developed to cluster single-species to the strain level. If you want to re-use the same groups from a previous run you would need to use the 'index' ref_mode.
-
-Alternatively ANI-based community finding algorithms are available; using sketchlib to derive ANI followed by a choice of community-finding algorithms from the package `python-igraph`. Deterministic methods include `connected_components` (also known as single linkage clustering), `walktrap`, `fastgreedy` and `eigenvector`. Also available are the `louvain`, `leiden`, `infomap` and `label_propagation` methods.
+Deterministic methods include `connected_components` (default, also known as single-linkage clustering), `walktrap`, `fastgreedy` and `eigenvector`. Also available are the `louvain`, `leiden`, `infomap` and `label_propagation` methods.
 
 ---
 

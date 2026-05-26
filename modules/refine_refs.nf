@@ -82,7 +82,7 @@ process SPLIT_DIST_MATRIX {
     script:
     get_submatrix_script = "${workflow.projectDir}/bin/get_submatrix.py"
     // If poppunk has sanitised the ref_labels this flag accounts for that
-    if (params.cluster_tool == "poppunk") {
+    if (params.cluster_dist == "core_acc") {
         get_submatrix_script += " --poppunk_style_labels"
         }
     
@@ -112,34 +112,14 @@ process EXTRACT_REF_LABEL {
     script:
     output_csv = "${meta.ID}_reference_paths.csv"
     extract_ref_label = "${projectDir}/bin/extract_ref_label.py"
-    if (params.cluster_tool == "poppunk") {
-        extract_ref_label_script += " --poppunk_style_labels"
+    if (params.cluster_dist == "core_acc") {
+        extract_ref_label += " --poppunk_style_labels"
     }
 
     """
     ${extract_ref_label} \\
         --references ${references} \\
         --output ${output_csv}
-    """
-}
-
-process NORMALISE_REFERENCE_LIST {
-    tag "${meta.ID}"
-    label "cpu_1"
-    label "mem_1"
-    label "time_queue_from_small"
-
-    container "quay.io/sangerpathogens/pandas:2.2.1"  // TODO Only needs to rely on ubuntu...
-
-    input:
-    tuple val(meta), path(reference_list)
-
-    output:
-    tuple val(meta), path("references.txt")
-
-    script:
-    """
-    cut -d',' -f1 $reference_list > references.txt
     """
 }
 

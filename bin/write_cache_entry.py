@@ -34,12 +34,7 @@ def parse_args():
     parser.add_argument("--species", required=True, help="Species or taxon identifier.")
     parser.add_argument("--refs", type=Path, required=True, help="Generated references.txt for this species.")
     parser.add_argument("--groups", type=Path, required=True, help="Generated groups.txt for this species.")
-    parser.add_argument(
-        "--reference-clusters",
-        type=Path,
-        required=True,
-        help="Generated label/ref/group CSV for this species.",
-    )
+    parser.add_argument("--reference-clusters", type=Path, required=True, help="Generated label/ref/group CSV for this species.")
     parser.add_argument("--cache-config", type=Path, required=True, help="cache_config.json from CHECK_CACHE.")
     return parser.parse_args()
 
@@ -145,7 +140,7 @@ def update_metadata(
 ):
     metadata = {
         "species_id": species,
-        "cluster_tool": cache_config.get("cluster_tool"),
+        "cluster_method": cache_config.get("cluster_method"),
         "representatives": cache_config.get("representatives"),
         "last_update": {
             "added_references": added,

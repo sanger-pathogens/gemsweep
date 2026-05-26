@@ -2,7 +2,6 @@ include { SPLIT_CLUSTERS_CSV;
           SPLIT_DIST_MATRIX;
           GENERATE_TOTAL_DIST_MATRIX;
           SUBSELECT_GRAPH;
-          NORMALISE_REFERENCE_LIST;
           EXTRACT_REF_LABEL;
           BUILD_REFERENCE_CLUSTER_FILES; } from '../modules/refine_refs.nf'
 
@@ -58,20 +57,23 @@ workflow REFINE_REFS {
 
     SUBSELECT_GRAPH.out.representatives
     | mix(clusters_no_derep)
-    | NORMALISE_REFERENCE_LIST  // Chosen representatives is a list of [meta, rep_file] where rep_file is heterogeneous because it contains "rep,cluster" for clusters_no_derep and "rep" alone for SUBSELECT_GRAPH.out.representatives. So quick helper to normalize.
-    | collectFile { representatives_tuple ->
-        def (meta, rep_file) = representatives_tuple
-        ["${meta.ID}_representatives.txt", rep_file.readLines().join("\n") + "\n"]  // Add last newline to ensure last line has a newline character too!
+    | collectFile { meta, rep_file ->
+        def rep_lines = rep_file.readLines()
+            .collect { rep_line ->
+                // strip cluster col if present - rep_file is heterogeneous because it contains "rep,cluster" for clusters_no_derep and "rep" alone for SUBSELECT_GRAPH.out.representatives
+                rep_line.contains(',') ? rep_line.split(',')[0] : rep_line
+        }
+        ["${meta.ID}_representatives.txt",rep_lines.join("\n") + "\n"]  // Add last newline to ensure last line has a newline character too!
     }
     | set { chosen_representatives }
 
     EXTRACT_REF_LABEL(clusters_info.references)
 
     chosen_representatives
-    | map { chosen_representatives -> 
-        def taxon = chosen_representatives.baseName.replace("_representatives", "")
+    | map { chosen_reps -> 
+        def taxon = chosen_reps.baseName.replace("_representatives", "")
         def meta = ["ID":taxon]
-        [meta, chosen_representatives]
+        [meta, chosen_reps]
     }
     | set { chosen_representatives }
 
