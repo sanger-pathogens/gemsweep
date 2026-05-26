@@ -168,9 +168,9 @@ mkdir mGEMs_bins_manifest
 
 The pipeline's idea of strain-level is defined by the clustering stage. When you supply groups in `--ref_mode index` the references are pre-clustered. In `--ref_mode refine` or `full` you have a choice of clustering workflows defined by the `--cluster_dist` param.
 
-The default value `--cluster_dist core_acc` means that a `poppunk` workflow is applied; see PopPUNK Options below to configure. Be aware this is a non-deterministic mode of clustering, developed to cluster single-species to the strain level. If you want to re-use the same clusters generated in a previous run you would need to use `--ref_mode index`. Note that `--ref_mode autoselect` currently _only_ uses this poppunk-based clustering workflow.
+The default value `--cluster_dist core_acc` means that a `poppunk` workflow is applied; see PopPUNK Options below to configure. Be aware this is a non-deterministic mode of clustering, developed to cluster single-species genome datasets to the strain level. If you want to re-use the same clusters generated in a previous run you would need to use `--ref_mode index`. Note that `--ref_mode autoselect` currently _only_ uses this poppunk-based clustering workflow.
 
-Alternatively ANI-based community-finding algorithms are available; using `--cluster_dist ani` instead invokes `sketchlib` to derive ANI followed by a choice of community-finding algorithms from the package `python-igraph`, including some deterministic algorithms. See Sketchlib workflow options below to configure.
+Alternatively ANI-based community-finding algorithms are available; using `--cluster_dist ani` instead invokes `sketchlib` to estimate ANI similarities followed by a choice of community-finding algorithms from the package `python-igraph`, including some deterministic algorithms. See Sketchlib workflow options below to configure.
 
 ---
 
@@ -240,7 +240,7 @@ The config-level `metadata.json` records the clustering settings used for that c
 | `cluster_strict` | `bool` | `false` | Fail early if all genomes form a single cluster, or each genome is a singleton. |
 | `cluster_algorithm` | `str` | `connected_components` | Name of clustering/ community-finding algorithm to be used in sketchlib clustering. Options: connected_components, leiden, louvain, walktrap, fastgreedy, label_propagation, infomap, eigenvector |
 
-Deterministic methods include `connected_components` (default, also known as single linkage clustering), `walktrap`, `fastgreedy` and `eigenvector`. Also available are the `louvain`, `leiden`, `infomap` and `label_propagation` methods.
+Deterministic methods include `connected_components` (default, also known as single-linkage clustering), `walktrap`, `fastgreedy` and `eigenvector`. Also available are the `louvain`, `leiden`, `infomap` and `label_propagation` methods.
 
 ---
 
