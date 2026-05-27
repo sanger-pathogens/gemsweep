@@ -89,6 +89,10 @@ ID,R1,R2
 sampleA,/path/to/sampleA_1.fastq.gz,/path/to/sampleA_2.fastq.gz
 ```
 
+#### Generating a manifest
+
+**Sanger users:** the [manifest_generator](https://gitlab.internal.sanger.ac.uk/sanger-pathogens/pipelines/manifest_generator/) tool can generate a compatible `ID,R1,R2` manifest from a directory of FASTQ files or from iRODS.
+
 #### References (`--references`)
 
 A text file listing paths to reference FASTA files (one per line). Required when `--ref_mode` is `full` or `refine`.
