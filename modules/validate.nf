@@ -137,6 +137,9 @@ def validate_autoselect_ref_mode(all_errors) {
     
     // Check no additional, incompatible ref params are given
     validate_incompatible("autoselect", ["references", "themisto_index", "ref_groups"], all_errors)
+
+    // Warn of experimental nature of the feature
+    log.warn("Be aware that autoselect mode is still in development and is offered as an experimental feature.")
 }
 
 // --------------------- Main Functions ---------------------
@@ -152,6 +155,7 @@ def validate_params() {
     validate_choice_param("--ref_mode", params.ref_mode, ref_mode_options, validation_errors)
 
     if (params.ref_mode == "index") {
+
         validate_index_ref_mode(validation_errors)
 
     } else if (params.ref_mode == "full") {
