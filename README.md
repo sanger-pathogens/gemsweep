@@ -12,12 +12,12 @@
 
 The reference preparation and indexing steps are controlled by `--ref_mode`:
 
-| `--ref_mode` | Description |
-| --- | --- |
-| `index` | Use a pre-built Themisto index and group assignments file directly. |
-| `full` | Cluster all references with PopPUNK or Sketchlib and build the index (no de-replication). |
-| `refine` | Cluster references and de-replicate each cluster to a configurable number of maximally-distant representatives before building the index. |
-| `autoselect` | Automatically select candidate references from reads using Sylph, then cluster and refine. |
+| `--ref_mode` | Description                                                                                                                               |
+| ------------ | ----------------------------------------------------------------------------------------------------------------------------------------- |
+| `index`      | Use a pre-built Themisto index and group assignments file directly.                                                                       |
+| `full`       | Cluster all references with PopPUNK or Sketchlib and build the index (no de-replication).                                                 |
+| `refine`     | Cluster references and de-replicate each cluster to a configurable number of maximally-distant representatives before building the index. |
+| `autoselect` | Automatically select candidate references from reads using Sylph, then cluster and refine.                                                |
 
 The core read processing steps (shared across all modes) are:
 
@@ -132,98 +132,98 @@ results/
 
 **General options**
 
-| Option | Type | Default | Description |
-| --- | --- | --- | --- |
-| `--manifest` | `path` | `null` | Input manifest CSV with header `ID,R1,R2` (mandatory). |
-| `--outdir` | `path` | `./results` | Directory where results are written. |
-| `--ref_mode` | `string` | `null` | Reference processing mode: `index`, `full`, `refine`, or `autoselect` (mandatory). |
-| `--ref_prep_only` | `boolean` | `false` | Run only the reference preparation steps, skipping pseudoalignment and binning. |
+| Option            | Type      | Default     | Description                                                                        |
+| ----------------- | --------- | ----------- | ---------------------------------------------------------------------------------- |
+| `--manifest`      | `path`    | `null`      | Input manifest CSV with header `ID,R1,R2` (mandatory).                             |
+| `--outdir`        | `path`    | `./results` | Directory where results are written.                                               |
+| `--ref_mode`      | `string`  | `null`      | Reference processing mode: `index`, `full`, `refine`, or `autoselect` (mandatory). |
+| `--ref_prep_only` | `boolean` | `false`     | Run only the reference preparation steps, skipping pseudoalignment and binning.    |
 
 ---
 
 **Reference options**
 
-| Option | Type | Default | Description |
-| --- | --- | --- | --- |
-| `--references` | `path` | `null` | Text file with paths to reference FASTAs (one per line). Required for `full` and `refine` modes. |
-| `--representatives` | `integer` | `20` | Maximum representatives per cluster when `--ref_mode` is `refine` or `autoselect`. |
-| `--cluster_tool` | `string` | `poppunk` | Clustering tool for `full` and `refine` modes. Options: `poppunk`, `sketchlib`. |
+| Option              | Type      | Default   | Description                                                                                      |
+| ------------------- | --------- | --------- | ------------------------------------------------------------------------------------------------ |
+| `--references`      | `path`    | `null`    | Text file with paths to reference FASTAs (one per line). Required for `full` and `refine` modes. |
+| `--representatives` | `integer` | `20`      | Maximum representatives per cluster when `--ref_mode` is `refine` or `autoselect`.               |
+| `--cluster_tool`    | `string`  | `poppunk` | Clustering tool for `full` and `refine` modes. Options: `poppunk`, `sketchlib`.                  |
 
 ---
 
 **Cache (autoselect mode)**
 
-| Option | Type | Default | Description |
-| --- | --- | --- | --- |
-| `--cache_dir` | `path` | `null` | Path to a cache directory for autoselect mode. Reuses previously computed per-species reference sets to avoid redundant clustering. |
+| Option        | Type   | Default | Description                                                                                                                         |
+| ------------- | ------ | ------- | ----------------------------------------------------------------------------------------------------------------------------------- |
+| `--cache_dir` | `path` | `null`  | Path to a cache directory for autoselect mode. Reuses previously computed per-species reference sets to avoid redundant clustering. |
 
 ---
 
 **PopPUNK options**
 
-| Option | Type | Default | Description |
-| --- | --- | --- | --- |
-| `--poppunk_model` | `string` | `dbscan` | Clustering model. Options: `dbscan`, `bgmm`. |
-| `--publish_poppunk` | `boolean` | `false` | Publish full PopPUNK output. Group assignments are always published. |
+| Option              | Type      | Default  | Description                                                          |
+| ------------------- | --------- | -------- | -------------------------------------------------------------------- |
+| `--poppunk_model`   | `string`  | `dbscan` | Clustering model. Options: `dbscan`, `bgmm`.                         |
+| `--publish_poppunk` | `boolean` | `false`  | Publish full PopPUNK output. Group assignments are always published. |
 
 ---
 
 **Sketchlib options**
 
-| Option | Type | Default | Description |
-| --- | --- | --- | --- |
-| `--sketchlib_kstep` | `string` | `13,29,4` | K-mer sizes for sketching in the format `start,stop,step`. |
-| `--cluster_algorithm` | `string` | `connected_components` | Community-finding algorithm for distance-based clustering. Options: `connected_components`, `leiden`, `louvain`, `walktrap`, etc. |
-| `--ani_threshold` | `float` | `0.02` | Maximum ANI distance for clustering (0.02 clusters genomes sharing >98% ANI similarity). |
-| `--cluster_strict` | `boolean` | `false` | Fail early if all genomes form a single cluster or are all singletons. |
+| Option                | Type      | Default                | Description                                                                                                                       |
+| --------------------- | --------- | ---------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
+| `--sketchlib_kstep`   | `string`  | `13,29,4`              | K-mer sizes for sketching in the format `start,stop,step`.                                                                        |
+| `--cluster_algorithm` | `string`  | `connected_components` | Community-finding algorithm for distance-based clustering. Options: `connected_components`, `leiden`, `louvain`, `walktrap`, etc. |
+| `--ani_threshold`     | `float`   | `0.02`                 | Maximum ANI distance for clustering (0.02 clusters genomes sharing >98% ANI similarity).                                          |
+| `--cluster_strict`    | `boolean` | `false`                | Fail early if all genomes form a single cluster or are all singletons.                                                            |
 
 ---
 
 **Themisto options**
 
-| Option | Type | Default | Description |
-| --- | --- | --- | --- |
-| `--themisto_index` | `path` | `null` | Pre-built Themisto index prefix (without extensions). Used with `--ref_mode index`. Requires `--ref_groups`. |
-| `--themisto_k` | `integer` | `31` | K-mer size for index building and pseudoalignment. Options: `21`, `31`, `51`. Must match a pre-built index if `--themisto_index` is provided. |
-| `--temp_dir` | `path` | `null` | Custom temporary storage directory for index creation. Defaults to `/tmp`. |
-| `--temp_space` | `integer` | `10000` | Temporary storage (MB) to reserve during index creation and pseudoalignment. |
+| Option             | Type      | Default | Description                                                                                                                                   |
+| ------------------ | --------- | ------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
+| `--themisto_index` | `path`    | `null`  | Pre-built Themisto index prefix (without extensions). Used with `--ref_mode index`. Requires `--ref_groups`.                                  |
+| `--themisto_k`     | `integer` | `31`    | K-mer size for index building and pseudoalignment. Options: `21`, `31`, `51`. Must match a pre-built index if `--themisto_index` is provided. |
+| `--temp_dir`       | `path`    | `null`  | Custom temporary storage directory for index creation. Defaults to `/tmp`.                                                                    |
+| `--temp_space`     | `integer` | `10000` | Temporary storage (MB) to reserve during index creation and pseudoalignment.                                                                  |
 
 ---
 
 **mSWEEP options**
 
-| Option | Type | Default | Description |
-| --- | --- | --- | --- |
-| `--ref_groups` | `path` | `null` | Grouped references text file (one line per reference). Required with `--ref_mode index`. |
+| Option         | Type   | Default | Description                                                                              |
+| -------------- | ------ | ------- | ---------------------------------------------------------------------------------------- |
+| `--ref_groups` | `path` | `null`  | Grouped references text file (one line per reference). Required with `--ref_mode index`. |
 
 ---
 
 **mGEMS options**
 
-| Option | Type | Default | Description |
-| --- | --- | --- | --- |
-| `--get_assignments` | `boolean` | `false` | Output the read assignment table used by mGEMS for binning. |
-| `--min_abundance` | `float` | `0.0001` | Minimum relative abundance. Only groups exceeding this will have reads binned. |
+| Option              | Type      | Default  | Description                                                                    |
+| ------------------- | --------- | -------- | ------------------------------------------------------------------------------ |
+| `--get_assignments` | `boolean` | `false`  | Output the read assignment table used by mGEMS for binning.                    |
+| `--min_abundance`   | `float`   | `0.0001` | Minimum relative abundance. Only groups exceeding this will have reads binned. |
 
 ---
 
 **Sylph reference selection options (autoselect mode)**
 
-| Option | Type | Default | Description |
-| --- | --- | --- | --- |
-| `--sylph_db` | `path` | `/data/pam/software/sylph/gtdb-r226-c200-dbv1/gtdb-r226-c200-dbv1.syldb` | Pre-built Sylph database. |
-| `--sylph_k` | `integer` | `31` | Sketch k-mer size for Sylph. Options: `21`, `31`. |
-| `--sylph_min_ani` | `float` | `95` | Minimum ANI threshold for Sylph candidate selection. |
-| `--sylph_min_cov` | `float` | `0.01` | Minimum coverage threshold for Sylph candidate selection. |
-| `--taxonomic_rank` | `string` | `species` | Taxonomic rank by which to group references. Options: `domain`, `phylum`, `class`, `order`, `family`, `genus`, `species`. |
-| `--genome_id_to_file` | `path` | See schema | TSV file mapping GTDB genome IDs to local FASTA paths. |
+| Option                | Type      | Default                                                                  | Description                                                                                                               |
+| --------------------- | --------- | ------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------- |
+| `--sylph_db`          | `path`    | `/data/pam/software/sylph/gtdb-r226-c200-dbv1/gtdb-r226-c200-dbv1.syldb` | Pre-built Sylph database.                                                                                                 |
+| `--sylph_k`           | `integer` | `31`                                                                     | Sketch k-mer size for Sylph. Options: `21`, `31`.                                                                         |
+| `--sylph_min_ani`     | `float`   | `95`                                                                     | Minimum ANI threshold for Sylph candidate selection.                                                                      |
+| `--sylph_min_cov`     | `float`   | `0.01`                                                                   | Minimum coverage threshold for Sylph candidate selection.                                                                 |
+| `--taxonomic_rank`    | `string`  | `species`                                                                | Taxonomic rank by which to group references. Options: `domain`, `phylum`, `class`, `order`, `family`, `genus`, `species`. |
+| `--genome_id_to_file` | `path`    | See schema                                                               | TSV file mapping GTDB genome IDs to local FASTA paths.                                                                    |
 
 ---
 
 **General**
 
-| Option | Type | Default | Description |
-| --- | --- | --- | --- |
+| Option              | Type      | Default | Description                 |
+| ------------------- | --------- | ------- | --------------------------- |
 | `--monochrome_logs` | `boolean` | `false` | Output logs in plain ASCII. |
 
 ### Advanced usage
@@ -272,14 +272,14 @@ For `autoselect` mode, the following databases must be available (Sanger HPC def
 
 ## Software versions
 
-| Software | Version | Image |
-| --- | --- | --- |
-| Themisto | — | `quay.io/biocontainers/themisto:*` |
-| mSWEEP | — | `quay.io/sangerpathogens/msweep:*` |
-| mGEMS | — | `quay.io/sangerpathogens/mgems:*` |
-| PopPUNK | — | `quay.io/biocontainers/poppunk:*` |
-| Sylph | — | `quay.io/sangerpathogens/sylph:*` |
-| Sketchlib | — | `quay.io/sangerpathogens/sketchlib:*` |
+| Software  | Version | Image                                 |
+| --------- | ------- | ------------------------------------- |
+| Themisto  | —       | `quay.io/biocontainers/themisto:*`    |
+| mSWEEP    | —       | `quay.io/sangerpathogens/msweep:*`    |
+| mGEMS     | —       | `quay.io/sangerpathogens/mgems:*`     |
+| PopPUNK   | —       | `quay.io/biocontainers/poppunk:*`     |
+| Sylph     | —       | `quay.io/sangerpathogens/sylph:*`     |
+| Sketchlib | —       | `quay.io/sangerpathogens/sketchlib:*` |
 
 See `modules/` for pinned container versions.
 
