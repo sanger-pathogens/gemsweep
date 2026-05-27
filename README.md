@@ -93,8 +93,6 @@ gemsweep --help
 Example reference grouping file would be useful to add.
 --->
 
-#### Experimental Feature: Autoselection of Reference Genomes
-
 ### Outputs
 
 Main pipeline outputs are written under `--outdir` (`./results` by default).
