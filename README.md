@@ -81,7 +81,7 @@ gemsweep --help
 >
 > **Resource allocation**
 >
-> A custom config may be needed to increase resource limits. The `POPPUNK` process peaks below 64 GB for all GTDB species except _E. coli_. For the `MSWEEP` process, memory should also be increased. As a rough guide a Toy Human Gut (CAMI dataset) sample with 113 species detected required over 96GB memory for `MSWEEP`.
+> A custom config may be needed to increase resource limits. The `POPPUNK` process peaks below 64 GB for all GTDB species except _E. coli_. For the `MSWEEP` process, memory should also be increased. As a rough guide a Toy Human Gut (CAMI dataset) sample with 113 species detected required ~320GB peak memory for `MSWEEP`.
 >
 > **Clustering limitations**
 >
