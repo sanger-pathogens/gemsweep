@@ -19,17 +19,6 @@ flake8:
     - when: never
 #
 
-#     The two sections below prevent this template being deployed to the farm.
-#     DELETE THESE SECTIONS THIS IN YOUR PROJECT
-pipeline_deploy_to_farm_test:
-  rules:
-    - when: never
-
-pipeline_deploy_to_farm_prod:
-  rules:
-    - when: never
-#
-
 #     The FARM_NAME variable can be used to set the name of the module on the farm.
 #     The module name will be the same as your git project by default.
 
