@@ -286,14 +286,14 @@ For `autoselect` mode, the following databases must be available (Sanger HPC def
 
 ## Software versions
 
-| Software  | Version | Image                                 |
-| --------- | ------- | ------------------------------------- |
-| Themisto  | —       | `quay.io/biocontainers/themisto:*`    |
-| mSWEEP    | —       | `quay.io/sangerpathogens/msweep:*`    |
-| mGEMS     | —       | `quay.io/sangerpathogens/mgems:*`     |
-| PopPUNK   | —       | `quay.io/biocontainers/poppunk:*`     |
-| Sylph     | —       | `quay.io/sangerpathogens/sylph:*`     |
-| Sketchlib | —       | `quay.io/sangerpathogens/sketchlib:*` |
+| Software  | Version | Image                                                  |
+| --------- | ------- | ------------------------------------------------------ |
+| Themisto  | 3.2.2   | `quay.io/sangerpathogens/themisto:3.2.2`               |
+| mSWEEP    | 2.2.1   | `quay.io/biocontainers/msweep:2.2.1--h503566f_1`       |
+| mGEMS     | 1.3.3   | `quay.io/biocontainers/mgems:1.3.3--h13024bc_2`        |
+| PopPUNK   | 2.7.8   | `quay.io/biocontainers/poppunk:2.7.8--py310h4d0eb5b_0` |
+| Sylph     | 0.8.1   | `quay.io/biocontainers/sylph:0.8.1--ha6fb395_0`        |
+| Sketchlib | 2.1.5   | `quay.io/sangerpathogens/pp-sketchlib-python:2.1.5-c1` |
 
 See `modules/` for pinned container versions.
 
