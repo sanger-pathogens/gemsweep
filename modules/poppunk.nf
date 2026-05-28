@@ -2,42 +2,53 @@ process PREP_REFS {
     label 'cpu_1'
     label 'mem_1'
     label 'time_30m'
+    tag "${meta.ID}"
 
     input:
-    path refs_txt
+    tuple val(meta), path(refs_txt)
 
     output:
-    path 'references.tsv', emit: refs_csv
+    tuple val(meta), path('references.tsv'), emit: refs_tsv
 
     script:
     """
-    python3 ${projectDir}/bin/poppunk_helper.py ${refs_txt} .
+    sed -i '/^\s*\$/d' "${refs_txt}"    # Remove blank lines
+    python3 ${projectDir}/bin/poppunk_helper.py --input ${refs_txt} --outdir .
     """
 }
 
 process POPPUNK {
     label 'cpu_4'
-    label 'mem_8'
-    label 'time_12'
+    label 'mem_16'
+    label 'time_queue_from_normal'
+    tag "${meta.ID}"
 
     container 'quay.io/biocontainers/poppunk:2.7.8--py310h4d0eb5b_0'
 
-    publishDir "${params.outdir}/poppunk/", mode: 'copy', pattern: 'pp_database/*', enabled: params.publish_poppunk
+    publishDir "${params.outdir}/clustering", mode: 'copy', pattern: "${meta.ID}/*", enabled: params.publish_poppunk
+
+    afterScript """
+    if [ "${params.publish_poppunk}" = "false" ]; then
+        find ${meta.ID} -type f \
+            ! -name "${meta.ID}_clusters.csv" \
+            ! -name "${meta.ID}.dists.npy" \
+            -delete
+        find ${meta.ID} -type d -empty -delete
+    fi
+    """
 
     input:
-    path ref_tsv
+    tuple val(meta), path(refs_tsv)
 
     output:
-    path "${out}/${out}_clusters.csv", emit: clusters     // for downstream
-    path "${out}/${out}.dists.npy",    emit: dist_matrix
-    path "${out}/*"                                       // for publishing
+    tuple val(meta), path("${meta.ID}/${meta.ID}_clusters.csv"), emit: clusters     // for downstream
+    tuple val(meta), path("${meta.ID}/${meta.ID}.dists.npy"),    emit: dist_matrix
+    tuple val(meta), path("${meta.ID}/*"),                       optional: true    // for publishing
 
     script:
-    out = "pp_database"
-
     """
-    poppunk --create-db --output ${out} --r-files ${ref_tsv} --threads ${task.cpus}
-    poppunk --fit-model ${params.poppunk_model} --ref-db ${out} --threads ${task.cpus}
+    poppunk --create-db --output ${meta.ID} --r-files ${refs_tsv} --threads ${task.cpus}
+    poppunk --fit-model ${params.poppunk_model} --ref-db ${meta.ID} --threads ${task.cpus}
     """
 }
 
@@ -45,21 +56,25 @@ process ORDER_GROUPS {
     label 'cpu_1'
     label 'mem_1'
     label 'time_30m'
+    tag "${meta.ID}"
 
-    publishDir "${params.outdir}/poppunk/", mode: 'copy', overwrite: true
+    publishDir "${params.outdir}/clustering/${meta.ID}", mode: 'copy', overwrite: true
 
     input:
-    path refs_tsv
-    path clusters_csv
+    tuple val(meta), path(refs_tsv), path(clusters_csv)
 
 
     output:
-    path "groups.txt", emit: groups
-    path clusters_csv
-
+    tuple val(meta), path("groups.txt"), emit: groups
 
     script:
+    order_groups = "${projectDir}/bin/order_groups.py"
+    if (params.cluster_dist == "core_acc") {
+        order_groups += " --poppunk_style_labels"
+        }
+
+    
     """
-    python3 ${projectDir}/bin/order_groups.py ${refs_tsv} ${clusters_csv} .
+    ${order_groups} --references_tsv ${refs_tsv} --groups_csv ${clusters_csv} --outdir .
     """
 }

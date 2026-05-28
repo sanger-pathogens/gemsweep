@@ -9,12 +9,13 @@ import numpy as np
 import pandas as pd
 
 def parse_arguments():
-    parser = argparse.ArgumentParser(description="Subset the poppunk matrix file into cluster-specific submatrices.")
-    parser.add_argument("--matrix", type=Path, help="Path to the matrix file (.npy)")
+    parser = argparse.ArgumentParser(description="Subset the distance matrix file into cluster-specific submatrices.")
+    parser.add_argument("--matrix", type=Path, help="Path to the matrix file (.dists.npy)")
     parser.add_argument("--outdir", type=Path, help="Directory to save the output submatrices", default=Path.cwd())
     parser.add_argument("--clusters", type=Path, help="List of samples and their clusters to subset (*.csv)")
     parser.add_argument("--header", help="Specifies whether the clusters file has a header row", action='store_true')
     parser.add_argument("--references", type=Path, help="List of references that relate (*.txt)")
+    parser.add_argument("--poppunk_style_labels", action='store_true', help="Corrects reference genome names by replacing dots `.` with underscore `_` characters to match PopPUNK's way of editing reference labels")
     return parser.parse_args()
 
 def read_matrix(matrix_file: Path) -> np.ndarray:
@@ -34,12 +35,15 @@ def read_clusters(clusters_file: Path, header: bool = False) -> dict:
     return cluster_to_sample
 
 
-def read_references(references_file: Path) -> set:
+def read_references(references_file: Path, label_transform: bool) -> set:
     """Return a set of reference labels"""
     references = set()
     with open(references_file, 'r') as f:
         for line in f:
-            ref_label = Path(line.strip()).stem.replace('.','_')
+            if label_transform:
+                ref_label = Path(line.strip()).stem.replace('.','_')
+            else:
+                ref_label = Path(line.strip()).stem
             references.add(ref_label)
     return references
 
@@ -97,7 +101,10 @@ def main():
     args.outdir.mkdir(parents=True, exist_ok=True)
     
     # Read the matrix and cluster information
-    references = read_references(args.references)
+    references = read_references(
+        references_file=args.references,
+        label_transform=args.poppunk_style_labels
+        )
     references = list(references)
     cluster_to_sample = read_clusters(args.clusters, args.header)
     cluster_to_sample = remove_singletons(cluster_to_sample)
@@ -107,9 +114,6 @@ def main():
         cluster_dists = defaultdict(list)
         ref_query_generator = iterDistRows(references, references, self=True)
         for i, (ref, query) in enumerate(ref_query_generator):
-            # print(samples)
-            # print(ref, query)
-            # break
             if ref in samples and query in samples:
                 cluster_dists["sample"].append(query)
                 cluster_dists["reference"].append(ref)

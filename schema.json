@@ -12,26 +12,42 @@
         "default": "null",
         "help_text": "Input manifest CSV with (required) header line 'ID,R1,R2', containing per sample paths to .fastq.gz files"
       },
-      "references": {
-        "default": "null",
-        "help_text": "Path to text file containing paths to references, one per line. If provided, ref_groups and themisto_index will be ignored."
-      },
       "outdir": {
         "default": "./results",
         "help_text": "Path to top directory containing all results, by default 'results' within the launch directory."
       }
     },
-    "Reference refinement options": {
-      "refine_refs": {
+    "Workflow options": {
+      "ref_prep_only": {
         "default": "false",
-        "help_text": "Set to true to switch on reference refinement."
+        "help_text": "Run only reference preparatory steps, skipping read pseudoalignment through to binning."
+      },
+      "ref_mode": {
+        "default": "null",
+        "help_text": "Mode for processing of reference or index inputs. Choose from: 'index', 'full', 'refine', 'autoselect'."
+      }
+    },
+    "References options": {
+      "references": {
+        "default": "null",
+        "help_text": "Path to text file containing paths to references, one per line. Required when --ref_mode is full or refine. Not used when --ref_mode is autoselect, or when --themisto_index and --ref_groups are provided for index mode."
       },
       "representatives": {
         "default": "20",
-        "help_text": "Number of representatives at which to cap each reference cluster."
+        "help_text": "Number of representatives at which to cap each reference cluster. Used when ref_mode is refine or autoselect."
+      },
+      "cluster_dist": {
+        "default": "core_acc",
+        "help_text": "Genomic distance used in clustering references (core_acc|ani). Determines the clustering workflow, see docs for more info. Only used when ref_mode is 'refine' or 'full'"
       }
     },
-    "Clustering options": {
+    "Cache Autoselection options": {
+      "cache_dir": {
+        "default": "null",
+        "help_text": "Path to a cache root or an existing config-specific cache directory for autoselect mode. The pipeline reuses a matching cache directory containing metadata.json and per-species references.txt/groups.txt entries."
+      }
+    },
+    "PopPUNK options": {
       "poppunk_model": {
         "default": "dbscan",
         "help_text": "Clustering model for poppunk to use (dbscan|bgmm)"
@@ -41,7 +57,33 @@
         "help_text": "Optionally publish full poppunk output, group assignments are always published."
       }
     },
+    "Sketchlib workflow options": {
+      "sketchlib_kstep": {
+        "default": "13,29,4",
+        "help_text": "Kmer sizes at which sketchlib will sketch the reference in the format start,stop,step"
+      },
+      "cluster_algorithm": {
+        "default": "connected_components",
+        "help_text": "Name of clustering/ community-finding algorithm to be used on distances (connected_components|leiden|louvain|walktrap|fastgreedy|label_propagation|infomap|eigenvector)."
+      },
+      "ani_threshold": {
+        "default": "0.02",
+        "help_text": "Max ANI distance threshold for clustering (default 0.2 clusters genomes sharing >98% ANI similarity)"
+      },
+      "cluster_strict": {
+        "default": "false",
+        "help_text": "Fail early if all genomes form a single cluster, or each genome is a singleton."
+      }
+    },
     "Themisto options": {
+      "themisto_index": {
+        "default": "null",
+        "help_text": "Path to a pre-built Themisto index including the index prefix (without exts). Skips indexing if provided."
+      },
+      "themisto_k": {
+        "default": "31",
+        "help_text": "K-mer size to use for index and pseudoalignment (21|31|51). If providing an index ensure k-mer size is identical."
+      },
       "temp_dir": {
         "default": "null",
         "help_text": "Absolute path to custom temporary storage directory to be used during runtime. Otherwise local /tmp will be used."
@@ -49,14 +91,6 @@
       "temp_space": {
         "default": "10000",
         "help_text": "Amount of /tmp space (MB) that will be reserved for index creation and pseudoalignment, if /tmp is being used as the temporary storage directory."
-      },
-      "themisto_index": {
-        "default": "null",
-        "help_text": "Path to a pre-built Themisto index including the index prefix (without exts). Skips indexing if provided."
-      },
-      "kmer_size": {
-        "default": "31",
-        "help_text": "K-mer size to use for index and pseudoalignment (21|31|51). If providing an index ensure k-mer size is identical."
       }
     },
     "mSWEEP options": {
