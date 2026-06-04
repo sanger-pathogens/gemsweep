@@ -304,7 +304,9 @@ See `modules/` for pinned container versions.
 - **mSWEEP finds no groups**: when using `--ref_mode index`, ensure `--ref_groups` matches the reference set used to build `--themisto_index`. Group labels must correspond one-to-one with references in the index.
 - **Autoselect finds no candidates**: check that `--sylph_db` points to the correct Sylph database and that `--sylph_min_ani` / `--sylph_min_cov` thresholds are not too stringent.
 - **Resuming a failed run**: add `-resume` to your command to restart from cached intermediate results.
-- For further help, check `.nextflow.log` and the per-process logs in the `work/` directory.
+- For further help, check `.nextflow.log` and the per-process `.command.log` logs in the `work/` directory.
+
+Sanger users may find [this page](https://ssg-confluence.internal.sanger.ac.uk/spaces/PaMI/pages/181078206/General+pipeline+info#Generalpipelineinfo-Troubleshootingafailedpipelinerunandsendingabugreport) useful for troubleshooting Nextflow pipeline runs.
 
 ## Issues and Contributions
 
