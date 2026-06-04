@@ -64,7 +64,7 @@ gemsweep --help
 - One of the following options for supplying references:
 
   - a prebuilt themisto index of references AND a reference grouping text file\*
-  - a references.txt (indexing and clustering will happen within the pipeline)
+  - a text file of paths to each reference 'references.txt' (indexing and clustering will happen within the pipeline)
   - none when opting for autoselection of GTDB genomes based on sylph queries of the supplied reads
 
   Compatible parameters for each reference mode (`ref_mode`):
