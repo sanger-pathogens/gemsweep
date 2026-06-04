@@ -129,17 +129,29 @@ Results are written to `--outdir` (default: `./results`):
 
 ```
 results/
-  binned_reads/
-    <sample_ID>/
-      <group>.R1.fastq.gz           # Binned reads per reference group
-      <group>.R2.fastq.gz
-  msweep/
-    <sample_ID>.msweep_abundances   # mSWEEP relative abundance estimates
+  <sample_ID>/
+    <sample_ID>_mSWEEP_abundances.txt   # mSWEEP relative abundance estimates
+    <sample_ID>_mSWEEP_probs.tsv        # mSWEEP assignment probabilities
+    mGEMS/
+      <sample_ID>_<group>.R1.fastq.gz   # Binned reads per reference group
+      <sample_ID>_<group>.R2.fastq.gz
   ref_groups/
-    groups.txt                      # Reference-to-group assignments
-  themisto_stats/                   # Index statistics
-  sylph/                            # Sylph output (autoselect mode only)
-  poppunk/                          # PopPUNK output (when --publish_poppunk true)
+    references.txt                      # Reference sequences used for index building
+    groups.txt                          # Reference-to-group assignments
+  themisto/
+    <index_prefix>.*                    # Themisto index files
+    index_report.txt                    # Themisto index statistics
+  <cluster_tool>/                       # e.g. poppunk/ or sketchlib/
+    <reference_ID>/
+      groups.txt                        # Per-reference group assignments
+  poppunk/
+    <reference_ID>/
+      pp_database/                      # PopPUNK database (if --publish_poppunk true)
+  sylph/
+    <sample_ID>_sylph_filtered_report.tsv    # Sylph filtered profile (autoselect mode)
+    taxon_refs/                              # Reference lists per taxon (autoselect mode)
+    taxon_group_ref_reports/                 # Combined reference reports (autoselect mode)
+    taxon_refs/*                             # Expanded reference FASTAs (autoselect mode)
 ```
 
 ### Parameters
