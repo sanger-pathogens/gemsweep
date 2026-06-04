@@ -315,7 +315,7 @@ To see the dependencies for a previous version go to the tag corresponding to th
 
 ## Customise Temporary Storage
 
-The `--temp_dir` option is available to customise temporary storage location if necessary. Themisto pseudoalignment requires temporary storage and requires that it is on the same filesystem as the process is run. By default this pipeline uses node-local `/tmp` which is safe for both HPC and non-HPC as long as `/tmp` is available and writable (usually true).
+The `--temp_dir` option is available to customise temporary storage location if necessary. Themisto pseudoalignment requires temporary storage and requires that is on the same filesystem as the process is run. By default this pipeline uses node-local `/tmp` which is safe for both HPC and non-HPC as long as `/tmp` is available and writable (usually true).
 
 ## GPU Acceleration
 
