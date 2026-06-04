@@ -35,7 +35,7 @@ The core read processing steps (shared across all modes) are:
 1. Clone this repository (including submodules):
 
    ```bash
-   git clone --recurse-submodules https://gitlab.internal.sanger.ac.uk/sanger-pathogens/pipelines/gemsweep.git
+   git clone --recurse-submodules <repo-url>
    cd gemsweep
    ```
 
