@@ -1,2 +1,6 @@
 threshold: medium
 version: "1.0"
+fileignoreconfig:
+  - filename: assets/ISCB_2026_gemsweep_poster.pdf
+  - filename: assets/gemsweep_release_1.0.0-beta_autoselect_diagram.png
+  - filename: assets/gemsweep_release_1.0.0-beta_main_diagram.png
