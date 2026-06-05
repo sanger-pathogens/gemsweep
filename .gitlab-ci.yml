@@ -2,7 +2,11 @@ include:
   - project: "sanger-pathogens/templates/ci-templates"
     ref: "$CI_CD_TEMPLATES_LATEST_STABLE"
     file: "Pipelines/PaM-Info-Nextflow.gitlab-ci.yml"
-#
+
+# Stop talisman complaining about the poster and diagrams in commit history:
+talisman:
+  variables:
+    TALISMAN_OPTS: "--scan --ignoreHistory"
 
 # If your project contains python code, delete the sections below which disable black, isort and flake8
 # See also .pre-commit-config.yaml, which will have black, isort and flake8 jobs disabled.

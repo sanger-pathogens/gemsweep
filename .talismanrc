@@ -2,5 +2,11 @@ threshold: medium
 version: "1.0"
 fileignoreconfig:
   - filename: assets/ISCB_2026_gemsweep_poster.pdf
+    checksum: b7b7748c6593a5b1a36d9b8226c71da1d963b38ffe84037c72905e32eb2944a1
+    ignore_detectors: [filecontent]
   - filename: assets/gemsweep_release_1.0.0-beta_autoselect_diagram.png
+    checksum: 91c556e6ff1da717be6a7c8ec2e25d9b2d365168fd5fe8fdb26df8ef533da08d
+    ignore_detectors: [filecontent]
   - filename: assets/gemsweep_release_1.0.0-beta_main_diagram.png
+    checksum: 156142e9c6bf17b53c2eda4db5569894d8466ea166d427164090dd5f2f46d839
+    ignore_detectors: [filecontent]
