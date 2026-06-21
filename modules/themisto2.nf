@@ -52,7 +52,7 @@ process THEMISTO_PSEUDOALIGN {
     tag "${meta.ID}"
     label 'cpu_16'
     label 'mem_32'
-    label 'time_queue_from_long'
+    label 'time_12'
 
     // TODO: add a container for themisto2. For now assumes themisto2 is installed and available in PATH.
 
