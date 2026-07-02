@@ -24,7 +24,7 @@ module load ISG/singularity
 
 # Load message
 if { [ module-info mode load ] } {
-    puts stderr "\tModule loaded. For more information run 'module help {{farm_name}}/{{version}}' or check the README at {{repo-url}}/-/blob/{{version}}/README.md?ref_type=tags."
+    puts stderr "\tModule loaded. For more information run 'module help {{farm_name}}/{{version}}' or check the README at {{repo_url}}/-/blob/{{version}}/README.md?ref_type=tags."
 }
 
 # Conflicts
