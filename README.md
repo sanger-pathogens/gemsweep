@@ -322,14 +322,15 @@ Themisto index creation requires substantial temporary disk space and the temp d
 
 ## Software versions
 
-| Software     | Version | Image                                                  |
-| ------------ | ------- | ------------------------------------------------------ |
-| Themisto     | 3.2.2   | `quay.io/sangerpathogens/themisto:3.2.2`               |
-| mSWEEP       | 2.2.1   | `quay.io/biocontainers/msweep:2.2.1--h503566f_1`       |
-| mGEMS        | 1.3.3   | `quay.io/biocontainers/mgems:1.3.3--h13024bc_2`        |
-| PopPUNK      | 2.7.8   | `quay.io/biocontainers/poppunk:2.7.8--py310h4d0eb5b_0` |
-| Sylph        | 0.8.1   | `quay.io/biocontainers/sylph:0.8.1--ha6fb395_0`        |
-| pp-sketchlib | 2.1.5   | `quay.io/sangerpathogens/pp-sketchlib-python:2.1.5-c1` |
+| Software      | Version | Image                                                  |
+| ------------- | ------- | ------------------------------------------------------ |
+| Themisto      | 3.2.2   | `quay.io/sangerpathogens/themisto:3.2.2`               |
+| mSWEEP        | 2.2.1   | `quay.io/biocontainers/msweep:2.2.1--h503566f_1`       |
+| mGEMS         | 1.3.3   | `quay.io/biocontainers/mgems:1.3.3--h13024bc_2`        |
+| PopPUNK       | 2.7.8   | `quay.io/biocontainers/poppunk:2.7.8--py310h4d0eb5b_0` |
+| Sylph         | 0.8.1   | `quay.io/biocontainers/sylph:0.8.1--ha6fb395_0`        |
+| pp-sketchlib  | 2.1.5   | `quay.io/sangerpathogens/pp-sketchlib-python:2.1.5-c1` |
+| python-igraph | 1.0.0   | `quay.io/sangerpathogens/pp-sketchlib-python:2.1.5-c1` |
 
 See `modules/` for pinned container versions.
 
@@ -341,7 +342,8 @@ See `modules/` for pinned container versions.
 - **PopPUNK fails with too few references**: some species are underrepresented in GTDB; in `autoselect` mode these are skipped and will be absent from the final reference set.
 - **Autoselect finds no candidates**: check that `--sylph_db` points to the correct Sylph database and that `--sylph_min_ani` / `--sylph_min_cov` thresholds are not too stringent.
 - **Resuming a failed run**: add `-resume` to your command to restart from cached intermediate results.
-- For further help, check `.nextflow.log` and the per-process `.command.log` logs in the `work/` directory.
+
+For further help, check `.nextflow.log` and the per-process `.command.log` logs in the `work/` directory.
 
 Sanger users may find [this page](https://ssg-confluence.internal.sanger.ac.uk/spaces/PaMI/pages/181078206/General+pipeline+info#Generalpipelineinfo-Troubleshootingafailedpipelinerunandsendingabugreport) useful for troubleshooting Nextflow pipeline runs.
 
