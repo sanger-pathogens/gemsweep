@@ -1,0 +1,58 @@
+# This file deploys the interactive diagram on the GitHub mirror.
+#
+# Published site: https://sanger-pathogens.github.io/gemsweep/
+#
+# This should only publish the one HTML file, as a static site
+
+name: Deploy Pipeline Diagram
+
+on:
+  # Only re-run automatic deployment when there is a change on `main` to this specific path:
+  push:
+    branches: [main]
+    paths: ["assets/gemsweep_interactive_diagram.html"]
+
+  # Enable manual re-deploy from the Actions tab if needed:
+  workflow_dispatch:
+
+# Minimum permissions needed for GitHub Actions to publish to Pages
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Favour the newer if two pushes trigger re-deployment:
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      # Pull the repo contents so we can access the diagram:
+      - uses: actions/checkout@v4
+
+      # Copy ONLY the diagram into a clean folder (_site) that will become
+      # the published site. Renaming to index.html means the site loads at
+      # the clean root URL rather than requiring the filename in the address.
+      # Nothing in the actual repo is renamed - this only affects the copy
+      # that gets published.
+      - name: Stage site
+        run: |
+          mkdir -p _site
+          cp assets/gemsweep_interactive_diagram.html _site/index.html
+
+      - uses: actions/configure-pages@v5
+
+      # Package the _site folder as the thing that will be deployed:
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+      # Publish the packaged artifact to GitHub Pages:
+      - id: deployment
+        uses: actions/deploy-pages@v4
