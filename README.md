@@ -20,6 +20,8 @@ Finally, we offer an **experimental** feature in which reference genomes can ins
 
 ![workflow diagram](assets/gemsweep_release_1.0.0-beta_autoselect_diagram.png)
 
+> 💡 To explore how your chosen parameters will affect how the pipeline will run, please take a look at the [Interactive Pipeline Diagram](https://sanger-pathogens.github.io/gemsweep/).
+
 View the poster summary of this project presented at ISCB-UK 2026 [here](assets/ISCB_2026_gemsweep_poster.pdf).
 
 ## Usage
