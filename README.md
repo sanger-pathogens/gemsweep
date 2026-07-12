@@ -172,7 +172,9 @@ results/
 
 #### Generate a manifest of binned reads
 
-To generate a manifest of binned reads for downstream analysis, use `generate_manifest.py` from the assorted-sub-workflows submodule after your run has completed (path relative to repo root):
+Note: The following instructions apply to anyone with a clone of this repo, users of the Sanger farm have the option to load and use the manifest_generator module instead if preferred.
+
+To generate a manifest of binned reads for downstream analysis, use `generate_manifest.py` included in this repo via the assorted-sub-workflows submodule. After your run has completed (path relative to repo root):
 
 ```bash
 mkdir mGEMs_bins_manifest
@@ -193,7 +195,7 @@ mkdir mGEMs_bins_manifest
 
 | Option              | Type      | Default     | Description                                                                                   |
 | ------------------- | --------- | ----------- | --------------------------------------------------------------------------------------------- |
-| `--manifest`        | `path`    | `null`      | Input manifest CSV with header `ID,R1,R2` (mandatory unless using other `mixed_input` modes). |
+| `--manifest`        | `path`    | `null`      | Input manifest CSV with header `ID,R1,R2` (required, unless using other `mixed_input` modes). |
 | `--outdir`          | `path`    | `./results` | Directory where results are written.                                                          |
 | `--monochrome_logs` | `boolean` | `false`     | Output logs in plain ASCII (disable coloured logging).                                        |
 
