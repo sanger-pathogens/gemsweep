@@ -356,7 +356,7 @@
             text-anchor="middle"
             dominant-baseline="central"
           >
-            Provided index
+            Provided index and groups
           </text>
           <text
             class="ts nsub"
@@ -365,7 +365,7 @@
             text-anchor="middle"
             dominant-baseline="central"
           >
-            ref_mode=index
+            ref_mode = index
           </text>
         </g>
         <g class="nbox" data-node="n1b">
@@ -386,7 +386,7 @@
             text-anchor="middle"
             dominant-baseline="central"
           >
-            full / refine
+            ref_mode = full / refine
           </text>
         </g>
         <g class="nbox" data-node="n1c">
@@ -407,7 +407,7 @@
             text-anchor="middle"
             dominant-baseline="central"
           >
-            ref_mode=autoselect
+            ref_mode = autoselect
           </text>
         </g>
 
@@ -443,7 +443,7 @@
             text-anchor="middle"
             dominant-baseline="central"
           >
-            PopPUNK / core-accessory
+            PopPUNK / core and accessory distances
           </text>
         </g>
 
@@ -661,7 +661,7 @@
         const n3sub = document.getElementById("n3-subtitle");
         if (mode === "autoselect") n3sub.textContent = "PopPUNK (forced)";
         else if (cluster === "ani") n3sub.textContent = "Sketchlib / ANI";
-        else n3sub.textContent = "PopPUNK / core-accessory";
+        else n3sub.textContent = "PopPUNK / core and accessory";
 
         if (!prepOnly) {
           actN("n6");
