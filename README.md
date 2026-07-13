@@ -110,16 +110,9 @@ This pipeline supports additional input modes via the `mixed_input` sub-workflow
 
 For more detail, see the [mixed_input README](https://gitlab.internal.sanger.ac.uk/sanger-pathogens/pipelines/assorted-sub-workflows/-/blob/main/mixed_input/README.md).
 
-#### References (`--references`)
+#### References
 
-A plain text file listing paths to reference FASTA files (one per line). Required when `--ref_mode` is `full` or `refine`:
-
-```
-/path/to/reference1.fasta
-/path/to/reference2.fasta
-```
-
-Compatible parameters for each reference mode (`--ref_mode`):
+References can be prepared as per the choice of reference mode (`--ref_mode`). Compatible inputs and parameters for each mode:
 
 | Reference mode | Required params                    | Description                                                                                                                                                                                                                                     |
 | -------------- | ---------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -136,6 +129,30 @@ Compatible parameters for each reference mode (`--ref_mode`):
 > 2. For diverse samples (i.e. many species present)`MSWEEP` may require significantly more memory allocation
 >
 > To allocate additional memory please see our documentation on configuring pipeline resources: https://github.com/sanger-pathogens/nextflow-commons/tree/master/configs#readme.
+
+**Example file expected by `--references`**
+
+A plain text file listing paths to reference genome FASTA files (one per line):
+
+```
+/path/to/reference1.fasta
+/path/to/reference2.fasta
+/path/to/reference3.fasta
+/path/to/reference4.fasta
+```
+
+**Example file expected by `--ref_groups`**
+
+A plain text file listing the groups the reference genomes are assigned to, one per line. For example if you wanted to provide the sequence types as groups, and references 1-3 are ST131 _E coli_ whilst 4 is ST73, you would provide the following as a text file:
+
+```
+ST131
+ST131
+ST131
+ST73
+```
+
+The assignment is determined from the exact positional order being identical across the references and ref_groups files.
 
 ### Output
 
