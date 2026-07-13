@@ -126,7 +126,7 @@ References can be prepared as per the choice of reference mode (`--ref_mode`). C
 > The autoselection feature is still **under development** in this release. Currently clustering always uses PopPUNK which can fail for species with low representation in GTDB. Also, resource requirements can be high for some processes:
 >
 > 1. the `POPPUNK` process requires additional memory for _Escherichia coli_ due to especially high representation in GTDB
-> 2. For diverse samples (i.e. many species present)`MSWEEP` may require significantly more memory allocation
+> 2. For diverse samples (i.e. many species present)`MSWEEP` may require significantly more memory allocation. As a rough guide a Toy Human Gut (CAMI dataset) sample with 113 species detected required ~320GB peak memory for mSWEEP.
 >
 > To allocate additional memory please see our documentation on configuring pipeline resources: https://github.com/sanger-pathogens/nextflow-commons/tree/master/configs#readme.
 
