@@ -239,29 +239,29 @@ mkdir mGEMs_bins_manifest
 
 **Workflow options**
 
-| Option            | Type      | Default | Description                                                                              |
-| ----------------- | --------- | ------- | ---------------------------------------------------------------------------------------- |
-| `--ref_mode`      | `string`  | `null`  | Reference processing mode (mandatory). Options: `index`, `full`, `refine`, `autoselect`. |
-| `--ref_prep_only` | `boolean` | `false` | Run only reference preparation steps, skipping pseudoalignment and binning.              |
+| Option            | Type      | Default | Description                                                                             |
+| ----------------- | --------- | ------- | --------------------------------------------------------------------------------------- |
+| `--ref_mode`      | `string`  | `null`  | Reference processing mode (required). Options: `index`, `full`, `refine`, `autoselect`. |
+| `--ref_prep_only` | `boolean` | `false` | Run only reference preparation steps, skipping pseudoalignment to binning.              |
 
 ---
 
 **References options**
 
-| Option              | Type      | Default    | Description                                                                                                          |
-| ------------------- | --------- | ---------- | -------------------------------------------------------------------------------------------------------------------- |
-| `--references`      | `path`    | `null`     | Text file with paths to reference FASTAs (one per line). Required for `full` and `refine` modes.                     |
-| `--representatives` | `integer` | `20`       | Maximum representatives per cluster (used when `--ref_mode` is `refine` or `autoselect`).                            |
-| `--cluster_dist`    | `string`  | `core_acc` | Clustering workflow. `core_acc` uses PopPUNK; `ani` uses Sketchlib. Applies when `--ref_mode` is `full` or `refine`. |
+| Option              | Type      | Default    | Description                                                                                                                                                                 |
+| ------------------- | --------- | ---------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `--references`      | `path`    | `null`     | Text file with paths to reference FASTAs (one per line). Required for `full` and `refine` modes.                                                                            |
+| `--representatives` | `integer` | `20`       | Maximum representatives per cluster (used when `--ref_mode` is `refine` or `autoselect`).                                                                                   |
+| `--cluster_dist`    | `string`  | `core_acc` | Genomic distance which determines clustering workflow. Use core and accessory with PopPUNK; ANI with Sketchlib and igraph. Applies when `--ref_mode` is `full` or `refine`. |
 
 ---
 
 **PopPUNK options**
 
-| Option              | Type      | Default  | Description                                                                           |
-| ------------------- | --------- | -------- | ------------------------------------------------------------------------------------- |
-| `--poppunk_model`   | `string`  | `dbscan` | Clustering model. Options: `dbscan`, `bgmm`.                                          |
-| `--publish_poppunk` | `boolean` | `false`  | Publish full PopPUNK output to `clustering/`. Group assignments are always published. |
+| Option              | Type      | Default  | Description                                                          |
+| ------------------- | --------- | -------- | -------------------------------------------------------------------- |
+| `--poppunk_model`   | `string`  | `dbscan` | Clustering model. Options: `dbscan`, `bgmm`.                         |
+| `--publish_poppunk` | `boolean` | `false`  | Publish full PopPUNK output, group assignments are always published. |
 
 :warning: It is strongly recommended to leave `--publish_poppunk false` when using `--ref_mode autoselect` or `--ref_mode refine`. Outputs are generated on the full (non-dereplicated) genome set and can be very large.
 
@@ -322,7 +322,7 @@ mkdir mGEMs_bins_manifest
 
 ---
 
-**Cache options** (`--ref_mode autoselect`)
+**Autoselect Cache options**
 
 | Option        | Type   | Default | Description                                                                                                                          |
 | ------------- | ------ | ------- | ------------------------------------------------------------------------------------------------------------------------------------ |
