@@ -342,6 +342,22 @@ nextflow run main.nf \
     --outdir my_output
 ```
 
+#### Pool latin taxa
+
+Certain genus/species in GTDB are further divided by appended alphabet suffixes; for example, in GTDB r226, _Escherichia coli_ has 3 species-rank taxonomic groups: `Escherichia_coli`, `Escherichia_coli_E` and `Escherichia_coli_F`. Further explanation is available in the [GTDB documentation](https://gtdb.ecogenomic.org/faq#why-do-some-genus-and-species-names-end-with-an-alphabetic-suffix). If you wanted to consider these as one group you can use this advanced option. Note that:
+
+a) generated groups are no longer compliant with GTDB taxonomic definitions, consider if this affects downstream
+
+b) the size of the produced group may be considerably larger, for example at the genus level in GTDB release 232 `g__Clostridium` has 1607 genomes but all 34 GTDB genuses in `g__Clostridium*` total at 2931 genomes.
+
+Note that not all taxa belonging to a "traditional" species might be pooled this way due to certain GTDB species being named differently; for instance in GTDB r232, a new species called `ECMA0423 sp047199055` has been created out of genomes previously classified as `Escherichia_coli`.
+
+#### Deterministic clustering
+
+The default value `--cluster_dist core_acc` means that a `poppunk` workflow is applied; see PopPUNK Options below to configure. Be aware this is a non-deterministic mode of clustering, developed to cluster single-species genome datasets to the strain level. If you want to re-use the same clusters generated in a previous run you would need to use `--ref_mode index`. Note that `--ref_mode autoselect` currently _only_ uses this poppunk-based clustering workflow, use caching to reuse clusters (see [Caching in Autoselect Mode](#caching-in-autoselect-mode-recommended)).
+
+Alternatively ANI-based community-finding algorithms are available; using `--cluster_dist ani` instead invokes `sketchlib` to estimate ANI similarities followed by a choice of community-finding algorithms from the package `python-igraph`, including some deterministic algorithms. Deterministic methods include `connected_components` (default, also known as single-linkage clustering), `walktrap`, `fastgreedy` and `eigenvector`. Also available are the `louvain`, `leiden`, `infomap` and `label_propagation` methods.
+
 #### Temporary storage
 
 Themisto index creation requires substantial temporary disk space and the temp directory must be on the same filesystem as the compute node. On the Sanger HPC, scratch space is allocated automatically. On other systems, set `--temp_dir` to a path with sufficient capacity and adjust `--temp_space` accordingly.
