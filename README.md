@@ -349,12 +349,10 @@ See `modules/` for pinned container versions.
 
 ## Troubleshooting
 
-- **`--ref_mode` not set**: `--ref_mode` is required. Run `--help` for the full list of options.
-- **Insufficient temporary disk space**: Themisto index creation requires substantial `/tmp` space. Set `--temp_dir` to a path with more capacity, or increase `--temp_space`.
-- **mSWEEP finds no groups**: when using `--ref_mode index`, ensure `--ref_groups` matches the reference set used to build `--themisto_index`. Group labels must correspond one-to-one with references in the index, in the same positional order.
+- **Memory and runtime errors**: Processes will automatically retry twice. Autoselect mode may require custom configuration - see [here](https://github.com/sanger-pathogens/nextflow-commons/tree/master/configs#readme) for more.
 - **PopPUNK fails with too few references**: some species are underrepresented in GTDB; in `autoselect` mode these are skipped and will be absent from the final reference set.
 - **Autoselect finds no candidates**: check that `--sylph_db` points to the correct Sylph database and that `--sylph_min_ani` / `--sylph_min_cov` thresholds are not too stringent.
-- **Resuming a failed run**: add `-resume` to your command to restart from cached intermediate results.
+- **Resuming a failed run**: add `-resume` to your command to restart from cached intermediate results. If running in autoselect mode use the same cache dir to re-use species representatives already computed.
 
 For further help, check `.nextflow.log` and the per-process `.command.log` logs in the `work/` directory.
 
