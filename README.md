@@ -311,19 +311,6 @@ mkdir mGEMs_bins_manifest
 
 ### Advanced usage
 
-#### Using a pre-built index
-
-Skip clustering and index building entirely by supplying a pre-built Themisto index and group assignments:
-
-```bash
-nextflow run main.nf \
-    --manifest manifest.csv \
-    --ref_mode index \
-    --themisto_index /path/to/index_prefix \
-    --ref_groups /path/to/groups.txt \
-    --outdir my_output
-```
-
 #### Reference preparation only
 
 Use `--ref_prep_only true` to build a Themisto index and group assignments file without running pseudoalignment or binning. The outputs can then be reused in a subsequent run with `--ref_mode index`:
