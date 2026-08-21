@@ -100,9 +100,10 @@ workflow {
         // no dereplication
         references_ch
         | map { meta, refs -> refs }
-        | set {representatives_ch}
+        | set { representatives_ch }
 
         ORDER_GROUPS.out.groups
+        | map { meta, groups_file -> groups_file }
         | first
         | set { ref_groups_ch }
 
