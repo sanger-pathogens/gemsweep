@@ -70,10 +70,12 @@ workflow {
 
     validate_params()
 
+    // Set up reads channel if required
     if (!params.ref_prep_only || params.ref_mode == 'autoselect') { // only autoselect requires reads for ref prep
         reads_ch = MIXED_INPUT()    // outputs channel of [meta, R1, R2] for reads_<1|2>.fastq.gz
     }
 
+    // Set up reference channels (themisto index and reference groups) according to ref_mode
     if (params.ref_mode == "index") {
         // Set up input channels starting from pre-built index AND provided ref_groups
         ref_groups_ch = channel.value(file(params.ref_groups))
@@ -234,7 +236,7 @@ workflow {
         THEMISTO_STATS(index_files_ch, index_prefix_ch)
     }
 
-    // Core Workflow
+    // Run abundance est. and binning workflow
     if (!params.ref_prep_only) {
         pseudoaligned_ch = THEMISTO_PSEUDOALIGN(reads_ch, index_files_ch, index_prefix_ch)
         msweep_ch = MSWEEP(pseudoaligned_ch, ref_groups_ch)
