@@ -30,8 +30,7 @@ include { SYLPH_REF_SELECTION   } from './assorted-sub-workflows/sylph_refset/sy
 include { CHECK_CACHE;
           CACHE_LOOKUP;
           WRITE_CACHE_ENTRY     } from './modules/cache.nf'
-include { PREP_REFS;             
-          POPPUNK;                
+include { PREP_REFS;
           ORDER_GROUPS          } from './modules/poppunk.nf'
 include { THEMISTO_BUILD_INDEX; 
           THEMISTO_PSEUDOALIGN;
@@ -39,15 +38,13 @@ include { THEMISTO_BUILD_INDEX;
 include { MSWEEP                } from './modules/msweep.nf'
 include { MGEMS                 } from './modules/mgems.nf'
 include { COMBINE_REFS          } from './modules/helper_processes.nf'
-include { SKETCHLIB_SKETCH;
-          SKETCHLIB_CLUSTER     }  from './modules/sketchlib.nf'
 
 //
 // SUBWORKFLOWS
 //
 include { REFINE_REFS } from './subworkflows/refine_refs.nf'
-
 include { VALIDATE_PREBUILT_INPUT } from './subworkflows/validate_prebuilt_input.nf'
+include { CLUSTER_REFS } from './subworkflows/cluster.nf'
 
 /*
 Helper Scripts
@@ -86,7 +83,7 @@ workflow {
         // Validate
         VALIDATE_PREBUILT_INPUT(index_files_ch, index_prefix_ch)
 
-    } else if ((params.ref_mode == "full") && (params.cluster_dist == "core_acc")) {
+    } else if (params.ref_mode == "full") {
         // Set up input channels starting from references.txt
         channel.fromPath(params.references)
         | first() // using .first() to get a value channel
@@ -95,39 +92,10 @@ workflow {
 
         // Cluster references
         PREP_REFS(references_ch)
-        POPPUNK(PREP_REFS.out.refs_tsv)
+        | CLUSTER_REFS
 
         PREP_REFS.out.refs_tsv
-        | join(POPPUNK.out.clusters)
-        | ORDER_GROUPS
-
-        // no dereplication
-        references_ch
-        | map { meta, refs ->
-            refs
-        }
-        | set {representatives_ch}
-        
-        ref_groups_ch = ORDER_GROUPS.out.groups.map { meta, groups_file -> groups_file }
-
-        index_prefix_ch = channel.value("index") // needs to be identical to what index is set as in indexing process
-        index_files_ch = THEMISTO_BUILD_INDEX(index_prefix_ch, representatives_ch).collect()
-
-    } else if ((params.ref_mode == "full") && (params.cluster_dist == "ani")) {
-        // Set up input channels starting from references.txt
-        channel.fromPath(params.references)
-        | first() // using .first() to get a value channel
-        | map { ref -> [ ["ID": "all_refs"], ref ] }
-        | set { references_ch }
-
-        // Cluster references
-        PREP_REFS(references_ch)
-
-        SKETCHLIB_SKETCH(PREP_REFS.out.refs_tsv)
-        | SKETCHLIB_CLUSTER
-
-        PREP_REFS.out.refs_tsv
-        | join(SKETCHLIB_CLUSTER.out.clusters)
+        | join(CLUSTER_REFS.out.clusters)
         | ORDER_GROUPS
 
         // no dereplication
@@ -142,7 +110,7 @@ workflow {
         index_prefix_ch = channel.value("index") // needs to be identical to what index is set as in indexing process
         index_files_ch = THEMISTO_BUILD_INDEX(index_prefix_ch, representatives_ch).collect()
 
-    } else if ((params.ref_mode == "refine") && (params.cluster_dist == "core_acc")) {
+    } else if (params.ref_mode == "refine") {
         // Set up input channels starting from references.txt
         channel.fromPath(params.references)
         | first() // using .first() to get a value channel
@@ -151,47 +119,12 @@ workflow {
 
         // Cluster references
         PREP_REFS(references_ch)
-        POPPUNK(PREP_REFS.out.refs_tsv)
+        | CLUSTER_REFS
 
-        // Select representatives from clusters
         references_ch
-        | join(POPPUNK.out.clusters)
-        | join(POPPUNK.out.dist_matrix)
-        | set { refine_refs_input }
-
-        REFINE_REFS(refine_refs_input)
-
-        // Split into references and groups, then publish
-        REFINE_REFS.out.rep_refs_and_groups
-        | map { meta, ref_groups_file -> ref_groups_file}
-        | collect
-        | COMBINE_REFS
-
-        representatives_ch = COMBINE_REFS.out.references
-        ref_groups_ch = COMBINE_REFS.out.groups
-
-        index_prefix_ch = channel.value("index") // needs to be identical to what index is set as in indexing process
-        index_files_ch = THEMISTO_BUILD_INDEX(index_prefix_ch, representatives_ch).collect()
-
-    } else if ((params.ref_mode == "refine") && (params.cluster_dist == "ani")) {
-        // Set up input channels starting from references.txt
-        channel.fromPath(params.references)
-        | first() // using .first() to get a value channel
-        | map { ref -> [ ["ID": "all_refs"], ref ] }
-        | set { references_ch }
-
-        // Cluster references
-        PREP_REFS(references_ch)
-        SKETCHLIB_SKETCH(PREP_REFS.out.refs_tsv)
-        | SKETCHLIB_CLUSTER
-
-        // Select representatives from clusters
-        references_ch
-        | join(SKETCHLIB_CLUSTER.out.clusters)
-        | join(SKETCHLIB_CLUSTER.out.dist_matrix)
-        | set { refine_refs_input }
-
-        REFINE_REFS(refine_refs_input)
+        | join(CLUSTER_REFS.out.clusters)
+        | join(CLUSTER_REFS.out.dist_matrix)
+        | REFINE_REFS
 
         // Split into references and groups, then publish
         REFINE_REFS.out.rep_refs_and_groups
@@ -242,16 +175,13 @@ workflow {
         // Cluster references
         // only uncached candidate references go through PREP_REFS and clustering
         PREP_REFS(candidate_refs_to_cluster_ch)
-        POPPUNK(PREP_REFS.out.refs_tsv)
-        poppunk_clusters_csv = POPPUNK.out.clusters
+        | CLUSTER_REFS
 
         // Always refine autoselected candidate references before indexing.
         candidate_refs_to_cluster_ch
-        | join(POPPUNK.out.clusters)
-        | join(POPPUNK.out.dist_matrix)
-        | set { refine_refs_input }
-
-        REFINE_REFS(refine_refs_input)
+        | join(CLUSTER_REFS.out.clusters)
+        | join(CLUSTER_REFS.out.dist_matrix)
+        | REFINE_REFS
 
         // For current run combine_refs.py input: tuple(meta, label_ref_group_csv)
         generated_ref_group_files_ch = REFINE_REFS.out.rep_refs_and_groups
