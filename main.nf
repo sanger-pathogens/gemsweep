@@ -42,9 +42,9 @@ include { COMBINE_REFS          } from './modules/helper_processes.nf'
 //
 // SUBWORKFLOWS
 //
-include { REFINE_REFS } from './subworkflows/refine_refs.nf'
+include { REFINE_REFS             } from './subworkflows/refine_refs.nf'
 include { VALIDATE_PREBUILT_INPUT } from './subworkflows/validate_prebuilt_input.nf'
-include { CLUSTER_REFS } from './subworkflows/cluster.nf'
+include { CLUSTER_REFS            } from './subworkflows/cluster.nf'
 
 /*
 Helper Scripts
@@ -76,7 +76,7 @@ workflow {
 
     if (params.ref_mode == "index") {
         // Set up input channels starting from pre-built index AND provided ref_groups
-        ref_groups_ch = channel.fromPath(params.ref_groups).first() // using .first() to get a value channel
+        ref_groups_ch = channel.value(file(params.ref_groups))
         index_files_ch = channel.fromPath("${params.themisto_index}*{tdbg,tcolors}").collect()
         index_prefix_ch = channel.value(file(params.themisto_index).getName())
 
@@ -85,8 +85,7 @@ workflow {
 
     } else if (params.ref_mode == "full") {
         // Set up input channels starting from references.txt
-        channel.fromPath(params.references)
-        | first() // using .first() to get a value channel
+        channel.value(file(params.references))
         | map { ref -> [ ["ID": "all_refs"], ref ] }
         | set { references_ch }
 
@@ -100,20 +99,19 @@ workflow {
 
         // no dereplication
         references_ch
-        | map { meta, refs ->
-            refs
-        }
+        | map { meta, refs -> refs }
         | set {representatives_ch}
 
-        ref_groups_ch = ORDER_GROUPS.out.groups
+        ORDER_GROUPS.out.groups
+        | first
+        | set { ref_groups_ch }
 
         index_prefix_ch = channel.value("index") // needs to be identical to what index is set as in indexing process
         index_files_ch = THEMISTO_BUILD_INDEX(index_prefix_ch, representatives_ch).collect()
 
     } else if (params.ref_mode == "refine") {
         // Set up input channels starting from references.txt
-        channel.fromPath(params.references)
-        | first() // using .first() to get a value channel
+        channel.value(file(params.references))
         | map { ref -> [ ["ID": "all_refs"], ref ] }
         | set { references_ch }
 
@@ -132,8 +130,11 @@ workflow {
         | collect
         | COMBINE_REFS
 
+        COMBINE_REFS.out.groups
+        | first
+        | set { ref_groups_ch }
+
         representatives_ch = COMBINE_REFS.out.references
-        ref_groups_ch = COMBINE_REFS.out.groups
 
         index_prefix_ch = channel.value("index") // needs to be identical to what index is set as in indexing process
         index_files_ch = THEMISTO_BUILD_INDEX(index_prefix_ch, representatives_ch).collect()
@@ -217,7 +218,10 @@ workflow {
             .set { ref_group_files }
 
         COMBINE_REFS(ref_group_files)
-        ref_groups_ch = COMBINE_REFS.out.groups
+
+        COMBINE_REFS.out.groups
+        | first
+        | set { ref_groups_ch }
 
         // Build themisto index
         index_prefix_ch = channel.value("index") // needs to be identical to what index is set as in indexing process
