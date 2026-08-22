@@ -86,86 +86,71 @@ workflow {
         VALIDATE_PREBUILT_INPUT(index_files_ch, index_prefix_ch)
 
     } else if (params.ref_mode == "autoselect") {
-        // Generate candidate references from reads via Sylph.
+        // Generate candidate references by profiling reads
         SYLPH_REF_SELECTION(reads_ch)
-        candidate_references_ch = SYLPH_REF_SELECTION.out.references
+        sylph_refs_ch = SYLPH_REF_SELECTION.out.references
 
-        // call cache search process if cache_dir is provided, otherwise skip to clustering with Sylph outputs as input.
-        // if cache is enabled, split sylph candidate into cached and uncached.
+        // If cache dir provided check for relevant cached species references
         if (params.cache_dir) {
-            // Cache-enabled path: create cached ref/group pairs and cluster cache misses.
             CHECK_CACHE()
-            cache_config_ch = CHECK_CACHE.out.config.first()
-            CACHE_LOOKUP(candidate_references_ch, cache_config_ch)
+            cache_config_ch = CHECK_CACHE.out.config.first() // TODO: check - is check_cache generating this config or reading it?
+            CACHE_LOOKUP(sylph_refs_ch, cache_config_ch) // TODO: change very similar process names
 
-            // Cached combined label/ref/group files for the current run combine step.
-            cached_ref_group_files_ch = CACHE_LOOKUP.out.hits
-                .map { meta, cache_hits_tsv, refs_file -> cache_hits_tsv }
-                .splitCsv(header: true, sep: '\t')
-                .map { row ->
-                    tuple([ID: row.species_id], file(row.cached_ref_groups))
-                }
+            // Organise cached references
+            CACHE_LOOKUP.out.hits
+            | map { meta, cache_hits_tsv, refs_file -> cache_hits_tsv }
+            | splitCsv(header: true, sep: '\t')
+            | map { row -> tuple([ID: row.species_id], file(row.cached_ref_groups)) }
+            | set { cached_ref_group_files_ch }
 
-            // Candidate references not found in the cache; these still need clustering/refinement.
-            candidate_refs_to_cluster_ch = CACHE_LOOKUP.out.misses
-                | map { meta, cache_miss_tsv, sylph_refs ->
-                    tuple(meta, sylph_refs)
-                }
+            // Organise (uncached) candidate references requiring clustering and refinement
+            CACHE_LOOKUP.out.misses
+            | map { meta, cache_miss_tsv, sylph_refs -> tuple(meta, sylph_refs) }
+            | set { candidate_refs_ch }
+
         } else {
-            // Cache-disabled path: all Sylph refs continue to clustering.
-            cached_ref_group_files_ch = Channel.empty()
-            // With no cache, every Sylph candidate reference set must be clustered/refined.
-            candidate_refs_to_cluster_ch = candidate_references_ch
+            // Without a set cache dir all continue as candidate references to clustering and refinement
+            cached_ref_group_files_ch = channel.empty()
+            candidate_refs_ch = sylph_refs_ch
         }
 
-        // Cluster references
-        // only uncached candidate references go through PREP_REFS and clustering
-        PREP_REFS(candidate_refs_to_cluster_ch)
+        // Cluster candidate references
+        PREP_REFS(candidate_refs_ch)
         | CLUSTER_REFS
 
-        // Always refine autoselected candidate references before indexing.
-        candidate_refs_to_cluster_ch
+        // Always refine autoselected candidate references before indexing
+        candidate_refs_ch
         | join(CLUSTER_REFS.out.clusters)
         | join(CLUSTER_REFS.out.dist_matrix)
         | REFINE_REFS
 
-        // For current run combine_refs.py input: tuple(meta, label_ref_group_csv)
-        generated_ref_group_files_ch = REFINE_REFS.out.rep_refs_and_groups
-
-        // all refine_refs emit outputs carry same meta so i can just join these two
         generated_rep_refs_ch = REFINE_REFS.out.representatives_ch
         generated_ref_groups_ch = REFINE_REFS.out.ref_groups_ch
 
-        // tuple(meta, references_txt, clusters_txt)
-        generated_ref_group_pairs_ch = generated_rep_refs_ch
-            .join(generated_ref_groups_ch)
-
-        // store newly generated species cache entries for future runs.
+        // Store newly generated species cache entries in dir, if provided
         if (params.cache_dir) {
-            generated_ref_group_pairs_ch
-                .join(generated_ref_group_files_ch)
-                .set { generated_cache_entries_ch}
+            generated_rep_refs_ch
+            | join(generated_ref_groups_ch)
+            | join(REFINE_REFS.out.rep_refs_and_groups)
+            | set { generated_cache_entries_ch}
             
             WRITE_CACHE_ENTRY(generated_cache_entries_ch, cache_config_ch)
         }
 
-        // Mix cached and generated combined ref/group CSVs for the current run.
-        combined_ref_group_files_ch = cached_ref_group_files_ch.mix(generated_ref_group_files_ch)
+        // Mix cached and generated species refs
+        cached_ref_group_files_ch
+        | mix(REFINE_REFS.out.rep_refs_and_groups)
+        | set { combined_ref_group_files_ch }
 
-        // Sort species for reproducible ref/group file order across runs.
-        combined_ref_group_files_ch
-            .collect(flat: false)
-            .flatMap { entries ->
-                entries.sort { a, b -> a[0].ID <=> b[0].ID }
-            }
-            .map { meta, ref_group_file -> ref_group_file }
-            .collect()
-            .set { ref_group_files }
-
-        COMBINE_REFS(ref_group_files)
+        // Sort species for reproducible ref/group file order across runs
+        combined_ref_group_files_ch // TODO: further simplify this block
+        | collect(flat: false)
+        | flatMap { entries -> entries.sort { a, b -> a[0].ID <=> b[0].ID } }
+        | map { meta, ref_group_file -> ref_group_file }
+        | collect()
+        | COMBINE_REFS
 
         COMBINE_REFS.out.groups
-        | first
         | set { ref_groups_ch }
 
         // Build themisto index
