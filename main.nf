@@ -195,7 +195,6 @@ workflow {
             | COMBINE_REFS
 
             COMBINE_REFS.out.groups
-            | first
             | set { ref_groups_ch }
 
             representatives_ch = COMBINE_REFS.out.references
