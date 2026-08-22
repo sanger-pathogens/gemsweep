@@ -79,11 +79,12 @@ workflow {
     if (params.ref_mode == "index") {
         // Set up input channels starting from pre-built index AND provided ref_groups
         ref_groups_ch = channel.value(file(params.ref_groups))
-        index_files_ch = channel.fromPath("${params.themisto_index}*{tdbg,tcolors}").collect()
-        index_prefix_ch = channel.value(file(params.themisto_index).getName())
+        index_ch = channel.fromPath("${params.themisto_index}*{tdbg,tcolors}")
+          .collect()
+          .map { files -> tuple(file(params.themisto_index).getName(), files) }
 
         // Validate
-        VALIDATE_PREBUILT_INPUT(index_files_ch, index_prefix_ch)
+        VALIDATE_PREBUILT_INPUT(index_ch)
 
     } else if (params.ref_mode == "autoselect") {
         // Generate candidate references by profiling reads
@@ -154,8 +155,7 @@ workflow {
         | set { ref_groups_ch }
 
         // Build themisto index
-        index_prefix_ch = channel.value("index") // needs to be identical to what index is set as in indexing process
-        index_files_ch = THEMISTO_BUILD_INDEX(index_prefix_ch, COMBINE_REFS.out.references).collect()
+        index_files_ch = THEMISTO_BUILD_INDEX(COMBINE_REFS.out.references).collect()
 
     } else { // if ref_mode == "refine" | "full"
         // Set up input channels starting from references.txt
@@ -198,14 +198,14 @@ workflow {
             | set { ref_groups_ch }
         }
 
-        index_prefix_ch = channel.value("index") // needs to be identical to what index is set as in indexing process
-        index_files_ch = THEMISTO_BUILD_INDEX(index_prefix_ch, representatives_ch).collect()
+        // Build themisto index
+        index_ch = THEMISTO_BUILD_INDEX(representatives_ch).collect()
 
     }
 
     if (params.ref_mode != "index") {
         // Output stats on the index (not required for anything just an additional output)
-        THEMISTO_STATS(index_files_ch, index_prefix_ch)
+        THEMISTO_STATS(index_ch)
     }
 
     // Run abundance est. and binning workflow

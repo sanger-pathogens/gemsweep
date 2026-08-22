@@ -17,13 +17,13 @@ process THEMISTO_BUILD_INDEX {
 
 
     input:
-    val index_prefix
     path references_txt
 
     output:
-    path "${index_prefix}.*"
+    tuple val(index_prefix), path "${index_prefix}.*"
 
     script:
+    index_prefix = "index"
     index_build_params = "-k ${params.themisto_k} -i ${references_txt} -o ${index_prefix} --n-threads ${task.cpus}"
     
     // User-provided temp storage if given otherwise use tmp workdir (since scratch is enabled)
@@ -62,8 +62,7 @@ process THEMISTO_PSEUDOALIGN {
 
     input:
     tuple val(meta), path(reads_1), path(reads_2)
-    path index_files    // For staging
-    val index_prefix    // For use in command
+    tuple val(index_prefix), path(index_files)
 
     output:
     tuple val(meta), path("pseudoalignments_1.aln.gz"), path("pseudoalignments_2.aln.gz")
@@ -95,8 +94,7 @@ process THEMISTO_STATS {
     publishDir mode: 'copy', path: "${params.outdir}/themisto"
 
     input:
-    path index_files    // For staging
-    val index_prefix    // For use in command
+    tuple val(index_prefix), path(index_files)
 
     output:
     path "index_report.txt"
