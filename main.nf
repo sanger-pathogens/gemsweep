@@ -155,7 +155,7 @@ workflow {
         | set { ref_groups_ch }
 
         // Build themisto index
-        index_ch = THEMISTO_BUILD_INDEX(COMBINE_REFS.out.references).collect()
+        index_ch = THEMISTO_BUILD_INDEX(COMBINE_REFS.out.references).first()
 
     } else { // if ref_mode == "refine" | "full"
         // Set up input channels starting from references.txt
@@ -200,7 +200,7 @@ workflow {
         }
 
         // Build themisto index
-        index_ch = THEMISTO_BUILD_INDEX(representatives_ch).collect()
+        index_ch = THEMISTO_BUILD_INDEX(representatives_ch).first()
 
     }
 
