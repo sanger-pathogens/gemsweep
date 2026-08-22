@@ -210,7 +210,7 @@ workflow {
 
     // Run abundance est. and binning workflow
     if (!params.ref_prep_only) {
-        pseudoaligned_ch = THEMISTO_PSEUDOALIGN(reads_ch, index_files_ch, index_prefix_ch)
+        pseudoaligned_ch = THEMISTO_PSEUDOALIGN(reads_ch, index_ch)
         msweep_ch = MSWEEP(pseudoaligned_ch, ref_groups_ch)
         
         MGEMS(
@@ -220,8 +220,7 @@ workflow {
               .map { meta, r1, r2, aln1, aln2, abund, probs ->
                   tuple(meta, r1, r2, aln1, aln2, abund, probs)
               },
-            index_files_ch,
-            index_prefix_ch,
+            index_ch,
             ref_groups_ch
         )
     }
