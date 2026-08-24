@@ -20,7 +20,7 @@ process THEMISTO_BUILD_INDEX {
     path references_txt
 
     output:
-    tuple val(index_prefix), path "${index_prefix}.*"
+    tuple val(index_prefix), path("${index_prefix}.*")
 
     script:
     index_prefix = "index"
