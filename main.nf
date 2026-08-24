@@ -157,7 +157,7 @@ workflow {
         // Build themisto index
         index_ch = THEMISTO_BUILD_INDEX(COMBINE_REFS.out.references).first()
 
-    } else { // if ref_mode == "refine" | "full"
+    } else if (params.ref_mode in ["refine", "full"]) {
         // Set up input channels starting from references.txt
         channel.value(file(params.references))
         | map { ref -> [ ["ID": "all_refs"], ref ] }
@@ -183,7 +183,7 @@ workflow {
             | set { ref_groups_ch }
 
             representatives_ch = COMBINE_REFS.out.references
-        } else { // ref_mode == "full"
+        } else if (params.ref_mode == "full") {
             PREP_REFS.out.refs_tsv
             | join(CLUSTER_REFS.out.clusters)
             | ORDER_GROUPS
@@ -191,7 +191,7 @@ workflow {
             // no dereplication
             references_ch
             | map { meta, refs -> refs }
-            | set {representatives_ch}
+            | set { representatives_ch }
 
             ORDER_GROUPS.out.groups
             | map { meta, groups_file -> groups_file }
@@ -224,5 +224,7 @@ workflow {
             index_ch,
             ref_groups_ch
         )
+    } else { // Should be caught in validate.nf but here as a failsafe
+        error("Unrecognised ref_mode: '${params.ref_mode}'.")
     }
 }
