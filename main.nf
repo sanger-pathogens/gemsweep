@@ -133,7 +133,7 @@ workflow {
             generated_rep_refs_ch
             | join(generated_ref_groups_ch)
             | join(REFINE_REFS.out.rep_refs_and_groups)
-            | set { generated_cache_entries_ch}
+            | set { generated_cache_entries_ch }
             
             WRITE_CACHE_ENTRY(generated_cache_entries_ch, cache_config_ch)
         }
@@ -144,11 +144,11 @@ workflow {
         | set { combined_ref_group_files_ch }
 
         // Sort species for reproducible ref/group file order across runs
-        combined_ref_group_files_ch // TODO: further simplify this block
-        | collect(flat: false)
-        | flatMap { entries -> entries.sort { a, b -> a[0].ID <=> b[0].ID } }
-        | map { meta, ref_group_file -> ref_group_file }
-        | collect()
+        combined_ref_group_files_ch
+        | collect
+        | map { entries ->
+            entries.sort { a, b -> a[0].ID <=> b[0].ID }
+                   .collect { meta, ref_group_file -> ref_group_file } }
         | COMBINE_REFS
 
         COMBINE_REFS.out.groups
@@ -195,7 +195,6 @@ workflow {
 
             ORDER_GROUPS.out.groups
             | map { meta, groups_file -> groups_file }
-            | first
             | set { ref_groups_ch }
         }
 
