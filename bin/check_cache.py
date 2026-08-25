@@ -28,7 +28,8 @@ cache_config.json contains:
   "cache_root": "/path/to/cache",
   "effective_cache_dir": "/path/to/cache/specific_cache_dir",
   "cluster_method": "ani-louvain",
-  "representatives": 20
+  "representatives": 20,
+  "db": "gtdb_full_r226"
 }
 """
 
@@ -45,6 +46,7 @@ def parse_args():
     parser.add_argument("--cache-root", type=Path, required=True, help="User-provided cache root or configuration-specific cache directory.")
     parser.add_argument("--cluster-method", required=True, help="Clustering methodology in the format <distance_type>-<algorithm>.")
     parser.add_argument("--representatives", type=int, required=True, help="Representative cap for this run.")
+    parser.add_argument("--db", type=str, required=True, help="Identifier of the database from which the genomes were selected.")
     parser.add_argument("--out", type=Path, default=Path("cache_config.json"), help="Output cache config JSON.")
     return parser.parse_args()
 
@@ -59,6 +61,7 @@ def build_metadata(args) -> dict:
     return {
         "cluster_method": args.cluster_method,
         "representatives": args.representatives,
+        "db": args.db,
     }
 
 
@@ -132,6 +135,7 @@ def config_payload(
         "effective_cache_dir": str(effective_cache_dir),
         "cluster_method": metadata["cluster_method"],
         "representatives": metadata["representatives"],
+        "db": metadata["db"],
         "status": status,
     }
     if message:

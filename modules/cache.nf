@@ -11,17 +11,19 @@ process CHECK_CACHE {
 
     script:
     if (params.cluster_dist == "core_acc") {
-        cluster_method = "${params.cluster_dist}-${params.poppunk_model}"
+        def cluster_method = "${params.cluster_dist}-${params.poppunk_model}"
     } else if (params.cluster_dist == "ani") {
-        cluster_method = "${params.cluster_dist}-${params.cluster_algorithm}"
+        def cluster_method = "${params.cluster_dist}-${params.cluster_algorithm}"
     }
 
+    def sylph_db_name = params.sylph_db.baseName
 
     """
     python3 ${projectDir}/bin/check_cache.py \\
         --cache-root '${params.cache_dir}' \\
         --cluster-method '${cluster_method}' \\
         --representatives '${params.representatives}' \\
+        --db '${sylph_db_name}' \\
         --out cache_config.json
     """
 }
