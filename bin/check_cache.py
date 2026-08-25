@@ -74,7 +74,7 @@ def build_effective_cache_dir(cache_root: Path, metadata: dict) -> Path:
     cache_name = "_".join(
         [
             safe_path_part(metadata["cluster_method"]),
-            f"{safe_path_part(metadata['representatives'])_reps}",
+            f"{safe_path_part(metadata['representatives'])}_reps",
         ]
     )
     return cache_root / cache_name
@@ -84,7 +84,7 @@ def resolve_cache_paths(cache_root: Path, metadata: dict) -> tuple[Path, Path]:
     expected_cache_name = "_".join(
         [
             safe_path_part(metadata["cluster_method"]),
-            f"reps{safe_path_part(metadata['representatives'])}",
+            f"{safe_path_part(metadata['representatives'])}_reps",
         ]
     )
 
