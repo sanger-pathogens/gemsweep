@@ -10,16 +10,17 @@ process CHECK_CACHE {
     path("cache_config.json"), emit: config
 
     script:
+    def cluster_method
     if (params.cluster_dist == "core_acc") {
-        def cluster_method = "${params.cluster_dist}-${params.poppunk_model}"
+        cluster_method = "${params.cluster_dist}-${params.poppunk_model}"
     } else if (params.cluster_dist == "ani") {
-        def cluster_method = "${params.cluster_dist}-${params.cluster_algorithm}"
+        cluster_method = "${params.cluster_dist}-${params.cluster_algorithm}"
     }
 
-    def sylph_db_name = params.sylph_db.baseName
+    def sylph_db_name = file(params.sylph_db).baseName
 
     """
-    python3 ${projectDir}/bin/check_cache.py \\
+    ${projectDir}/bin/check_cache.py \\
         --cache-root '${params.cache_dir}' \\
         --cluster-method '${cluster_method}' \\
         --representatives '${params.representatives}' \\
@@ -49,7 +50,7 @@ process CACHE_LOOKUP {
 
     script:
     """
-    python3 ${projectDir}/bin/cache_lookup.py \\
+    ${projectDir}/bin/cache_lookup.py \\
         --species '${meta.ID}' \\
         --refs '${refs_file}' \\
         --cache-config '${cache_config}'
@@ -70,7 +71,7 @@ process WRITE_CACHE_ENTRY {
 
     script:
     """
-    python3 ${projectDir}/bin/write_cache_entry.py \\
+    ${projectDir}/bin/write_cache_entry.py \\
         --species '${meta.ID}' \\
         --refs '${refs_file}' \\
         --groups '${groups_file}' \\
