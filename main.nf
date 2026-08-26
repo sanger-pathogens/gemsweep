@@ -145,7 +145,7 @@ workflow {
 
         // Sort species for reproducible ref/group file order across runs
         combined_ref_group_files_ch
-        | collect
+        | collect(flat: false)
         | map { entries ->
             entries.sort { a, b -> a[0].ID <=> b[0].ID }
                    .collect { meta, ref_group_file -> ref_group_file } }
