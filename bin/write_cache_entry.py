@@ -142,6 +142,7 @@ def update_metadata(
         "species_id": species,
         "cluster_method": cache_config.get("cluster_method"),
         "representatives": cache_config.get("representatives"),
+        "db": cache_config.get("db"),
         "last_update": {
             "added_references": added,
             "added_reference_ids": added_reference_ids,
