@@ -34,7 +34,7 @@ def parse_args():
     parser.add_argument("--species", required=True, help="Species or taxon identifier.")
     parser.add_argument("--refs", type=Path, required=True, help="Generated references.txt for this species.")
     parser.add_argument("--groups", type=Path, required=True, help="Generated groups.txt for this species.")
-    parser.add_argument("--reference-clusters", type=Path, required=True, help="Generated label/ref/group CSV for this species.")
+    parser.add_argument("--reference-clusters", type=Path, required=True, help="Generated CSV for this species with header 'label,reference_path,cluster'.")
     parser.add_argument("--cache-config", type=Path, required=True, help="cache_config.json from CHECK_CACHE.")
     return parser.parse_args()
 
@@ -73,12 +73,12 @@ def append_reference_cluster_rows(
     with open(incoming_ref_groups_file, newline="") as in_f:
         reader = csv.DictReader(in_f)
         fieldnames = reader.fieldnames
-        if fieldnames is None or "ref" not in fieldnames:
+        if fieldnames is None or "reference_path" not in fieldnames:
             raise SystemExit(
                 f"Cannot write cache entry: {incoming_ref_groups_file} must have "
-                "a header including a 'ref' column."
+                "a header including a 'reference_path' column."
             )
-        rows_to_add = [row for row in reader if row["ref"] in refs_to_add]
+        rows_to_add = [row for row in reader if row["reference_path"] in refs_to_add]
 
     if len(rows_to_add) != len(refs_to_add):
         raise SystemExit(
