@@ -12,13 +12,12 @@ workflow VALIDATE_PREBUILT_INPUT {
     // to ensure compatibility (kmer size, number of refs)
 
     take:
-    index_files_ch
-    index_prefix_ch
+    index_ch // tuple val(index_prefix), path(index_files)
 
     main:
     def len_ref_groups = file(params.ref_groups).readLines().findAll { it.trim() }.size()
     
-    THEMISTO_STATS(index_files_ch, index_prefix_ch)
+    THEMISTO_STATS(index_ch)
     .map { file ->
         def lines = file.readLines()
 
