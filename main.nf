@@ -217,9 +217,6 @@ workflow {
             reads_ch
               .join(pseudoaligned_ch, by: 0)
               .join(msweep_ch, by: 0)
-              .map { meta, r1, r2, aln1, aln2, abund, probs ->
-                  tuple(meta, r1, r2, aln1, aln2, abund, probs)
-              },
             index_ch,
             ref_groups_ch
         )
