@@ -72,17 +72,6 @@ def metadata_with_note(metadata: dict, note: dict | None = None) -> dict:
     annotated_metadata["cache_note"] = note
     return annotated_metadata
 
-
-def build_effective_cache_dir(cache_root: Path, metadata: dict) -> Path:
-    cache_name = "_".join(
-        [
-            safe_path_part(metadata["cluster_method"]),
-            f"{safe_path_part(metadata['representatives'])}_reps",
-        ]
-    )
-    return cache_root / cache_name
-
-
 def resolve_cache_paths(cache_root: Path, metadata: dict) -> tuple[Path, Path]:
     expected_cache_name = "_".join(
         [
@@ -97,7 +86,7 @@ def resolve_cache_paths(cache_root: Path, metadata: dict) -> tuple[Path, Path]:
     if cache_root.name == expected_cache_name:
         return cache_root.parent, cache_root
 
-    return cache_root, build_effective_cache_dir(cache_root, metadata)
+    return cache_root, cache_root / expected_cache_name
 
 
 def read_json(path: Path) -> dict:
