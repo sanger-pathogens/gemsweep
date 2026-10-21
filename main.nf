@@ -32,7 +32,8 @@ include { CHECK_CACHE;
           WRITE_CACHE_ENTRY     } from './modules/cache.nf'
 include { PREP_REFS;
           ORDER_GROUPS          } from './modules/poppunk.nf'
-include { THEMISTO_PSEUDOALIGN  } from './modules/themisto.nf'
+include { THEMISTO_PSEUDOALIGN;
+          THEMISTO2_PSEUDOALIGN } from './modules/themisto.nf'
 include { MSWEEP                } from './modules/msweep.nf'
 include { MGEMS                 } from './modules/mgems.nf'
 include { COMBINE_REFS          } from './modules/helper_processes.nf'
