@@ -210,7 +210,7 @@ workflow {
         MGEMS(
             reads_ch
               .join(pseudoaligned_ch, by: 0)
-              .join(msweep_ch, by: 0)
+              .join(msweep_ch, by: 0),
             index_ch,
             ref_groups_ch
         )
