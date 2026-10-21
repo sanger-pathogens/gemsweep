@@ -76,6 +76,10 @@
       }
     },
     "Themisto options": {
+      "themisto2": {
+        "default": "false",
+        "help_text": "Use Themisto2 for indexing and pseudoalignment instead of the default Themisto v1."
+      },
       "themisto_index": {
         "default": "null",
         "help_text": "Path to a pre-built Themisto index including the index prefix (without exts). Skips indexing if provided."
