@@ -67,7 +67,7 @@ process THEMISTO2_BUILD_INDEX {
     path lcs_index
 
     output:
-    tuple val(index_prefix), path "${index_prefix}.*"
+    tuple val(index_prefix), path("${index_prefix}.*")
 
     script:
     index_prefix = "index"
@@ -189,5 +189,26 @@ process THEMISTO_STATS {
     script:
     """
     themisto stats -i ${index_prefix} > "index_report.txt"
+    """
+}
+
+process THEMISTO2_STATS {
+    label 'cpu_1'
+    label "mem_10"
+    label 'time_1'
+
+    container 'quay.io/sangerpathogens/themisto2:0.0.1'
+
+    publishDir mode: 'copy', path: "${params.outdir}/themisto"
+
+    input:
+    tuple val(index_prefix), path(index_files)
+
+    output:
+    path "index_report.txt"
+
+    script:
+    """
+    themisto2 stats -i ${index_prefix}.thm2 > "index_report.txt"
     """
 }
