@@ -32,9 +32,7 @@ include { CHECK_CACHE;
           WRITE_CACHE_ENTRY     } from './modules/cache.nf'
 include { PREP_REFS;
           ORDER_GROUPS          } from './modules/poppunk.nf'
-include { THEMISTO_BUILD_INDEX; 
-          THEMISTO_PSEUDOALIGN;
-          THEMISTO_STATS        } from './modules/themisto.nf'
+include { THEMISTO_PSEUDOALIGN  } from './modules/themisto.nf'
 include { MSWEEP                } from './modules/msweep.nf'
 include { MGEMS                 } from './modules/mgems.nf'
 include { COMBINE_REFS          } from './modules/helper_processes.nf'
@@ -45,6 +43,7 @@ include { COMBINE_REFS          } from './modules/helper_processes.nf'
 include { REFINE_REFS             } from './subworkflows/refine_refs.nf'
 include { VALIDATE_PREBUILT_INPUT } from './subworkflows/validate_prebuilt_input.nf'
 include { CLUSTER_REFS            } from './subworkflows/cluster.nf'
+include { BUILD_INDEX             } from './subworkflows/build_index.nf'
 
 /*
 Helper Scripts
@@ -68,7 +67,7 @@ workflow {
         exit 0
     }
 
-    validate_params()
+    //validate_params()
 
     // Set up reads channel if required
     if (!params.ref_prep_only || params.ref_mode == 'autoselect') { // only autoselect requires reads for ref prep
@@ -155,7 +154,7 @@ workflow {
         | set { ref_groups_ch }
 
         // Build themisto index
-        index_ch = THEMISTO_BUILD_INDEX(COMBINE_REFS.out.references).first()
+        index_ch = BUILD_INDEX(COMBINE_REFS.out.references).first()
 
     } else if (params.ref_mode in ["refine", "full"]) {
         // Set up input channels starting from references.txt
@@ -175,7 +174,7 @@ workflow {
 
             // Split into references and groups, then publish
             REFINE_REFS.out.rep_refs_and_groups
-            | map { meta, ref_groups_file -> ref_groups_file}
+            | map { meta, ref_groups_file -> ref_groups_file }
             | collect
             | COMBINE_REFS
 
@@ -199,13 +198,8 @@ workflow {
         }
 
         // Build themisto index
-        index_ch = THEMISTO_BUILD_INDEX(representatives_ch).first()
+        index_ch = BUILD_INDEX(representatives_ch).first()
 
-    }
-
-    if (params.ref_mode != "index") {
-        // Output stats on the index (not required for anything just an additional output)
-        THEMISTO_STATS(index_ch)
     }
 
     // Run abundance est. and binning workflow
