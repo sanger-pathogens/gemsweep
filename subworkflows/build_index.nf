@@ -10,17 +10,17 @@ workflow BUILD_INDEX {
     references
 
     main:
-    index_prefix = (params.themisto_index).getName
+    index_prefix = channel.value('index')
+
 
     if (params.themisto2 == false) { // Use Themisto(1) modules
-    index_ch = THEMISTO_BUILD_INDEX(index_prefix, references)
-    THEMISTO_STATS(index_prefix, index_ch)
-    
+    index_ch = index_prefix.join(THEMISTO_BUILD_INDEX(references))
+    THEMISTO_STATS(index_ch)
+
     } else if (params.themisto2 == true) { // Use GGCAT, SBWT and Themisto2 modules
-    index_prefix_ch = channel.value('index')
-    GGCAT(index_prefix_ch, references)
-    SBWT_BUILD(index_prefix_ch, GGCAT.out.unitigs)
-    index_ch = THEMISTO2_BUILD_INDEX(references, SBWT.out.sbwt, SBWT.out.lcs_array).collect()
+    GGCAT(index_prefix, references)
+    SBWT_BUILD(index_prefix, GGCAT.out.unitigs)
+    index_ch = index_prefix.join(THEMISTO2_BUILD_INDEX(references, SBWT_BUILD.out.sbwt, SBWT_BUILD.out.lcs_array).collect())
     }
 
     emit:
