@@ -205,7 +205,7 @@ workflow {
 
     // Run abundance est. and binning workflow
     if (!params.ref_prep_only) {
-        pseudoaligned_ch = THEMISTO_PSEUDOALIGN(reads_ch, index_ch)
+        pseudoaligned_ch = params.themisto2 ? THEMISTO2_PSEUDOALIGN(reads_ch, index_ch) : THEMISTO_PSEUDOALIGN(reads_ch, index_ch)
         msweep_ch = MSWEEP(pseudoaligned_ch, ref_groups_ch)
         MGEMS(
             reads_ch
