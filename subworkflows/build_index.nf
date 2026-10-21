@@ -21,6 +21,7 @@ workflow BUILD_INDEX {
     GGCAT(index_prefix, references)
     SBWT_BUILD(index_prefix, GGCAT.out.unitigs)
     index_ch = index_prefix.join(THEMISTO2_BUILD_INDEX(references, SBWT_BUILD.out.sbwt, SBWT_BUILD.out.lcs_array).collect())
+    THEMISTO2_STATS(index_ch)
     }
 
     emit:
