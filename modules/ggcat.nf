@@ -24,7 +24,9 @@ process GGCAT {
     path "${index_prefix}.ggcat.fa", emit: unitigs
 
     script:
-    index_build_params = "--input-lists ${references_txt} -o ${index_prefix}.ggcat.fa -k ${params.themisto_k} --threads-count ${task.cpus} --memory ${task.memory} --prefer-memory -s 1"
+    //memory buffer 10%
+    mem_gigas_param = (task.memory.toGiga() * 0.9).toInteger()
+    index_build_params = "--input-lists ${references_txt} -o ${index_prefix}.ggcat.fa -k ${params.themisto_k} --threads-count ${task.cpus} --memory ${mem_gigas_param} --prefer-memory -s 1"
 
     // User-provided temp storage if given otherwise use tmp workdir (since scratch is enabled)
     if (params.temp_dir) {

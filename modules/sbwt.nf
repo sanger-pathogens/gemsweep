@@ -27,8 +27,8 @@ process SBWT_BUILD {
     // User-provided temp storage if given otherwise use tmp workdir (since scratch is enabled)
     temp_storage_location = params.temp_dir ? params.temp_dir : "\$PWD"
 
-    // supply less memory allocation in the command as it requires additional overhead (will likely fail if exact)
-    mem_gigas_param = (task.memory.toGiga() / 1.2).toInteger()
+    // Jarno recommendation: at least 10% buffer
+    mem_gigas_param = (task.memory.toGiga() * 0.9).toInteger()
 
     // TODO: remove -v (verbose) after validation
     """
