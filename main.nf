@@ -155,7 +155,7 @@ workflow {
         | set { ref_groups_ch }
 
         // Build themisto index
-        index_ch = THEMISTO_BUILD_INDEX(COMBINE_REFS.out.references).first()
+        index_ch = THEMISTO_BUILD_INDEX(COMBINE_REFS.out.references)
 
     } else if (params.ref_mode in ["refine", "full"]) {
         // Set up input channels starting from references.txt
@@ -199,7 +199,7 @@ workflow {
         }
 
         // Build themisto index
-        index_ch = THEMISTO_BUILD_INDEX(representatives_ch).first()
+        index_ch = THEMISTO_BUILD_INDEX(representatives_ch)
 
     }
 
@@ -210,9 +210,12 @@ workflow {
 
     // Run abundance est. and binning workflow
     if (!params.ref_prep_only) {
+        // Ensure ref_groups and index are value and not queue channels
+        ref_groups_ch = ref_groups_ch.first()
+        index_ch = index_ch.first()
+        
         pseudoaligned_ch = THEMISTO_PSEUDOALIGN(reads_ch, index_ch)
         msweep_ch = MSWEEP(pseudoaligned_ch, ref_groups_ch)
-        
         MGEMS(
             reads_ch
               .join(pseudoaligned_ch, by: 0)
