@@ -87,7 +87,7 @@ process THEMISTO2_BUILD_INDEX {
 
     """
     sed -i '/^\s*\$/d' "${references_txt}"    # Remove blank lines
-    themisto build ${index_build_params}
+    themisto2 build ${index_build_params}
     """
 }
 
