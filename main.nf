@@ -213,13 +213,13 @@ workflow {
         // Ensure ref_groups and index are value and not queue channels
         ref_groups_ch = ref_groups_ch.first()
         index_ch = index_ch.first()
-        
+
         pseudoaligned_ch = THEMISTO_PSEUDOALIGN(reads_ch, index_ch)
         msweep_ch = MSWEEP(pseudoaligned_ch, ref_groups_ch)
         MGEMS(
             reads_ch
               .join(pseudoaligned_ch, by: 0)
-              .join(msweep_ch, by: 0)
+              .join(msweep_ch, by: 0),
             index_ch,
             ref_groups_ch
         )
