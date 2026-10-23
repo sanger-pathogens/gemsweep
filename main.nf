@@ -155,8 +155,7 @@ workflow {
         | set { ref_groups_ch }
 
         // Build themisto index
-        // first() operation sets it as a value channel! Otherwise index consumed on first sample of the manifest
-        index_ch = THEMISTO_BUILD_INDEX(COMBINE_REFS.out.references).first()
+        index_ch = THEMISTO_BUILD_INDEX(COMBINE_REFS.out.references)
 
     } else if (params.ref_mode in ["refine", "full"]) {
         // Set up input channels starting from references.txt
@@ -201,11 +200,11 @@ workflow {
 
             ORDER_GROUPS.out.groups
             | map { meta, groups_file -> groups_file }
+            | first
             | set { ref_groups_ch }
 
         // Build themisto index
-        // first() operation sets it as a value channel! Otherwise index consumed on first sample of the manifest
-        index_ch = THEMISTO_BUILD_INDEX(representatives_ch).first()
+        index_ch = THEMISTO_BUILD_INDEX(representatives_ch)
         }
     }
 
