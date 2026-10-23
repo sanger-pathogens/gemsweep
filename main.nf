@@ -196,7 +196,7 @@ workflow {
 
             ORDER_GROUPS.out.groups
             | map { meta, groups_file -> groups_file }
-            | first
+            | first    // Ensures a value channel not queue
             | set { ref_groups_ch }
         }
 
