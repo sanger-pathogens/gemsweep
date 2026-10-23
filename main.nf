@@ -155,7 +155,8 @@ workflow {
         | set { ref_groups_ch }
 
         // Build themisto index
-        index_ch = THEMISTO_BUILD_INDEX(COMBINE_REFS.out.references)
+        // first() operation sets it as a value channel! Otherwise index consumed on first sample of the manifest
+        index_ch = THEMISTO_BUILD_INDEX(COMBINE_REFS.out.references).first()
 
     } else if (params.ref_mode in ["refine", "full"]) {
         // Set up input channels starting from references.txt
@@ -183,6 +184,11 @@ workflow {
             | set { ref_groups_ch }
 
             representatives_ch = COMBINE_REFS.out.references
+
+            // Build themisto index
+            // Note: representatives_ch is a value channel already so no additional operation needed unlike other ref_modes
+            index_ch = THEMISTO_BUILD_INDEX(representatives_ch)
+
         } else if (params.ref_mode == "full") {
             PREP_REFS.out.refs_tsv
             | join(CLUSTER_REFS.out.clusters)
@@ -196,11 +202,11 @@ workflow {
             ORDER_GROUPS.out.groups
             | map { meta, groups_file -> groups_file }
             | set { ref_groups_ch }
-        }
 
         // Build themisto index
-        index_ch = THEMISTO_BUILD_INDEX(representatives_ch)
-
+        // first() operation sets it as a value channel! Otherwise index consumed on first sample of the manifest
+        index_ch = THEMISTO_BUILD_INDEX(representatives_ch).first()
+        }
     }
 
     if (params.ref_mode != "index") {
@@ -210,10 +216,6 @@ workflow {
 
     // Run abundance est. and binning workflow
     if (!params.ref_prep_only) {
-        // Ensure ref_groups and index are value and not queue channels
-        ref_groups_ch = ref_groups_ch.first()
-        index_ch = index_ch.first()
-
         pseudoaligned_ch = THEMISTO_PSEUDOALIGN(reads_ch, index_ch)
         msweep_ch = MSWEEP(pseudoaligned_ch, ref_groups_ch)
         MGEMS(
