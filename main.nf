@@ -184,10 +184,6 @@ workflow {
 
             representatives_ch = COMBINE_REFS.out.references
 
-            // Build themisto index
-            // Note: representatives_ch is a value channel already so no additional operation needed unlike other ref_modes
-            index_ch = THEMISTO_BUILD_INDEX(representatives_ch)
-
         } else if (params.ref_mode == "full") {
             PREP_REFS.out.refs_tsv
             | join(CLUSTER_REFS.out.clusters)
@@ -202,10 +198,10 @@ workflow {
             | map { meta, groups_file -> groups_file }
             | first
             | set { ref_groups_ch }
+        }
 
         // Build themisto index
         index_ch = THEMISTO_BUILD_INDEX(representatives_ch)
-        }
     }
 
     if (params.ref_mode != "index") {
