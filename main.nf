@@ -25,26 +25,23 @@ def printHelp() {
     IMPORT MODULES/SUBWORKFLOWS
 ========================================================================================
 */
-include { MIXED_INPUT           } from './assorted-sub-workflows/mixed_input/mixed_input.nf'
-include { SYLPH_REF_SELECTION   } from './assorted-sub-workflows/sylph_refset/sylph_refset.nf'
 include { CHECK_CACHE;
           CACHE_LOOKUP;
           WRITE_CACHE_ENTRY     } from './modules/cache.nf'
 include { PREP_REFS;
           ORDER_GROUPS          } from './modules/poppunk.nf'
-include { THEMISTO_PSEUDOALIGN;
-          THEMISTO2_PSEUDOALIGN } from './modules/themisto.nf'
-include { MSWEEP                } from './modules/msweep.nf'
-include { MGEMS                 } from './modules/mgems.nf'
 include { COMBINE_REFS          } from './modules/helper_processes.nf'
 
 //
 // SUBWORKFLOWS
 //
+include { MIXED_INPUT           } from './assorted-sub-workflows/mixed_input/mixed_input.nf'
+include { SYLPH_REF_SELECTION   } from './assorted-sub-workflows/sylph_refset/sylph_refset.nf'
 include { REFINE_REFS             } from './subworkflows/refine_refs.nf'
 include { VALIDATE_PREBUILT_INPUT } from './subworkflows/validate_prebuilt_input.nf'
 include { CLUSTER_REFS            } from './subworkflows/cluster.nf'
 include { BUILD_INDEX             } from './subworkflows/build_index.nf'
+include { DEMIX_READS             } from './subworkflows/demix_reads.nf'
 
 /*
 Helper Scripts
@@ -202,20 +199,13 @@ workflow {
 
         // Build themisto index
         index_ch = BUILD_INDEX(representatives_ch)
-    }
 
-    // Run abundance est. and binning workflow
-    if (!params.ref_prep_only) {
-        pseudoaligned_ch = params.themisto2 ? THEMISTO2_PSEUDOALIGN(reads_ch, index_ch) : THEMISTO_PSEUDOALIGN(reads_ch, index_ch)
-        msweep_ch = MSWEEP(pseudoaligned_ch, ref_groups_ch)
-        MGEMS(
-            reads_ch
-              .join(pseudoaligned_ch, by: 0)
-              .join(msweep_ch, by: 0),
-            index_ch,
-            ref_groups_ch
-        )
     } else { // Should be caught in validate.nf but here as a failsafe
         error("Unrecognised ref_mode: '${params.ref_mode}'.")
+    }
+
+    if (!params.ref_prep_only) {
+        // Run abundance est. and binning workflow
+        DEMIX_READS(reads_ch, index_ch, ref_groups_ch)
     }
 }
