@@ -1,7 +1,8 @@
 #!/usr/bin/env nextflow
 // Copyright (C) 2024 Genome Research Ltd.
 // Processes
-include { THEMISTO_STATS      } from '../modules/themisto.nf'
+include { THEMISTO_STATS } from '../modules/themisto.nf'
+
 
 // Helper Functions
 include { validate_index;
@@ -16,25 +17,28 @@ workflow VALIDATE_PREBUILT_INPUT {
 
     main:
     def len_ref_groups = file(params.ref_groups).readLines().findAll { it.trim() }.size()
-    
-    THEMISTO_STATS(index_ch)
-    .map { file ->
-        def lines = file.readLines()
 
-        def kmer_index = lines.find { it.startsWith('Node length k:') }
-                            .tokenize(':')[1].trim().toInteger()
+    if (params.themisto2 == false) { // TODO: Themisto2 has a different layout and doesn't directly report kmer count
+        THEMISTO_STATS(index_ch)
+        .map { file ->
+            def lines = file.readLines()
 
-        def range = lines.find { it.startsWith('Color id range:') }
-                        .split(':')[1].trim()
-                        .split('\\.\\.')
+            def kmer_index = lines.find { it.startsWith('Node length k:') }
+                                .tokenize(':')[1].trim().toInteger()
 
-        def refs_index = range[1].toInteger() - range[0].toInteger() + 1
+            def range = lines.find { it.startsWith('Color id range:') }
+                            .split(':')[1].trim()
+                            .split('\\.\\.')
 
-        tuple(kmer_index, refs_index)
+            def refs_index = range[1].toInteger() - range[0].toInteger() + 1
+
+            tuple(kmer_index, refs_index)
+        }
+        .map { kmer_index, refs_index ->
+            validate_index(kmer_index, params.themisto_k)
+            validate_ref_groups(refs_index, len_ref_groups)
+            tuple(kmer_index, refs_index)
+        }
     }
-    .map { kmer_index, refs_index ->
-        validate_index(kmer_index, params.themisto_k)
-        validate_ref_groups(refs_index, len_ref_groups)
-        tuple(kmer_index, refs_index)
-    }
+
 }
