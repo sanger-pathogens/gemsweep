@@ -14,8 +14,6 @@ process GGCAT {
 
     container 'quay.io/biocontainers/ggcat:2.2.0--hf1b6044_0'
 
-    publishDir mode: 'copy', path: "${params.outdir}/ggcat"
-
     input:
     val index_prefix
     path references_txt

@@ -13,8 +13,6 @@ process SBWT_BUILD {
 
     container 'quay.io/sangerpathogens/sbwt:0.4.2'
 
-    publishDir mode: 'copy', path: "${params.outdir}/sbwt"
-
     input:
     val index_prefix
     path ggcat_unitigs
