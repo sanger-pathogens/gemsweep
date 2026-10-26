@@ -11,7 +11,7 @@ def logo = NextflowTool.logo(workflow, params.monochrome_logs)
 
 log.info logo
 
-NextflowTool.commandLineParams(workflow.commandLine, log, params.monochrome_logs)
+NextflowTool.commandLineParams(workflow.commandLine, params, log, params.monochrome_logs)
 
 
 def printHelp() {
@@ -155,7 +155,7 @@ workflow {
         | set { ref_groups_ch }
 
         // Build themisto index
-        index_ch = THEMISTO_BUILD_INDEX(COMBINE_REFS.out.references).first()
+        index_ch = THEMISTO_BUILD_INDEX(COMBINE_REFS.out.references)
 
     } else if (params.ref_mode in ["refine", "full"]) {
         // Set up input channels starting from references.txt
@@ -183,6 +183,7 @@ workflow {
             | set { ref_groups_ch }
 
             representatives_ch = COMBINE_REFS.out.references
+
         } else if (params.ref_mode == "full") {
             PREP_REFS.out.refs_tsv
             | join(CLUSTER_REFS.out.clusters)
@@ -195,12 +196,12 @@ workflow {
 
             ORDER_GROUPS.out.groups
             | map { meta, groups_file -> groups_file }
+            | first    // Ensures a value channel not queue
             | set { ref_groups_ch }
         }
 
         // Build themisto index
-        index_ch = THEMISTO_BUILD_INDEX(representatives_ch).first()
-
+        index_ch = THEMISTO_BUILD_INDEX(representatives_ch)
     }
 
     if (params.ref_mode != "index") {
@@ -212,11 +213,10 @@ workflow {
     if (!params.ref_prep_only) {
         pseudoaligned_ch = THEMISTO_PSEUDOALIGN(reads_ch, index_ch)
         msweep_ch = MSWEEP(pseudoaligned_ch, ref_groups_ch)
-        
         MGEMS(
             reads_ch
               .join(pseudoaligned_ch, by: 0)
-              .join(msweep_ch, by: 0)
+              .join(msweep_ch, by: 0),
             index_ch,
             ref_groups_ch
         )
