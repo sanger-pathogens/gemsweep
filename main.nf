@@ -76,9 +76,15 @@ workflow {
     if (params.ref_mode == "index") {
         // Set up input channels starting from pre-built index AND provided ref_groups
         ref_groups_ch = channel.value(file(params.ref_groups))
-        index_ch = channel.fromPath("${params.themisto_index}*{tdbg,tcolors}")
-          .collect()
-          .map { files -> tuple(file(params.themisto_index).getName(), files) }
+
+        if (params.themisto2 == false) {
+            index_ch = channel.fromPath("${params.themisto_index}*{tdbg,tcolors}")
+            .collect()
+            .map { index_files -> tuple(file(params.themisto_index).getName(), index_files) }
+        } else { // themisto2 is a single file index, thenmisto produces two files per index
+            index_ch = channel.value(file("${params.themisto_index}.thm2"))
+            .map { index_file -> tuple(file(params.themisto_index).getName(), index_file) }
+        }
 
         // Validate
         VALIDATE_PREBUILT_INPUT(index_ch)
