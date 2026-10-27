@@ -35,8 +35,8 @@ include { COMBINE_REFS          } from './modules/helper_processes.nf'
 //
 // SUBWORKFLOWS
 //
-include { MIXED_INPUT           } from './assorted-sub-workflows/mixed_input/mixed_input.nf'
-include { SYLPH_REF_SELECTION   } from './assorted-sub-workflows/sylph_refset/sylph_refset.nf'
+include { MIXED_INPUT             } from './assorted-sub-workflows/mixed_input/mixed_input.nf'
+include { SYLPH_REF_SELECTION     } from './assorted-sub-workflows/sylph_refset/sylph_refset.nf'
 include { REFINE_REFS             } from './subworkflows/refine_refs.nf'
 include { VALIDATE_PREBUILT_INPUT } from './subworkflows/validate_prebuilt_input.nf'
 include { CLUSTER_REFS            } from './subworkflows/cluster.nf'
@@ -81,7 +81,7 @@ workflow {
             index_ch = channel.fromPath("${params.themisto_index}*{tdbg,tcolors}")
             .collect()
             .map { index_files -> tuple(file(params.themisto_index).getName(), index_files) }
-        } else { // themisto2 is a single file index, thenmisto produces two files per index
+        } else { // themisto2 is a single file index, themisto produces two files per index
             index_ch = channel.value(file("${params.themisto_index}.thm2"))
             .map { index_file -> tuple(file(params.themisto_index).getName(), index_file) }
         }
