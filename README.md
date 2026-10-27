@@ -282,7 +282,7 @@ mkdir mGEMs_bins_manifest
 
 | Option             | Type      | Default | Description                                                                                                                                   |
 | ------------------ | --------- | ------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
-| `--themisto2` | `boolean`    | `false`  | Use Themisto2 for indexing and pseudoalignment instead of the default Themisto v1.                                  |
+| `--themisto2`      | `boolean` | `false` | Use Themisto2 for indexing and pseudoalignment instead of the default Themisto v1.                                                            |
 | `--themisto_index` | `path`    | `null`  | Pre-built Themisto index prefix (without extensions). Used with `--ref_mode index`. Requires `--ref_groups`.                                  |
 | `--themisto_k`     | `integer` | `31`    | K-mer size for index building and pseudoalignment. Options: `21`, `31`, `51`. Must match a pre-built index if `--themisto_index` is provided. |
 | `--temp_dir`       | `path`    | `null`  | Custom temporary storage directory for index creation and pseudoalignment. Defaults to `/tmp`.                                                |
