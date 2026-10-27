@@ -282,6 +282,7 @@ mkdir mGEMs_bins_manifest
 
 | Option             | Type      | Default | Description                                                                                                                                   |
 | ------------------ | --------- | ------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
+| `--themisto2` | `boolean`    | `false`  | Use Themisto2 for indexing and pseudoalignment instead of the default Themisto v1.                                  |
 | `--themisto_index` | `path`    | `null`  | Pre-built Themisto index prefix (without extensions). Used with `--ref_mode index`. Requires `--ref_groups`.                                  |
 | `--themisto_k`     | `integer` | `31`    | K-mer size for index building and pseudoalignment. Options: `21`, `31`, `51`. Must match a pre-built index if `--themisto_index` is provided. |
 | `--temp_dir`       | `path`    | `null`  | Custom temporary storage directory for index creation and pseudoalignment. Defaults to `/tmp`.                                                |
@@ -373,6 +374,9 @@ Themisto index creation requires substantial temporary disk space and the temp d
 | Software      | Version | Image                                                  |
 | ------------- | ------- | ------------------------------------------------------ |
 | Themisto      | 3.2.2   | `quay.io/sangerpathogens/themisto:3.2.2`               |
+| GGCAT         | 2.2.0   | `quay.io/biocontainers/ggcat:2.2.0--hf1b6044_0`        |
+| SBWT          | 0.4.2   | `quay.io/sangerpathogens/sbwt:0.4.2`                   |
+| Themisto2     | 0.0.1   | `quay.io/sangerpathogens/themisto2:0.0.1`              |
 | mSWEEP        | 2.2.1   | `quay.io/biocontainers/msweep:2.2.1--h503566f_1`       |
 | mGEMS         | 1.3.3   | `quay.io/biocontainers/mgems:1.3.3--h13024bc_2`        |
 | PopPUNK       | 2.7.8   | `quay.io/biocontainers/poppunk:2.7.8--py310h4d0eb5b_0` |
