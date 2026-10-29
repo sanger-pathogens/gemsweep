@@ -1,16 +1,17 @@
-include { THEMISTO_BUILD_INDEX;
-          THEMISTO_STATS;
-          THEMISTO2_BUILD_INDEX;
-          THEMISTO2_STATS        } from '../modules/themisto.nf'
-include { GGCAT                  } from '../modules/ggcat.nf'
-include { SBWT_BUILD             } from '../modules/sbwt.nf'
+include { THEMISTO_BUILD;
+          THEMISTO_STATS         } from '../modules/themisto.nf'
+include { THEMISTO2_BUILD;
+          THEMISTO2_STATS        } from '../assorted-sub-workflows/themisto2/themisto2.nf'
+include { GGCAT                  } from '../assorted-sub-workflows/themisto2/ggcat.nf'
+include { SBWT_BUILD             } from '../assorted-sub-workflows/themisto2/sbwt.nf'
 
 workflow BUILD_INDEX {
     take:
-    references
+    references // text file of paths to references to index
 
     main:
-    index_prefix = channel.value('index')
+    meta = [ID: 'index']
+    refs_ch = references.map { refs -> [meta, refs] }
 
 
     if (params.themisto2 == false) { // Use Themisto(1) modules
@@ -19,10 +20,14 @@ workflow BUILD_INDEX {
     }
 
     if (params.themisto2 == true) { // Use GGCAT, SBWT and Themisto2 modules
-        GGCAT(index_prefix, references)
-        SBWT_BUILD(index_prefix, GGCAT.out.unitigs)
-        index_ch = index_prefix.join(THEMISTO2_BUILD_INDEX(references, SBWT_BUILD.out.sbwt, SBWT_BUILD.out.lcs_array))
-        THEMISTO2_STATS(index_ch)
+        GGCAT(refs_ch)
+        | SBWT_BUILD
+    
+        SBWT_BUILD.out.index.combine(refs_ch, by: 0).map { m, sbwt, lcs, refs -> [m, refs, sbwt, lcs] }
+        | THEMISTO2_BUILD // expects [meta, colors, sbwt, lcs]
+        | THEMISTO2_STATS
+
+        index_ch = THEMISTO2_STATS.out.index
     }
 
     emit:
