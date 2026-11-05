@@ -1,4 +1,4 @@
-process THEMISTO_BUILD_INDEX {
+process THEMISTO_BUILD {
     tag "${meta.ID}"
     label 'cpu_16'
     label "mem_32"
