@@ -1,4 +1,5 @@
 process THEMISTO_BUILD_INDEX {
+    tag "${meta.ID}"
     label 'cpu_16'
     label "mem_32"
     label 'time_queue_from_normal'
@@ -17,13 +18,13 @@ process THEMISTO_BUILD_INDEX {
 
 
     input:
-    path references_txt
+    tuple val(meta), path(references_txt)
 
     output:
     tuple val(index_prefix), path("${index_prefix}.*")
 
     script:
-    index_prefix = "index"
+    index_prefix = {meta.ID}
     index_build_params = "-k ${params.themisto_k} -i ${references_txt} -o ${index_prefix} --n-threads ${task.cpus}"
     
     // User-provided temp storage if given otherwise use tmp workdir (since scratch is enabled)
