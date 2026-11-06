@@ -1,9 +1,9 @@
 include { THEMISTO_BUILD;
           THEMISTO_STATS         } from '../modules/themisto.nf'
 include { THEMISTO2_BUILD;
-          THEMISTO2_STATS        } from '../assorted-sub-workflows/themisto2/themisto2.nf'
-include { GGCAT                  } from '../assorted-sub-workflows/themisto2/ggcat.nf'
-include { SBWT_BUILD             } from '../assorted-sub-workflows/themisto2/sbwt.nf'
+          THEMISTO2_STATS        } from '../assorted-sub-workflows/themisto2/modules/themisto2.nf'
+include { GGCAT                  } from '../assorted-sub-workflows/themisto2/modules/ggcat.nf'
+include { SBWT_BUILD             } from '../assorted-sub-workflows/themisto2/modules/sbwt.nf'
 
 workflow BUILD_INDEX {
     take:
