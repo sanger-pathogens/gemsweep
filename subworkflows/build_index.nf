@@ -15,7 +15,7 @@ workflow BUILD_INDEX {
 
 
     if (params.themisto2 == false) { // Use Themisto(1) modules
-        index_ch = index_prefix.join(THEMISTO_BUILD_INDEX(refs_ch))
+        index_ch = THEMISTO_BUILD(refs_ch)
         THEMISTO_STATS(index_ch)
     }
 
