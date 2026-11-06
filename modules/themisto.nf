@@ -139,7 +139,7 @@ process THEMISTO_STATS {
     tuple val(index_prefix), path(index_files)
 
     output:
-    path "index_report.txt"
+    path "${index_prefix}_report.txt"
 
     script:
     """
