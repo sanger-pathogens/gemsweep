@@ -16,7 +16,7 @@ process MGEMS {
           path(pseudoalignment_2),
           path(msweep_abundances),
           path(msweep_probs)
-    tuple val(index_prefix),
+    tuple val(index_meta),
           path(index_files)
     path(reference_groups)
 

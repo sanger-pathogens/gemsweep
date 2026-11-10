@@ -64,13 +64,13 @@ process THEMISTO_PSEUDOALIGN {
 
     input:
     tuple val(meta), path(reads_1), path(reads_2)
-    tuple val(index_prefix), path(index_files)
+    tuple val(index_meta), path(index_files)
 
     output:
     tuple val(meta), path("pseudoalignments_1.aln.gz"), path("pseudoalignments_2.aln.gz")
 
     script:
-    pseudoalignment_params = "-i ${index_prefix} --n-threads ${task.cpus} --sort-output-lines --gzip-output"
+    pseudoalignment_params = "-i ${index_meta.ID} --n-threads ${task.cpus} --sort-output-lines --gzip-output"
 
     // User-provided temp storage if given otherwise use tmp workdir (since scratch is enabled)
     if (params.temp_dir) {
@@ -104,13 +104,13 @@ process THEMISTO2_PSEUDOALIGN {
 
     input:
     tuple val(meta), path(reads_1), path(reads_2)
-    tuple val(index_prefix), path(index_files)
+    tuple val(index_meta), path(index_file)
 
     output:
     tuple val(meta), path("pseudoalignments_1.aln.gz"), path("pseudoalignments_2.aln.gz")
 
     script:
-    pseudoalignment_params = "-i ${index_prefix}.thm2 --n-threads ${task.cpus} --sort-output --themisto1-output-format"
+    pseudoalignment_params = "-i ${index_file} --n-threads ${task.cpus} --sort-output --themisto1-output-format"
 
     // // User-provided temp storage if given otherwise use tmp workdir (since scratch is enabled)
     // if (params.temp_dir) {
