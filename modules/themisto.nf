@@ -136,13 +136,13 @@ process THEMISTO_STATS {
     publishDir mode: 'copy', path: "${params.outdir}/themisto"
 
     input:
-    tuple val(index_prefix), path(index_files)
+    tuple val(meta), path(index_files)
 
     output:
-    path "${index_prefix}_report.txt"
+    path "${meta.ID}_report.txt"
 
     script:
     """
-    themisto stats -i ${index_prefix} > "index_report.txt"
+    themisto stats -i ${meta.ID} > "${meta.ID}_report.txt"
     """
 }
