@@ -100,7 +100,7 @@ process THEMISTO2_PSEUDOALIGN {
     // scratch used for fast node-local temp storage
     scratch true
 
-    container 'quay.io/sangerpathogens/themisto2:0.1.0-ffb98e6'
+    container 'quay.io/sangerpathogens/themisto2:0.1.0-ffb98e6-c1'
 
     input:
     tuple val(meta), path(reads_1), path(reads_2)
