@@ -127,6 +127,7 @@ process THEMISTO2_PSEUDOALIGN {
 }
 
 process THEMISTO_STATS {
+    tag "${meta.ID}"
     label 'cpu_1'
     label "mem_10"
     label 'time_1'
