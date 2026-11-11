@@ -13,7 +13,7 @@ workflow VALIDATE_PREBUILT_INPUT {
     // to ensure compatibility (kmer size, number of refs)
 
     take:
-    index_ch // tuple val(index_prefix), path(index_files)
+    index_ch // tuple index_meta, path(index_files)
 
     main:
     def len_ref_groups = file(params.ref_groups).readLines().findAll { it.trim() }.size()
