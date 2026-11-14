@@ -3,7 +3,7 @@
 """
 Write one generated species reference entry into the configured cache.
 
-The script reads cache_config.json from CHECK_CACHE, checks write_cache, and
+The script reads cache_config.json from CACHE_RESOLVE, checks write_cache, and
 writes generated references/groups and combined reference cluster CSVs to:
 
   effective_cache_dir/species/<species_id>/
@@ -35,7 +35,7 @@ def parse_args():
     parser.add_argument("--refs", type=Path, required=True, help="Generated references.txt for this species.")
     parser.add_argument("--groups", type=Path, required=True, help="Generated groups.txt for this species.")
     parser.add_argument("--reference-clusters", type=Path, required=True, help="Generated CSV for this species with header 'label,reference_path,cluster'.")
-    parser.add_argument("--cache-config", type=Path, required=True, help="cache_config.json from CHECK_CACHE.")
+    parser.add_argument("--cache-config", type=Path, required=True, help="cache_config.json from CACHE_RESOLVE.")
     return parser.parse_args()
 
 
