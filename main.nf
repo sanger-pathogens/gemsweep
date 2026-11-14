@@ -103,15 +103,17 @@ workflow {
             CACHE_LOOKUP(sylph_refs_ch, cache_config_ch) // TODO: change very similar process names
 
             // Organise cached references
+            // hits: [meta, cache_hits_tsv]
             CACHE_LOOKUP.out.hits
-            | map { meta, cache_hits_tsv, refs_file -> cache_hits_tsv }
+            | map { meta, cache_hits_tsv -> cache_hits_tsv }
             | splitCsv(header: true, sep: '\t')
             | map { row -> tuple([ID: row.species_id], file(row.cached_ref_groups)) }
             | set { cached_ref_group_files_ch }
 
-            // Organise (uncached) candidate references requiring clustering and refinement
+            // misses: [meta, cache_miss_tsv] -> restore the original Sylph refs by meta
             CACHE_LOOKUP.out.misses
-            | map { meta, cache_miss_tsv, sylph_refs -> tuple(meta, sylph_refs) }
+            | join(sylph_refs_ch)
+            | map { meta, cache_miss_tsv, refs_file -> tuple(meta, refs_file) }
             | set { candidate_refs_ch }
 
         } else {
