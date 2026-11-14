@@ -27,9 +27,9 @@ def printHelp() {
 */
 include { MIXED_INPUT           } from './assorted-sub-workflows/mixed_input/mixed_input.nf'
 include { SYLPH_REF_SELECTION   } from './assorted-sub-workflows/sylph_refset/sylph_refset.nf'
-include { CHECK_CACHE;
+include { CACHE_RESOLVE;
           CACHE_LOOKUP;
-          WRITE_CACHE_ENTRY     } from './modules/cache.nf'
+          CACHE_WRITE           } from './modules/cache.nf'
 include { PREP_REFS;
           ORDER_GROUPS          } from './modules/poppunk.nf'
 include { THEMISTO_BUILD_INDEX; 
@@ -93,9 +93,9 @@ workflow {
 
         // If cache dir provided check for relevant cached species references
         if (params.cache_dir) {
-            CHECK_CACHE()
-            cache_config_ch = CHECK_CACHE.out.config.first() // TODO: check - is check_cache generating this config or reading it?
-            CACHE_LOOKUP(sylph_refs_ch, cache_config_ch) // TODO: change very similar process names
+            CACHE_RESOLVE()
+            cache_config_ch = CACHE_RESOLVE.out.config.first()
+            CACHE_LOOKUP(sylph_refs_ch, cache_config_ch)
 
             // Organise cached references
             // hits: [meta, cache_hits_tsv]
@@ -137,7 +137,7 @@ workflow {
             | join(REFINE_REFS.out.rep_refs_and_groups)
             | set { generated_cache_entries_ch }
             
-            WRITE_CACHE_ENTRY(generated_cache_entries_ch, cache_config_ch)
+            CACHE_WRITE(generated_cache_entries_ch, cache_config_ch)
         }
 
         // Mix cached and generated species refs

@@ -1,5 +1,5 @@
-// calls check_cache.py to create or validate a config-specific cache directory, write cache metadata, and emit cache_config.json.
-process CHECK_CACHE {
+// calls CACHE_RESOLVE.py to create or validate a config-specific cache directory, write cache metadata, and emit cache_config.json.
+process CACHE_RESOLVE {
     label 'cpu_1'
     label 'mem_4'
     label 'time_queue_from_small'
@@ -20,7 +20,7 @@ process CHECK_CACHE {
     def sylph_db_name = file(params.sylph_db).baseName
 
     """
-    ${projectDir}/bin/check_cache.py \\
+    ${projectDir}/bin/cache_resolve.py \\
         --cache-root '${params.cache_dir}' \\
         --cluster-method '${cluster_method}' \\
         --representatives '${params.representatives}' \\
@@ -57,7 +57,7 @@ process CACHE_LOOKUP {
     """
 }
 
-process WRITE_CACHE_ENTRY {
+process CACHE_WRITE {
     tag "${meta.ID}"
     label 'cpu_1'
     label 'mem_4'

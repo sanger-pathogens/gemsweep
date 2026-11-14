@@ -20,7 +20,7 @@ def parse_args():
     )
     parser.add_argument("--species", required=True, help="Species or taxon identifier.")
     parser.add_argument("--refs", type=Path, required=True, help="Sylph references file to use on a cache miss.")
-    parser.add_argument("--cache-config", type=Path, required=True, help="cache_config.json from CHECK_CACHE.")
+    parser.add_argument("--cache-config", type=Path, required=True, help="cache_config.json from CACHE_RESOLVE.")
     return parser.parse_args()
 
 
