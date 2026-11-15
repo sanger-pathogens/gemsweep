@@ -3,7 +3,7 @@ process CACHE_RESOLVE {
     label 'mem_4'
     label 'time_queue_from_small'
 
-    container 'quay.io/sangerpathogens/pandas:2.2.1'
+    container 'quay.io/sangerpathogens/pandas:2.2.1' // TODO: unecessary container, only need py3
 
     output:
     path("cache_config.json"), emit: config
@@ -38,7 +38,7 @@ process CACHE_LOOKUP {
     label 'mem_4'
     label 'time_queue_from_small'
 
-    container 'quay.io/sangerpathogens/pandas:2.2.1'
+    container 'quay.io/sangerpathogens/pandas:2.2.1' // TODO: unecessary container, only need py3
 
     input:
     tuple val(meta), path(refs_file)
@@ -63,7 +63,7 @@ process CACHE_WRITE {
     label 'mem_4'
     label 'time_queue_from_small'
 
-    container 'quay.io/sangerpathogens/pandas:2.2.1'
+    container 'quay.io/sangerpathogens/pandas:2.2.1' // TODO: unecessary container, only need py3
 
     input:
     tuple val(meta), path(refs_file), path(groups_file), path(reference_clusters)
