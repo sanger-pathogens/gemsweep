@@ -158,19 +158,21 @@ The assignment is determined from the exact positional order being identical acr
 
 Across different samples containing the same species, reproducible representative reference genomes can be used by supplying a location to cache results (`--cache_dir`). This will also speed up the run as it avoids recomputing clusters on the same species for each sample it is detected in.
 
-The cache will record what clustering methodology was used and how many representatives per cluster were selected. As well as caching between samples in the same pipeline run, you can reuse the same cache for future pipeline runs. If your clustering parameters are set the same it will reuse the computed reps, otherwise it will add an entry for the new representatives.
+The cache will record what clustering methodology was used, the name of the sylph database used and how many representatives per cluster were selected. As well as caching between samples in the same pipeline run, you can reuse the same cache for future pipeline runs. If your clustering parameters are set the same it will reuse the computed reps, otherwise it will add an entry for the new representatives.
+
+There is an option to supply a read-only cache, which can be useful where a centrally managed cache exists. The cache layout is identical but new entires will not be written if they do not exist. If you supply a read-only cache this will be checked first, before checking the `--cache_dir` and finally writing a new entry to the `--cache_dir` if none can be found for that species.
 
 An example cache directory layout:
 
 ```
-<cache_root>/                       # as supplied to --cache_dir
+<cache_root>/                       # as supplied to --cache_dir or --read_only_cache_dir
   core_acc-bgmm-20_reps/            # dir name records the clustering parameters
     metadata.json                   # file record of the clustering parameters
     species/
       escherichia_coli/             # per species directories
         references.txt              # paths to selected reps
         groups.txt                  # group assignments for reps
-        metadata.json               # records cache write/update details for that species, incl. update counts and added reference IDs
+        metadata.json               # records cache write details
 ```
 
 ### Output
@@ -324,9 +326,10 @@ mkdir mGEMs_bins_manifest
 
 **Autoselect Cache options**
 
-| Option        | Type   | Default | Description                                                                                                                          |
-| ------------- | ------ | ------- | ------------------------------------------------------------------------------------------------------------------------------------ |
-| `--cache_dir` | `path` | `null`  | Path to a cache root for autoselect mode. The pipeline reuses previously computed per-species reference sets to avoid re-clustering. |
+| Option                  | Type   | Default | Description                                                                                                                                                                                                                                                     |
+| ----------------------- | ------ | ------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `--cache_dir`           | `path` | `null`  | Path to an existing cache directory for autoselect mode, or the location at which to create one. Existing entries will be used for detected speices if the configuration matches. Entries will be added for detected species lacking already cached references. |
+| `--read_only_cache_dir` | `path` | `null`  | Optional additional path to a cache directory for autoselect mode. New entries will not be written, but existing entries for detected species will be used.                                                                                                     |
 
 ### Advanced usage
 
