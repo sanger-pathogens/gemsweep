@@ -44,7 +44,11 @@
     "Cache Autoselection options": {
       "cache_dir": {
         "default": "null",
-        "help_text": "Path to a cache root or an existing config-specific cache directory for autoselect mode. The pipeline reuses a matching cache directory containing metadata.json and per-species references.txt/groups.txt entries."
+        "help_text": "Path to an existing cache directory for autoselect mode, or the location at which to create one. Existing entries will be used for detected speices if the configuration matches. Entries will be added for detected species lacking already cached references."
+      },
+      "read_only_cache_dir": {
+        "default": "null",
+        "help_text": "Optional additional path to a cache directory for autoselect mode. New entries will not be written, but existing entries for detected species will be used."
       }
     },
     "PopPUNK options": {

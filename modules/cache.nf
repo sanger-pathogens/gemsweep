@@ -1,4 +1,3 @@
-// calls CACHE_RESOLVE.py to create or validate a config-specific cache directory, write cache metadata, and emit cache_config.json.
 process CACHE_RESOLVE {
     label 'cpu_1'
     label 'mem_4'
@@ -21,11 +20,12 @@ process CACHE_RESOLVE {
 
     """
     ${projectDir}/bin/cache_resolve.py \\
-        --cache-root '${params.cache_dir}' \\
+        --ro-cache-root '${params.read_only_cache_dir}'
+        --user-cache-root '${params.cache_dir}' \\
         --cluster-method '${cluster_method}' \\
         --representatives '${params.representatives}' \\
         --db '${sylph_db_name}' \\
-        --out cache_config.json
+        --out cache_config.json    # TODO: rename? Seems like a misleading name
     """
 }
 // receives Sylph species refs
