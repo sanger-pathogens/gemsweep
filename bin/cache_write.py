@@ -6,17 +6,13 @@ Write one generated species reference entry into the configured cache.
 The script reads cache_config.json from CACHE_RESOLVE, checks write_cache, and
 writes generated references/groups and combined reference cluster CSVs to:
 
-  effective_cache_dir/species/<species_id>/
+  write_cache_dir/species/<species_id>/
 
-If references.txt and groups.txt do not already exist, they are created. If they
-do exist, new reference/group pairs are appended while already-present
-references are ignored as a defensive guard. references.txt and groups.txt are
-kept line-aligned, so each incoming reference must have a matching group line.
-<species>_reference_clusters.csv is kept in sync with the appended
-reference/group pairs.
+write_cache_dir is always the user's read-write cache. The admin-managed
+read-only cache is never written to by this script.
 
 The script writes species-level metadata.json recording how many references were
-added, the added reference IDs, and how many references were already present.
+added and the added reference IDs.
 Top-level cache metadata is not updated here to avoid concurrent writes from
 multiple species tasks.
 """
@@ -105,7 +101,7 @@ def validate_line_counts(refs: list[str], groups: list[str], refs_file: Path, gr
 def cache_entry_paths(
     cache_config: dict, species: str
 ) -> tuple[Path, Path, Path, Path, Path]:
-    species_dir = Path(cache_config["effective_cache_dir"]) / "species" / species
+    species_dir = Path(cache_config["write_cache_dir"]) / "species" / species
     return (
         species_dir,
         species_dir / "references.txt",
