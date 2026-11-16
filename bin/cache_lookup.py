@@ -9,6 +9,8 @@ Emit cache_hits.tsv for the first directory in which references.txt, groups.txt
 and <species>_reference_clusters.csv all exist; otherwise emit cache_miss.tsv so
 the species continues through normal autoselect clustering.
 
+TODO: references.txt and groups.txt seem unecessary, CSV contains same info and is processed by downstream
+
 Nothing is written to any cache directory by this script.
 """
 

@@ -1,3 +1,4 @@
+// TODO: cache reolve and lookup could be done in one process since its already bottlenecked - would save a lot of nf file creation for rich metagenomic samples
 process CACHE_RESOLVE {
     label 'cpu_1'
     label 'mem_4'
