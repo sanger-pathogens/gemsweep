@@ -17,10 +17,12 @@ process CACHE_RESOLVE {
     }
 
     def sylph_db_name = file(params.sylph_db).baseName
+    def ro_cache_arg = params.read_only_cache_dir ? "--ro-cache-root '${params.read_only_cache_dir}'" : ""
+
 
     """
     ${projectDir}/bin/cache_resolve.py \\
-        --ro-cache-root '${params.read_only_cache_dir}'
+        --ro-cache-root '${ro_cache_arg}' \\
         --user-cache-root '${params.cache_dir}' \\
         --cluster-method '${cluster_method}' \\
         --representatives '${params.representatives}' \\
