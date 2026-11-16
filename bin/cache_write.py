@@ -11,16 +11,18 @@ writes generated references/groups and combined reference cluster CSVs to:
 write_cache_dir is always the user's read-write cache. The admin-managed
 read-only cache is never written to by this script.
 
-The script writes species-level metadata.json recording how many references were
-added and the added reference IDs.
-Top-level cache metadata is not updated here to avoid concurrent writes from
-multiple species tasks.
+Cache entries are immutable. If a complete entry already exists it is left
+unchanged (with a warning); if only some of its files exist the script exits
+with an error. The entry's metadata.json records the configuration, creation
+time, and reference IDs. Top-level cache metadata is not updated here to avoid
+concurrent writes from multiple species tasks.
 """
 
 import argparse
 import csv
 import json
 import shutil
+import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -51,45 +53,6 @@ def read_lines(path: Path) -> list[str]:
         return [line.rstrip("\n") for line in in_f]
 
 
-def append_lines(path: Path, lines: list[str]):
-    with open(path, "a") as out_f:
-        for line in lines:
-            out_f.write(f"{line}\n")
-
-
-def append_reference_cluster_rows(
-    cached_ref_groups_file: Path,
-    incoming_ref_groups_file: Path,
-    refs_to_add: list[str],
-):
-    refs_to_add = set(refs_to_add)
-    if not refs_to_add:
-        return
-
-    with open(incoming_ref_groups_file, newline="") as in_f:
-        reader = csv.DictReader(in_f)
-        fieldnames = reader.fieldnames
-        if fieldnames is None or "reference_path" not in fieldnames:
-            raise SystemExit(
-                f"Cannot write cache entry: {incoming_ref_groups_file} must have "
-                "a header including a 'reference_path' column."
-            )
-        rows_to_add = [row for row in reader if row["reference_path"] in refs_to_add]
-
-    if len(rows_to_add) != len(refs_to_add):
-        raise SystemExit(
-            f"Cannot write cache entry: {incoming_ref_groups_file} has "
-            f"{len(rows_to_add)} rows matching {len(refs_to_add)} new references."
-        )
-
-    write_header = not cached_ref_groups_file.exists()
-    with open(cached_ref_groups_file, "a", newline="") as out_f:
-        writer = csv.DictWriter(out_f, fieldnames=fieldnames)
-        if write_header:
-            writer.writeheader()
-        writer.writerows(rows_to_add)
-
-
 def validate_line_counts(refs: list[str], groups: list[str], refs_file: Path, groups_file: Path):
     if len(refs) != len(groups):
         raise SystemExit(
@@ -110,13 +73,6 @@ def cache_entry_paths(
         species_dir / "metadata.json",
     )
 
-
-def existing_refs(refs_file: Path) -> set[str]:
-    if not refs_file.exists():
-        return set()
-    return set(read_lines(refs_file))
-
-
 def reference_id(reference: str) -> str:
     name = Path(reference).name
     for suffix in [".gz", ".fna", ".fasta", ".fa", ".ffn", ".faa"]:
@@ -129,34 +85,20 @@ def update_metadata(
     metadata_file: Path,
     cache_config: dict,
     species: str,
-    added: int,
-    already_present: int,
-    total: int,
-    added_reference_ids: list[str],
+    reference_ids: list[str],
 ):
-    metadata = {
-        "species_id": species,
-        "cluster_method": cache_config.get("cluster_method"),
-        "representatives": cache_config.get("representatives"),
-        "db": cache_config.get("db"),
-        "last_update": {
-            "added_references": added,
-            "added_reference_ids": added_reference_ids,
-            "already_present_references": already_present,
-            "total_references": total,
-            "updated_at": datetime.now(timezone.utc).isoformat(),
+    write_json(
+        metadata_file,
+        {
+            "species_id": species,
+            "cluster_method": cache_config.get("cluster_method"),
+            "representatives": cache_config.get("representatives"),
+            "db": cache_config.get("db"),
+            "n_references": len(reference_ids),
+            "reference_ids": reference_ids,
+            "created_at": datetime.now(timezone.utc).isoformat(),
         },
-    }
-
-    if metadata_file.exists():
-        existing_metadata = read_json(metadata_file)
-        updates = existing_metadata.get("updates", [])
-        updates.append(metadata["last_update"])
-        metadata["updates"] = updates
-    else:
-        metadata["updates"] = [metadata["last_update"]]
-
-    write_json(metadata_file, metadata)
+    )
 
 
 def write_skipped_marker(species: str):
@@ -197,55 +139,31 @@ def main():
         cached_ref_groups_file.exists(),
     ]
 
-    if not any(cached_files_exist):
-        shutil.copyfile(args.refs, cached_refs_file)
-        shutil.copyfile(args.groups, cached_groups_file)
-        shutil.copyfile(args.reference_clusters, cached_ref_groups_file)
-        update_metadata(
-            metadata_file,
-            cache_config,
-            args.species,
-            len(incoming_refs),
-            0,
-            len(incoming_refs),
-            [reference_id(ref) for ref in incoming_refs],
+    if all(cached_files_exist):
+        print(
+            f"WARNING: Complete cache entry for {args.species} already exists at "
+            f"{species_dir}; leaving it unchanged.",
+            file=sys.stderr,
         )
         return
 
-    if len(set(cached_files_exist)) != 1:
+    if any(cached_files_exist):
         raise SystemExit(
-            f"Cannot update partial cache entry for {args.species}: "
-            f"{cached_refs_file} exists={cached_refs_file.exists()}, "
-            f"{cached_groups_file} exists={cached_groups_file.exists()}, "
-            f"{cached_ref_groups_file} exists={cached_ref_groups_file.exists()}."
+            f"Cannot write cache entry for {args.species}: partial entry at {species_dir} "
+            f"({cached_refs_file.name} exists={cached_refs_file.exists()}, "
+            f"{cached_groups_file.name} exists={cached_groups_file.exists()}, "
+            f"{cached_ref_groups_file.name} exists={cached_ref_groups_file.exists()}). "
+            "Cache entries are immutable; delete the directory and rerun."
         )
 
-    seen_refs = existing_refs(cached_refs_file)
-    refs_to_add = []
-    groups_to_add = []
-    already_present = 0
-
-    for ref, group in zip(incoming_refs, incoming_groups):
-        if ref in seen_refs:
-            already_present += 1
-            continue
-        refs_to_add.append(ref)
-        groups_to_add.append(group)
-        seen_refs.add(ref)
-
-    append_lines(cached_refs_file, refs_to_add)
-    append_lines(cached_groups_file, groups_to_add)
-    append_reference_cluster_rows(
-        cached_ref_groups_file, args.reference_clusters, refs_to_add
-    )
+    shutil.copyfile(args.refs, cached_refs_file)
+    shutil.copyfile(args.groups, cached_groups_file)
+    shutil.copyfile(args.reference_clusters, cached_ref_groups_file)
     update_metadata(
         metadata_file,
         cache_config,
         args.species,
-        len(refs_to_add),
-        already_present,
-        len(seen_refs),
-        [reference_id(ref) for ref in refs_to_add],
+        [reference_id(ref) for ref in incoming_refs],
     )
 
 
