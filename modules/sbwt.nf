@@ -30,6 +30,15 @@ process SBWT_BUILD {
 
     // TODO: remove -v (verbose) after validation
     """
-    sbwt build -k ${params.themisto_k} -i ${ggcat_unitigs} -o ${index_prefix} --temp-dir ${temp_storage_location} --build-lcs --mem-gb ${mem_gigas_param} --dedup-batches --add-revcomp --threads ${task.cpus} -v
+    sbwt build -k ${params.themisto_k} \\
+        -i ${ggcat_unitigs} \\
+        -o ${index_prefix} \\
+        --temp-dir ${temp_storage_location} \\
+        --build-lcs \\
+        --mem-gb ${mem_gigas_param} \\
+        --dedup-batches \\
+        --add-revcomp \\
+        --threads ${task.cpus} \\
+        -v
     """
 }
