@@ -12,9 +12,9 @@ workflow DEMIX_READS {
 
     main:
         // PSEUDOALIGNMENT
-        if (params.pseudoaligner == themisto) {
+        if (params.pseudoaligner == "themisto") {
             pseudoaligned_ch = THEMISTO_PSEUDOALIGN(reads_ch, index_ch)
-        } else if (params.pseudoaligner == themisto2) {
+        } else if (params.pseudoaligner == "themisto2") {
             pseudoaligned_ch = THEMISTO2_PSEUDOALIGN(reads_ch, index_ch)
         }
 
