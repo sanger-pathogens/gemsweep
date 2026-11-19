@@ -11,9 +11,17 @@ workflow DEMIX_READS {
     groups_ch // firstpass: GTDB species divided by group, second: SOI groups
 
     main:
-        pseudoaligned_ch = params.themisto2 ? THEMISTO2_PSEUDOALIGN(reads_ch, index_ch) : THEMISTO_PSEUDOALIGN(reads_ch, index_ch)
+        // PSEUDOALIGNMENT
+        if (params.pseudoaligner == themisto) {
+            pseudoaligned_ch = THEMISTO_PSEUDOALIGN(reads_ch, index_ch)
+        } else if (params.pseudoaligner == themisto2) {
+            pseudoaligned_ch = THEMISTO2_PSEUDOALIGN(reads_ch, index_ch)
+        }
+
+        // ABUNDANCE ESTIMATION
         msweep_ch = MSWEEP(pseudoaligned_ch, groups_ch)
-        
+
+        // READ EXTRACTION/ BINNING
         MGEMS(
             reads_ch
               .join(pseudoaligned_ch, by: 0)

@@ -75,10 +75,10 @@
         "help_text": "Fail early if all genomes form a single cluster, or each genome is a singleton."
       }
     },
-    "Themisto options": {
-      "themisto2": {
-        "default": "false",
-        "help_text": "Use Themisto2 for indexing and pseudoalignment instead of the default Themisto v1."
+    "Pseudoalignment options": {
+      "pseudoaligner": {
+        "default": "themisto",
+        "help_text": "Pseudoalignment tool (themisto|themisto2)"
       },
       "themisto_index": {
         "default": "null",

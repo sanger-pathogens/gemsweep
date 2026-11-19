@@ -18,7 +18,7 @@ workflow VALIDATE_PREBUILT_INPUT {
     main:
     def len_ref_groups = file(params.ref_groups).readLines().findAll { it.trim() }.size()
 
-    if (params.themisto2 == false) { // TODO: Themisto2 has a different layout and doesn't directly report kmer count
+    if (params.pseudoaligner == themisto) {// TODO: Themisto2 has a different layout and doesn't directly report kmer count
         THEMISTO_STATS(index_ch)
         .map { file ->
             def lines = file.readLines()

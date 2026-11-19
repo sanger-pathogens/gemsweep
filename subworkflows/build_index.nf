@@ -14,12 +14,12 @@ workflow BUILD_INDEX {
     refs_ch = references.map { refs -> [meta, refs] }
 
 
-    if (params.themisto2 == false) { // Use Themisto(1) modules
+    if (params.pseudoaligner == themisto) { // Use Themisto(1) modules
         index_ch = THEMISTO_BUILD(refs_ch)
         THEMISTO_STATS(index_ch)
     }
 
-    if (params.themisto2 == true) { // Use GGCAT, SBWT and Themisto2 modules
+    if (params.pseudoaligner == themisto2) { // Use GGCAT, SBWT and Themisto2 modules
         GGCAT(refs_ch)
         | SBWT_BUILD
     

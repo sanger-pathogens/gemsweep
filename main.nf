@@ -79,11 +79,11 @@ workflow {
 
         meta_index = [ID: file(params.themisto_index).getName()]
 
-        if (params.themisto2 == false) {
+        if (params.pseudoaligner == themisto) {
             index_ch = channel.fromPath("${params.themisto_index}*{tdbg,tcolors}")
             .collect()
             .map { index_files -> tuple(meta_index, index_files) }
-        } else { // themisto2 is a single file index, themisto produces two files per index
+        } else if (params.pseudoaligner == themisto2) { // themisto2 is a single file index, themisto produces two files per index
             index_ch = channel.value(file("${params.themisto_index}.thm2"))
             .map { index_file -> tuple(meta_index, index_file) }
         }
