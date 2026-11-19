@@ -111,14 +111,6 @@ process THEMISTO2_PSEUDOALIGN {
 
     script:
     pseudoalignment_params = "-i ${index_file} --n-threads ${task.cpus} --sort-output --themisto1-output-format"
-
-    // // User-provided temp storage if given otherwise use tmp workdir (since scratch is enabled)
-    // if (params.temp_dir) {
-    //     temp_storage_location = (params.temp_dir)
-    //     pseudoalignment_params += " --temp-dir ${temp_storage_location}"
-    // } else {
-    //     pseudoalignment_params += " --temp-dir \$PWD"
-    // }
     
     """
     themisto2 intersection-pseudoalign -q ${reads_1} ${pseudoalignment_params} | gzip > pseudoalignments_1.aln.gz
