@@ -74,7 +74,7 @@ process CACHE_WRITE {
 
     script:
     """
-    ${projectDir}/bin/write_cache_entry.py \\
+    ${projectDir}/bin/cache_write.py \\
         --species '${meta.ID}' \\
         --refs '${refs_file}' \\
         --groups '${groups_file}' \\
