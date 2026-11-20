@@ -27,9 +27,7 @@ def printHelp() {
 */
 include { MIXED_INPUT           } from './assorted-sub-workflows/mixed_input/mixed_input.nf'
 include { SYLPH_REF_SELECTION   } from './assorted-sub-workflows/sylph_refset/sylph_refset.nf'
-include { CACHE_RESOLVE;
-          CACHE_LOOKUP;
-          CACHE_WRITE           } from './modules/cache.nf'
+include { CACHE_WRITE           } from './modules/cache.nf'
 include { PREP_REFS;
           ORDER_GROUPS          } from './modules/poppunk.nf'
 include { THEMISTO_BUILD_INDEX; 
@@ -43,6 +41,7 @@ include { COMBINE_REFS          } from './modules/helper_processes.nf'
 // SUBWORKFLOWS
 //
 include { REFINE_REFS             } from './subworkflows/refine_refs.nf'
+include { READ_CACHE              } from './subworkflows/read_cache.nf'
 include { VALIDATE_PREBUILT_INPUT } from './subworkflows/validate_prebuilt_input.nf'
 include { CLUSTER_REFS            } from './subworkflows/cluster.nf'
 
@@ -93,23 +92,7 @@ workflow {
 
         // If cache dir provided check for relevant cached species references
         if (params.cache_dir) {
-            CACHE_RESOLVE()
-            cache_config_ch = CACHE_RESOLVE.out.config.first()
-            CACHE_LOOKUP(sylph_refs_ch, cache_config_ch)
-
-            // Organise cached references
-            // hits: [meta, cache_hits_tsv]
-            CACHE_LOOKUP.out.hits
-            | map { meta, cache_hits_tsv -> cache_hits_tsv }
-            | splitCsv(header: true, sep: '\t')
-            | map { row -> tuple([ID: row.species_id], file(row.cached_ref_groups)) }
-            | set { cached_ref_group_files_ch }
-
-            // misses: [meta, cache_miss_tsv] -> restore the original Sylph refs by meta
-            CACHE_LOOKUP.out.misses
-            | join(sylph_refs_ch)
-            | map { meta, cache_miss_tsv, refs_file -> tuple(meta, refs_file) }
-            | set { candidate_refs_ch }
+            cached_ref_group_files_ch, candidate_refs_ch = READ_CACHE(sylph_refs_ch)
 
         } else {
             // Without a set cache dir all continue as candidate references to clustering and refinement
