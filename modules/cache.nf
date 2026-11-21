@@ -27,7 +27,7 @@ process CACHE_RESOLVE {
 
     """
     ${projectDir}/bin/cache_resolve.py \\
-        --ro-cache-root '${ro_cache_arg}' \\
+        ${ro_cache_arg} \\
         --user-cache-root '${params.cache_dir}' \\
         --cluster-method '${cluster_method}' \\
         --representatives '${params.representatives}' \\
