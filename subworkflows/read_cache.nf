@@ -1,6 +1,5 @@
 include { CACHE_RESOLVE as RESOLVE;
-          CACHE_LOOKUP as LOOKUP;
-          CACHE_WRITE as WRITE      } from '../modules/cache.nf'
+          CACHE_LOOKUP as LOOKUP    } from '../modules/cache.nf'
 
 workflow READ_CACHE {
     take:
@@ -17,16 +16,17 @@ workflow READ_CACHE {
     | map { meta, cache_hits_tsv -> cache_hits_tsv }
     | splitCsv(header: true, sep: '\t')
     | map { row -> tuple([ID: row.species_id], file(row.cached_ref_groups)) }
-    | set { cached_ref_group_files_ch }
+    | set { cahce_hits }
 
     // misses: [meta, cache_miss_tsv] -> restore the original Sylph refs by meta
     LOOKUP.out.misses
     | join(sylph_refs_ch)
     | map { meta, cache_miss_tsv, refs_file -> tuple(meta, refs_file) }
-    | set { candidate_refs_ch }
+    | set { cache_misses }
 
     emit:
-    cached_ref_group_files_ch
-    candidate_refs_ch
+    cache_hits
+    cache_misses
+    config = cache_config_ch
 
 }

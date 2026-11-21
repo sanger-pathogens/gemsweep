@@ -98,7 +98,10 @@ workflow {
 
         // If cache dir provided check for relevant cached species references
         if (params.cache_dir) {
-            cached_ref_group_files_ch, candidate_refs_ch = READ_CACHE(sylph_refs_ch)
+            READ_CACHE(sylph_refs_ch)
+            cached_ref_group_files_ch = READ_CACHE.out.cache_hits
+            candidate_refs_ch = READ_CACHE.out.cache_misses
+            cache_config_ch = READ_CACHE.out.config
 
         } else {
             // Without a set cache dir all continue as candidate references to clustering and refinement
