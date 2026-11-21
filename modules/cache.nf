@@ -6,6 +6,10 @@ process CACHE_RESOLVE {
 
     container 'quay.io/sangerpathogens/pandas:2.2.1' // TODO: unecessary container, only need py3
 
+    input:
+    val(user_cache_dir)
+    val(ro_cache_dir)     // '' when no read-only cache is configured
+
     output:
     path("cache_config.json"), emit: config
 

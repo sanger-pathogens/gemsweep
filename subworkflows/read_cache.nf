@@ -6,7 +6,12 @@ workflow READ_CACHE {
     sylph_refs_ch
     
     main:
-    RESOLVE
+    // Prevent cache dir creation/check in workdir for relative paths
+    user_cache_dir = file(params.cache_dir).toAbsolutePath().toString()
+    ro_cache_dir   = params.read_only_cache_dir ? file(params.read_only_cache_dir).toAbsolutePath().toString() : ''
+
+    RESOLVE(user_cache_dir, ro_cache_dir)
+
     cache_config_ch = RESOLVE.out.config.first()
     LOOKUP(sylph_refs_ch, cache_config_ch)
 
