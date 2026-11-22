@@ -21,7 +21,7 @@ workflow READ_CACHE {
     | map { meta, cache_hits_tsv -> cache_hits_tsv }
     | splitCsv(header: true, sep: '\t')
     | map { row -> tuple([ID: row.species_id], file(row.cached_ref_groups)) }
-    | set { cahce_hits }
+    | set { cache_hits }
 
     // misses: [meta, cache_miss_tsv] -> restore the original Sylph refs by meta
     LOOKUP.out.misses
