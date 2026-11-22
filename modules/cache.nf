@@ -32,7 +32,7 @@ process CACHE_RESOLVE {
         --cluster-method '${cluster_method}' \\
         --representatives '${params.representatives}' \\
         --db '${sylph_db_name}' \\
-        --out cache_config.json    # TODO: rename? Seems like a misleading name
+        --out cache_config.json
     """
 }
 // receives Sylph species refs
