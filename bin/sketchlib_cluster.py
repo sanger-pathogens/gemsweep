@@ -52,7 +52,15 @@ def main():
     logging.info("Loading reference genomes...")
     # Load genome names
     with open(args.ref_ids) as f:
-        ref_ids = [line.strip() for line in f]
+        ref_ids = [line.strip() for line in f if line.strip()]
+
+    if len(ref_ids) == 1:
+        if args.strict_mode:
+            logging.error("Single reference in group; failing as --strict_mode is set.")
+            sys.exit(1)
+        logging.info("Single reference in group; passing through as its own cluster.")
+        write_singleton_outputs(ref_ids, args.out_prefix)
+        return
 
     klist = parse_kmer_sizes(args.kstep)
     logging.info(f"Using kmer lengths: {klist}")
@@ -74,7 +82,10 @@ def main():
         kNN            = 0,
         dist_col       = 0
     )
-    logging.debug(f"Distance stats: min={min(dists):.6f}, max={max(dists):.6f}, mean={sum(dists)/len(dists):.6f}")
+    if dists:
+        logging.debug(f"Distance stats: min={min(dists):.6f}, max={max(dists):.6f}, mean={sum(dists)/len(dists):.6f}")
+    else:
+        logging.warning("No pairs found below the distance threshold; all genomes will be singleton clusters")
 
     # Build a graph of the sparse sketchlib output (returned ANIs as edges)
     logging.info("Building graph from pairwise distances...")
@@ -276,6 +287,12 @@ def save_dist_matrix(num_refs: int, rows: list[int], cols: list[int], dists: lis
 
     np.save(out_prefix + ".dists.npy", dist_matrix)
     logging.info(f"Saved distance matrix to {out_prefix}.dists.npy")
+
+def write_singleton_outputs(ref_ids: list[str], out_prefix: str):
+    pd.DataFrame({'genome_id': ref_ids, 'cluster_id': [0]}).to_csv(
+        f"{out_prefix}_clusters.csv", sep=',', index=False
+    )
+    np.save(out_prefix + ".dists.npy", np.full((0, 2), 1.0, dtype=np.float32))
 
 if __name__ == "__main__":
     main()
