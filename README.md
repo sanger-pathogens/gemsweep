@@ -377,8 +377,8 @@ Themisto index creation requires substantial temporary disk space and the temp d
 | ------------- | ------- | ------------------------------------------------------ |
 | Themisto      | 3.2.2   | `quay.io/sangerpathogens/themisto:3.2.2`               |
 | GGCAT         | 2.2.0   | `quay.io/biocontainers/ggcat:2.2.0--hf1b6044_0`        |
-| SBWT          | 0.4.2   | `quay.io/sangerpathogens/sbwt:0.4.2`                   |
-| Themisto2     | 0.0.1   | `quay.io/sangerpathogens/themisto2:0.0.1`              |
+| SBWT-rs-cli   | 0.2.0   | `quay.io/sangerpathogens/sbwt-rs-cli:0.2.0-25f33b7`    |
+| Themisto2     | 0.1.0   | `quay.io/sangerpathogens/themisto2:0.1.0-ffb98e6-c1`   |
 | mSWEEP        | 2.2.1   | `quay.io/biocontainers/msweep:2.2.1--h503566f_1`       |
 | mGEMS         | 1.3.3   | `quay.io/biocontainers/mgems:1.3.3--h13024bc_2`        |
 | PopPUNK       | 2.7.8   | `quay.io/biocontainers/poppunk:2.7.8--py310h4d0eb5b_0` |
