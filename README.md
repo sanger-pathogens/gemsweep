@@ -12,6 +12,8 @@ This workflow deconvolutes mixed read sets (e.g. plate sweep sequencing data, sh
 
 Indexing references with Themisto and clustering are optionally automated, however if you have an index and a biologically meaningful grouping you may provide these and skip some computation.
 
+NOTE: Themisto2 is now used for indexing and pseudoalignment by default in the pipeline. For backwards compatibilty if required (e.g. when reusing a prebuilt index) set the new `--pseudoaligner` option to `themisto`.
+
 Additionally, for large reference datasets with significant redundancy we offer a reference refinement option. This involves subsetting references to a configurable number of maximally distant representatives from the clusters — to conserve some within-cluster diversity whilst reducing compute demands.
 
 ![workflow diagram](assets/gemsweep_release_1.0.0-beta_main_diagram.png)
@@ -114,12 +116,12 @@ For more detail, see the [mixed_input README](https://gitlab.internal.sanger.ac.
 
 References can be prepared as per the choice of reference mode (`--ref_mode`). Compatible inputs and parameters for each mode:
 
-| Reference mode | Required params                    | Description                                                                                                                                                                                                                                     |
-| -------------- | ---------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `index`        | `--themisto_index`, `--ref_groups` | The supplied index and reference groupings are validated and used directly. The k-mer size must match `--themisto_k` (default: 31) and the group file must be in the same positional order as the references used when the index was built.     |
-| `full`         | `--references`                     | All references are clustered (with the tool indicated by `--cluster_dist`) and indexed. No de-replication is applied.                                                                                                                           |
-| `refine`       | `--references`                     | References are clustered and each cluster is de-replicated to at most `--representatives` maximally-distant genomes before indexing. Only compatible with `--cluster_dist core_acc`.                                                            |
-| `autoselect`   | N/A                                | **Experimental.** References are not supplied; they are derived by querying reads against GTDB using Sylph. Reference refinement is always applied. In autoselect mode, clustering is always done with PopPUNK; `--cluster_dist` has no effect. |
+| Reference mode | Required params                    | Description                                                                                                                                                                                                                                         |
+| -------------- | ---------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `index`        | `--themisto_index`, `--ref_groups` | The supplied index and reference groupings are validated and used directly. The group file must be in the same positional order as the references used when the index was built. Ensure `--pseudoaligner` matches the tool used to build the index. |
+| `full`         | `--references`                     | All references are clustered (with the tool indicated by `--cluster_dist`) and indexed. No de-replication is applied.                                                                                                                               |
+| `refine`       | `--references`                     | References are clustered and each cluster is de-replicated to at most `--representatives` maximally-distant genomes before indexing. Only compatible with `--cluster_dist core_acc`.                                                                |
+| `autoselect`   | N/A                                | **Experimental.** References are not supplied; they are derived by querying reads against GTDB using Sylph. Reference refinement is always applied. In autoselect mode, clustering is always done with PopPUNK; `--cluster_dist` has no effect.     |
 
 > **⚠ Experimental feature — autoselection** `BETA`
 >
@@ -282,7 +284,7 @@ mkdir mGEMs_bins_manifest
 
 | Option             | Type      | Default     | Description                                                                                                                                   |
 | ------------------ | --------- | ----------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
-| `--pseudoaligner`  | `string`  | `themisto2` | Pseudoalignment tool. Options: `themisto`, `themisto2`.                                                                                       |
+| `--pseudoaligner`  | `string`  | `themisto2` | Pseudoalignment tool. Options: `themisto`, `themisto2`. If providing a prebuilt index ensure this matches the tool used in the build.         |
 | `--themisto_index` | `path`    | `null`      | Pre-built Themisto index prefix (without extensions). Used with `--ref_mode index`. Requires `--ref_groups`.                                  |
 | `--themisto_k`     | `integer` | `31`        | K-mer size for index building and pseudoalignment. Options: `21`, `31`, `51`. Must match a pre-built index if `--themisto_index` is provided. |
 | `--temp_dir`       | `path`    | `null`      | Custom temporary storage directory for index creation and pseudoalignment. Defaults to `/tmp`.                                                |
