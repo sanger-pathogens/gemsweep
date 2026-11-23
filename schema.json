@@ -77,7 +77,7 @@
     },
     "Pseudoalignment options": {
       "pseudoaligner": {
-        "default": "themisto",
+        "default": "themisto2",
         "help_text": "Pseudoalignment tool (themisto|themisto2)"
       },
       "themisto_index": {

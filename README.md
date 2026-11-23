@@ -8,7 +8,7 @@
 
 ## Pipeline overview
 
-This workflow deconvolutes mixed read sets (e.g. plate sweep sequencing data, shotgun metagenomic data) and resolves these into strain-level resolution bins. At its core it implements Themisto pseudoalignment of reads to a curated set of references, mSWEEP to estimate relative abundances and mGEMS to bin reads.
+This workflow deconvolutes mixed read sets (e.g. plate sweep sequencing data, shotgun metagenomic data) and resolves these into strain-level resolution bins. At its core it implements pseudoalignment of reads to a curated set of grouped references, mSWEEP to estimate relative abundances of each group and mGEMS to bin reads by group.
 
 Indexing references with Themisto and clustering are optionally automated, however if you have an index and a biologically meaningful grouping you may provide these and skip some computation.
 
@@ -280,13 +280,13 @@ mkdir mGEMs_bins_manifest
 
 **Pseudoalignment options**
 
-| Option             | Type      | Default    | Description                                                                                                                                   |
-| ------------------ | --------- | ---------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
-| `--pseudoaligner`  | `string`  | `themisto` | Pseudoalignment tool. Options: `themisto`, `themisto2`.                                                                                       |
-| `--themisto_index` | `path`    | `null`     | Pre-built Themisto index prefix (without extensions). Used with `--ref_mode index`. Requires `--ref_groups`.                                  |
-| `--themisto_k`     | `integer` | `31`       | K-mer size for index building and pseudoalignment. Options: `21`, `31`, `51`. Must match a pre-built index if `--themisto_index` is provided. |
-| `--temp_dir`       | `path`    | `null`     | Custom temporary storage directory for index creation and pseudoalignment. Defaults to `/tmp`.                                                |
-| `--temp_space`     | `integer` | `10000`    | Temporary storage (MB) to reserve (only applies when `/tmp` is used as the temporary storage directory).                                      |
+| Option             | Type      | Default     | Description                                                                                                                                   |
+| ------------------ | --------- | ----------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
+| `--pseudoaligner`  | `string`  | `themisto2` | Pseudoalignment tool. Options: `themisto`, `themisto2`.                                                                                       |
+| `--themisto_index` | `path`    | `null`      | Pre-built Themisto index prefix (without extensions). Used with `--ref_mode index`. Requires `--ref_groups`.                                  |
+| `--themisto_k`     | `integer` | `31`        | K-mer size for index building and pseudoalignment. Options: `21`, `31`, `51`. Must match a pre-built index if `--themisto_index` is provided. |
+| `--temp_dir`       | `path`    | `null`      | Custom temporary storage directory for index creation and pseudoalignment. Defaults to `/tmp`.                                                |
+| `--temp_space`     | `integer` | `10000`     | Temporary storage (MB) to reserve (only applies when `/tmp` is used as the temporary storage directory).                                      |
 
 ---
 
