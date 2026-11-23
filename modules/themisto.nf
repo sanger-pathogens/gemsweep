@@ -1,4 +1,5 @@
-process THEMISTO_BUILD_INDEX {
+process THEMISTO_BUILD {
+    tag "${meta.ID}"
     label 'cpu_16'
     label "mem_32"
     label 'time_queue_from_normal'
@@ -17,13 +18,13 @@ process THEMISTO_BUILD_INDEX {
 
 
     input:
-    path references_txt
+    tuple val(meta), path(references_txt)
 
     output:
     tuple val(index_prefix), path("${index_prefix}.*")
 
     script:
-    index_prefix = "index"
+    index_prefix = {meta.ID}
     index_build_params = "-k ${params.themisto_k} -i ${references_txt} -o ${index_prefix} --n-threads ${task.cpus}"
     
     // User-provided temp storage if given otherwise use tmp workdir (since scratch is enabled)
@@ -35,7 +36,7 @@ process THEMISTO_BUILD_INDEX {
     }
 
     // supply less memory allocation in the command as it requires additional overhead (will likely fail if exact)
-    mem_gigas_param = (task.memory.toGiga() / 1.2).toInteger()
+    mem_gigas_param = (task.memory.toGiga() * 0.9).toInteger()
     index_build_params += " --mem-gigas ${mem_gigas_param}"
 
     """
@@ -43,6 +44,7 @@ process THEMISTO_BUILD_INDEX {
     themisto build ${index_build_params}
     """
 }
+
 
 process THEMISTO_PSEUDOALIGN {
     tag "${meta.ID}"
@@ -62,13 +64,13 @@ process THEMISTO_PSEUDOALIGN {
 
     input:
     tuple val(meta), path(reads_1), path(reads_2)
-    tuple val(index_prefix), path(index_files)
+    tuple val(index_meta), path(index_files)
 
     output:
     tuple val(meta), path("pseudoalignments_1.aln.gz"), path("pseudoalignments_2.aln.gz")
 
     script:
-    pseudoalignment_params = "-i ${index_prefix} --n-threads ${task.cpus} --sort-output-lines --gzip-output"
+    pseudoalignment_params = "-i ${index_meta.ID} --n-threads ${task.cpus} --sort-output-lines --gzip-output"
 
     // User-provided temp storage if given otherwise use tmp workdir (since scratch is enabled)
     if (params.temp_dir) {
@@ -84,7 +86,40 @@ process THEMISTO_PSEUDOALIGN {
     """
 }
 
+process THEMISTO2_PSEUDOALIGN {
+    tag "${meta.ID}"
+    label 'cpu_16'
+    label 'mem_32'
+    label 'time_queue_from_long'
+
+    // Only request /tmp space if /tmp is being used (assumes TMPDIR is not set)
+    if (!params.temp_dir || params.temp_dir.startsWith("/tmp")) {
+        label 'request_temp'
+    }
+
+    // scratch used for fast node-local temp storage
+    scratch true
+
+    container 'quay.io/sangerpathogens/themisto2:0.1.0-ffb98e6-c1'
+
+    input:
+    tuple val(meta), path(reads_1), path(reads_2)
+    tuple val(index_meta), path(index_file)
+
+    output:
+    tuple val(meta), path("pseudoalignments_1.aln.gz"), path("pseudoalignments_2.aln.gz")
+
+    script:
+    pseudoalignment_params = "-i ${index_file} --n-threads ${task.cpus} --sort-output --themisto1-output-format"
+    
+    """
+    themisto2 intersection-pseudoalign -q ${reads_1} ${pseudoalignment_params} | gzip > pseudoalignments_1.aln.gz
+    themisto2 intersection-pseudoalign -q ${reads_2} ${pseudoalignment_params} | gzip > pseudoalignments_2.aln.gz
+    """
+}
+
 process THEMISTO_STATS {
+    tag "${meta.ID}"
     label 'cpu_1'
     label "mem_10"
     label 'time_1'
@@ -94,13 +129,13 @@ process THEMISTO_STATS {
     publishDir mode: 'copy', path: "${params.outdir}/themisto"
 
     input:
-    tuple val(index_prefix), path(index_files)
+    tuple val(meta), path(index_files)
 
     output:
-    path "index_report.txt"
+    path "${meta.ID}_report.txt"
 
     script:
     """
-    themisto stats -i ${index_prefix} > "index_report.txt"
+    themisto stats -i ${meta.ID} > "${meta.ID}_report.txt"
     """
 }

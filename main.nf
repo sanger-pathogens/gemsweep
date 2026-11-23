@@ -25,26 +25,23 @@ def printHelp() {
     IMPORT MODULES/SUBWORKFLOWS
 ========================================================================================
 */
-include { MIXED_INPUT           } from './assorted-sub-workflows/mixed_input/mixed_input.nf'
-include { SYLPH_REF_SELECTION   } from './assorted-sub-workflows/sylph_refset/sylph_refset.nf'
 include { CHECK_CACHE;
           CACHE_LOOKUP;
           WRITE_CACHE_ENTRY     } from './modules/cache.nf'
 include { PREP_REFS;
           ORDER_GROUPS          } from './modules/poppunk.nf'
-include { THEMISTO_BUILD_INDEX; 
-          THEMISTO_PSEUDOALIGN;
-          THEMISTO_STATS        } from './modules/themisto.nf'
-include { MSWEEP                } from './modules/msweep.nf'
-include { MGEMS                 } from './modules/mgems.nf'
 include { COMBINE_REFS          } from './modules/helper_processes.nf'
 
 //
 // SUBWORKFLOWS
 //
+include { MIXED_INPUT             } from './assorted-sub-workflows/mixed_input/mixed_input.nf'
+include { SYLPH_REF_SELECTION     } from './assorted-sub-workflows/sylph_refset/sylph_refset.nf'
 include { REFINE_REFS             } from './subworkflows/refine_refs.nf'
 include { VALIDATE_PREBUILT_INPUT } from './subworkflows/validate_prebuilt_input.nf'
 include { CLUSTER_REFS            } from './subworkflows/cluster.nf'
+include { BUILD_INDEX             } from './subworkflows/build_index.nf'
+include { DEMIX_READS             } from './subworkflows/demix_reads.nf'
 
 /*
 Helper Scripts
@@ -68,7 +65,7 @@ workflow {
         exit 0
     }
 
-    validate_params()
+    //validate_params()
 
     // Set up reads channel if required
     if (!params.ref_prep_only || params.ref_mode == 'autoselect') { // only autoselect requires reads for ref prep
@@ -79,9 +76,17 @@ workflow {
     if (params.ref_mode == "index") {
         // Set up input channels starting from pre-built index AND provided ref_groups
         ref_groups_ch = channel.value(file(params.ref_groups))
-        index_ch = channel.fromPath("${params.themisto_index}*{tdbg,tcolors}")
-          .collect()
-          .map { files -> tuple(file(params.themisto_index).getName(), files) }
+
+        meta_index = [ID: file(params.themisto_index).getName()]
+
+        if (params.pseudoaligner == themisto) {
+            index_ch = channel.fromPath("${params.themisto_index}*{tdbg,tcolors}")
+            .collect()
+            .map { index_files -> tuple(meta_index, index_files) }
+        } else if (params.pseudoaligner == themisto2) { // themisto2 is a single file index, themisto produces two files per index
+            index_ch = channel.value(file("${params.themisto_index}.thm2"))
+            .map { index_file -> tuple(meta_index, index_file) }
+        }
 
         // Validate
         VALIDATE_PREBUILT_INPUT(index_ch)
@@ -155,7 +160,7 @@ workflow {
         | set { ref_groups_ch }
 
         // Build themisto index
-        index_ch = THEMISTO_BUILD_INDEX(COMBINE_REFS.out.references)
+        index_ch = BUILD_INDEX(COMBINE_REFS.out.references)
 
     } else if (params.ref_mode in ["refine", "full"]) {
         // Set up input channels starting from references.txt
@@ -175,7 +180,7 @@ workflow {
 
             // Split into references and groups, then publish
             REFINE_REFS.out.rep_refs_and_groups
-            | map { meta, ref_groups_file -> ref_groups_file}
+            | map { meta, ref_groups_file -> ref_groups_file }
             | collect
             | COMBINE_REFS
 
@@ -201,26 +206,14 @@ workflow {
         }
 
         // Build themisto index
-        index_ch = THEMISTO_BUILD_INDEX(representatives_ch)
-    }
+        index_ch = BUILD_INDEX(representatives_ch)
 
-    if (params.ref_mode != "index") {
-        // Output stats on the index (not required for anything just an additional output)
-        THEMISTO_STATS(index_ch)
-    }
-
-    // Run abundance est. and binning workflow
-    if (!params.ref_prep_only) {
-        pseudoaligned_ch = THEMISTO_PSEUDOALIGN(reads_ch, index_ch)
-        msweep_ch = MSWEEP(pseudoaligned_ch, ref_groups_ch)
-        MGEMS(
-            reads_ch
-              .join(pseudoaligned_ch, by: 0)
-              .join(msweep_ch, by: 0),
-            index_ch,
-            ref_groups_ch
-        )
     } else { // Should be caught in validate.nf but here as a failsafe
         error("Unrecognised ref_mode: '${params.ref_mode}'.")
+    }
+
+    if (!params.ref_prep_only) {
+        // Run abundance est. and binning workflow
+        DEMIX_READS(reads_ch, index_ch, ref_groups_ch)
     }
 }

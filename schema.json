@@ -75,7 +75,11 @@
         "help_text": "Fail early if all genomes form a single cluster, or each genome is a singleton."
       }
     },
-    "Themisto options": {
+    "Pseudoalignment options": {
+      "pseudoaligner": {
+        "default": "themisto2",
+        "help_text": "Pseudoalignment tool (themisto|themisto2). If providing a prebuilt index ensure this matches the tool used in the build."
+      },
       "themisto_index": {
         "default": "null",
         "help_text": "Path to a pre-built Themisto index including the index prefix (without exts). Skips indexing if provided."

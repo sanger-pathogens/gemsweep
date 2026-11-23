@@ -8,9 +8,11 @@
 
 ## Pipeline overview
 
-This workflow deconvolutes mixed read sets (e.g. plate sweep sequencing data, shotgun metagenomic data) and resolves these into strain-level resolution bins. At its core it implements Themisto pseudoalignment of reads to a curated set of references, mSWEEP to estimate relative abundances and mGEMS to bin reads.
+This workflow deconvolutes mixed read sets (e.g. plate sweep sequencing data, shotgun metagenomic data) and resolves these into strain-level resolution bins. At its core it implements pseudoalignment of reads to a curated set of grouped references, mSWEEP to estimate relative abundances of each group and mGEMS to bin reads by group.
 
 Indexing references with Themisto and clustering are optionally automated, however if you have an index and a biologically meaningful grouping you may provide these and skip some computation.
+
+NOTE: Themisto2 is now used for indexing and pseudoalignment by default in the pipeline. For backwards compatibilty if required (e.g. when reusing a prebuilt index) set the new `--pseudoaligner` option to `themisto`.
 
 Additionally, for large reference datasets with significant redundancy we offer a reference refinement option. This involves subsetting references to a configurable number of maximally distant representatives from the clusters — to conserve some within-cluster diversity whilst reducing compute demands.
 
@@ -114,12 +116,12 @@ For more detail, see the [mixed_input README](https://gitlab.internal.sanger.ac.
 
 References can be prepared as per the choice of reference mode (`--ref_mode`). Compatible inputs and parameters for each mode:
 
-| Reference mode | Required params                    | Description                                                                                                                                                                                                                                     |
-| -------------- | ---------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `index`        | `--themisto_index`, `--ref_groups` | The supplied index and reference groupings are validated and used directly. The k-mer size must match `--themisto_k` (default: 31) and the group file must be in the same positional order as the references used when the index was built.     |
-| `full`         | `--references`                     | All references are clustered (with the tool indicated by `--cluster_dist`) and indexed. No de-replication is applied.                                                                                                                           |
-| `refine`       | `--references`                     | References are clustered and each cluster is de-replicated to at most `--representatives` maximally-distant genomes before indexing. Only compatible with `--cluster_dist core_acc`.                                                            |
-| `autoselect`   | N/A                                | **Experimental.** References are not supplied; they are derived by querying reads against GTDB using Sylph. Reference refinement is always applied. In autoselect mode, clustering is always done with PopPUNK; `--cluster_dist` has no effect. |
+| Reference mode | Required params                    | Description                                                                                                                                                                                                                                         |
+| -------------- | ---------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `index`        | `--themisto_index`, `--ref_groups` | The supplied index and reference groupings are validated and used directly. The group file must be in the same positional order as the references used when the index was built. Ensure `--pseudoaligner` matches the tool used to build the index. |
+| `full`         | `--references`                     | All references are clustered (with the tool indicated by `--cluster_dist`) and indexed. No de-replication is applied.                                                                                                                               |
+| `refine`       | `--references`                     | References are clustered and each cluster is de-replicated to at most `--representatives` maximally-distant genomes before indexing. Only compatible with `--cluster_dist core_acc`.                                                                |
+| `autoselect`   | N/A                                | **Experimental.** References are not supplied; they are derived by querying reads against GTDB using Sylph. Reference refinement is always applied. In autoselect mode, clustering is always done with PopPUNK; `--cluster_dist` has no effect.     |
 
 > **⚠ Experimental feature — autoselection** `BETA`
 >
@@ -278,14 +280,15 @@ mkdir mGEMs_bins_manifest
 
 ---
 
-**Themisto options**
+**Pseudoalignment options**
 
-| Option             | Type      | Default | Description                                                                                                                                   |
-| ------------------ | --------- | ------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
-| `--themisto_index` | `path`    | `null`  | Pre-built Themisto index prefix (without extensions). Used with `--ref_mode index`. Requires `--ref_groups`.                                  |
-| `--themisto_k`     | `integer` | `31`    | K-mer size for index building and pseudoalignment. Options: `21`, `31`, `51`. Must match a pre-built index if `--themisto_index` is provided. |
-| `--temp_dir`       | `path`    | `null`  | Custom temporary storage directory for index creation and pseudoalignment. Defaults to `/tmp`.                                                |
-| `--temp_space`     | `integer` | `10000` | Temporary storage (MB) to reserve (only applies when `/tmp` is used as the temporary storage directory).                                      |
+| Option             | Type      | Default     | Description                                                                                                                                   |
+| ------------------ | --------- | ----------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
+| `--pseudoaligner`  | `string`  | `themisto2` | Pseudoalignment tool. Options: `themisto`, `themisto2`. If providing a prebuilt index ensure this matches the tool used in the build.         |
+| `--themisto_index` | `path`    | `null`      | Pre-built Themisto index prefix (without extensions). Used with `--ref_mode index`. Requires `--ref_groups`.                                  |
+| `--themisto_k`     | `integer` | `31`        | K-mer size for index building and pseudoalignment. Options: `21`, `31`, `51`. Must match a pre-built index if `--themisto_index` is provided. |
+| `--temp_dir`       | `path`    | `null`      | Custom temporary storage directory for index creation and pseudoalignment. Defaults to `/tmp`.                                                |
+| `--temp_space`     | `integer` | `10000`     | Temporary storage (MB) to reserve (only applies when `/tmp` is used as the temporary storage directory).                                      |
 
 ---
 
@@ -373,6 +376,9 @@ Themisto index creation requires substantial temporary disk space and the temp d
 | Software      | Version | Image                                                  |
 | ------------- | ------- | ------------------------------------------------------ |
 | Themisto      | 3.2.2   | `quay.io/sangerpathogens/themisto:3.2.2`               |
+| GGCAT         | 2.2.0   | `quay.io/biocontainers/ggcat:2.2.0--hf1b6044_0`        |
+| SBWT-rs-cli   | 0.2.0   | `quay.io/sangerpathogens/sbwt-rs-cli:0.2.0-25f33b7`    |
+| Themisto2     | 0.1.0   | `quay.io/sangerpathogens/themisto2:0.1.0-ffb98e6-c1`   |
 | mSWEEP        | 2.2.1   | `quay.io/biocontainers/msweep:2.2.1--h503566f_1`       |
 | mGEMS         | 1.3.3   | `quay.io/biocontainers/mgems:1.3.3--h13024bc_2`        |
 | PopPUNK       | 2.7.8   | `quay.io/biocontainers/poppunk:2.7.8--py310h4d0eb5b_0` |
