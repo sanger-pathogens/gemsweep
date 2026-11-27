@@ -44,7 +44,7 @@
     "Cache Autoselection options": {
       "cache_dir": {
         "default": "null",
-        "help_text": "Path to an existing cache directory for autoselect mode, or the location at which to create one. Existing entries will be used for detected speices if the configuration matches. Entries will be added for detected species lacking already cached references."
+        "help_text": "Path to an existing cache directory for autoselect mode, or the location at which to create one. Existing entries will be used for detected species if the configuration matches. Entries will be added for detected species lacking already cached references."
       },
       "read_only_cache_dir": {
         "default": "null",
